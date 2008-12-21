@@ -1,0 +1,78 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="{LANG}" lang="{LANG}">
+<head>
+	<!-- 
+		CSS based on template of Dandelion wiki engine by Radomir Dopieralski who released this
+		template under the terms of GNU GPL. http://dandelion.sheep.art.pl/
+	-->
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<title>{PAGE_TITLE_HEAD  - }{WIKI_TITLE}</title>
+	<style type="text/css">
+html{font:96% sans-serif;color:#000;background:#f7f7f7;line-height:1.4;}
+body{margin:auto;width:60em;position:relative;color:#333;}
+#header{padding:7px 0px 7px 0px;}
+#content{background:white;padding:1em;border:1px solid #e0d78a;outline:0.5em solid #fef4a4;  margin:0.5em 0;padding:20px;min-height:20em;}
+h1{margin-top:0px;}
+h1,h2,h3,h4,h5,h6{letter-spacing:0.05em;color:#1474CA;font-weight:normal;}
+h1 a:hover,h2 a:hover,h3 a:hover,h4 a:hover,h5 a:hover,h6 a:hover{text-decoration:none;}
+a{color:#1474CA;text-decoration:none;}
+a:visited{color:#1474CA;}
+a.pending{color:#c174a0;}
+a:hover{text-decoration:underline;}
+a img{border:none;}
+input,textarea{font-size:94%;border:1px solid #999;background:#fff;color:#666;outline:0.2em solid #eee;padding:0px;line-height:1.2;margin:0.5em;vertical-align:middle;}
+textarea{display:block;margin:0.5em auto;height:22em;width:97%;}
+pre{outline:0.4em solid #eee;padding:0.5em;margin:0.5em;border:1px solid #e0d78a;background:#fef4a4;color:#644e22;width:640px;}
+img{border:1px solid #ccc;outline:0.25em solid #eee;padding:0.25em;float:right;margin:0.25em 0 0.25em 0.5em;background:#fff;}
+hr{height:0;border:none;color:#fff;background:transparent;border-bottom:1px solid #ccc; margin:0.5em 0;}
+#diff {outline:none;border:none;}
+#diff ins{color:green;text-decoration:none;font-weight:bold;}
+#diff del{color:red;text-decoration:line-through;}
+#diff .orig{color:#666;font-size:90%;}
+#diff{background:#fff;line-height:1.25;padding:1em;white-space:pre-wrap;word-wrap:break-word;    white-space:-moz-pre-wrap;white-space:-pre-wrap;white-space:-o-pre-wrap;width:97%;}
+hr{margin:10px 0 10px 0;height:0px;overflow:hidden;border:0px;border-top:2px solid #1474CA;}
+.error{color:#F25A5A;font-weight:bold;}
+form{display:inline;}
+#contentTextarea{width:100%;height:500px;}
+#toc{margin:5px 0 5px 10px;padding:6px 5px 7px 0px;float:right;list-style:none;outline:0.4em solid #eee;background:#fef4a4;border:1px solid #e0d78a;}
+#toc ul{list-style:none;padding:3px 0 3px 10px;}
+#toc li{font-size:11px;padding-left:10px;}
+#toc ul li{font-size:10px;}
+#toc ul ul li{font-size:9px;}
+#toc ul ul ul li{font-size:8px;}
+#toc ul ul ul ul li{font-size:7px;}
+.pageVersionsList{letter-spacing:0px;font-variant:normal;font-size:12px;}
+#renameForm{float:left;}
+.clear{clear:both;}
+.tagList{padding:0.2em 0.4em 0.2em 0.4em;margin-top:0.5em;border:1px dashed #e0d78a;background:#fef4a4;color:#644e22;}
+.tagCloud{float:right;width:200px;padding:0.5em;margin:1em;border:1px dashed #e0d78a;background:#fef4a4;color:#644e22;}
+	</style>
+  {HEAD}
+</head>
+
+<body>
+	<div id="header">
+		<div align="right">{HOME} {&nbsp;&nbsp; RECENT_CHANGES}</div>
+	</div>
+	<div id="content">
+		<h1>{PAGE_TITLE} {<span class="pageVersionsList">( plugin:VERSIONS_LIST )</span>}</h1>
+		{<div class="error"> ERROR </div>}
+{CONTENT}
+{plugin:TAG_LIST}
+{RENAME_FORM} {RENAME_TEXT} {RENAME_INPUT} {FORM_PASSWORD} {FORM_PASSWORD_INPUT} {RENAME_SUBMIT} {/RENAME_FORM} {<div style="float:right"> SYNTAX </div>}
+<div class="clear"></div>
+{CONTENT_FORM} {CONTENT_TEXTAREA} {<p style="float:right;"> FORM_PASSWORD} {FORM_PASSWORD_INPUT} {plugin:CAPTCHA_QUESTION} {plugin:CAPTCHA_INPUT} {EDIT_SUMMARY_TEXT} {EDIT_SUMMARY_INPUT} {CONTENT_SUBMIT} {CONTENT_PREVIEW </p>} {/CONTENT_FORM}
+	
+	<div class="clear"></div>
+	</div>
+	
+	<div id="footer">
+		<div style="float:left;">
+		{SEARCH_FORM}{SEARCH_INPUT}{SEARCH_SUBMIT}{/SEARCH_FORM} Powered by <a href="http://lionwiki.0o.cz/">{WIKI_VERSION}</a>
+		</div>
+		<div style="float:right;padding:7px;">{EDIT} {&nbsp;&nbsp; HISTORY}</div>
+	</div>
+</table>
+</body>
+</html>

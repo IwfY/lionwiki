@@ -1,0 +1,83 @@
+# File for turing test questions. Structure of the file is very simple, first
+# line of a record is "--" which indicates new record (question). Second line
+# is question and third line is right answer. You can add more answers to third
+# separated by comma. Everything else is ignored, so you can use it as comments.
+# In that case, please use something like "#" or "//" to make it clear it
+# is comment.
+# And, I forget, comparing answers is case insensitive.
+
+--
+What color is lemon?
+Yellow
+
+--
+How much is 4 times 4?
+16, sixteen
+
+--
+Fill missing: cat - Tom, mouse -
+Jerry
+
+--
+How many World Wars do you know?
+2, two
+
+--
+Correct spelling in this word: univrsity (educational institution)
+School
+
+--
+What is the difference between 22 and 17?
+5, five
+
+--
+I think, therefore I (fill missing word)
+am
+
+--
+What is the first name of famous physicist Einstein?
+Albert
+
+--
+Which of Australia, Antartica and Asia is the largest?
+Asia
+
+--
+How many moons has the Earth?
+1, one
+
+--
+Fill following word without underscores: d_i_f_f_e_r_e_n_t
+Different
+
+--
+What is the name of partner of Eve of Eden?
+Adam
+
+--
+What is the name of that thing you use to take pictures?
+Camera, DSLR, SLR, digital camera
+
+--
+Which word starts with "u" from the list: speculates, braved, underfloor, reparation?
+underfloor
+
+--
+If the toe is brown, what colour is it?
+brown
+
+--
+Tongue, chest or leg: which is below the waist?
+leg
+
+--
+Eighty five, 90, 33, forty six, eighty nine or 45: which of these is the smallest?
+33, thirty three, thirty-three
+
+--
+What is thirty nine thousand nine hundred and seventy one as a number?
+31971
+
+--
+How many colours are in the list white, Sunday and red?
+2, two

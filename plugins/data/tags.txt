@@ -1,0 +1,14 @@
+Plugins
+List,Plugin
+Admin plugin
+Plugin,Administration,A,C,D
+Captcha plugin
+Plugin,Spam
+RSS plugin
+Plugin
+Tables plugin
+Plugin,Syntax
+Syntax reference.cs
+Syntax
+Slimbox plugin
+plugin,syntax
