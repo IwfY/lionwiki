@@ -717,7 +717,7 @@
 		array("DATE", $datetw),
 		array("IP", $_SERVER['REMOTE_ADDR']),
 		array("TOC", $TOC),
-		array("SYNTAX", $action == "edit" ? "<a href=\"./?page=" . urlencode($SYNTAX_PAGE) . "\" rel=\"nofollow\">$T_SYNTAX</a>" : ""),
+		array("SYNTAX", $action == "edit" || $preview ? "<a href=\"./?page=" . urlencode($SYNTAX_PAGE) . "\" rel=\"nofollow\">$T_SYNTAX</a>" : ""),
 		array("COOKIE", '<a href="./?page=' . urlencode($page) . '&amp;action='. urlencode($action) .'&amp;erasecookie=1" rel="nofollow">' . $T_ERASE_COOKIE . '</a>')
 	);
 
