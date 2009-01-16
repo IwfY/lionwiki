@@ -3,7 +3,7 @@
 	  Configuration file for LionWiki. Lower the options are, lesser the need to change it. For 90% or users should be fine to change just first one or two.
 	*/
 
-	$WIKI_TITLE = "My New Wiki"; // name of the site
+	$WIKI_TITLE = "My new wiki"; // name of the site
 	$PASSWORD = ""; // if left blank, no password is required to edit. Consider also $PASSWORD_MD5 below
 	$USE_AUTOLANG = true; // should we try to detect language from browser?
 	$LANG = "en"; // language code you want to use, used only when $USE_AUTOLANG = false
@@ -20,7 +20,7 @@
 	$USE_HISTORY = true; // If you don't want to keep history of pages, change to false
 
 	$START_PAGE = "Main page"; // Which page should be default (start page)?
-  $HELP_PAGE = "Help"; // Which page contains help informations?
+  $SYNTAX_PAGE = "Syntax reference"; // Which page contains help informations?
   
 	$COOKIE_LIFE_WRITE = 365 * 24 * 86400; // lifetime of cookies when password protection applies only to writing
   $COOKIE_LIFE_READ = 4 * 3600; // lifetime of cookies when $PROTECTED_READ = true

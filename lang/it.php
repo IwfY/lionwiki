@@ -1,5 +1,4 @@
 <?
-		
 	$T_HOME = "Pagina principale";
 	$T_SYNTAX = "Sintassi";
 	$T_EDIT = "Modifica";
@@ -14,7 +13,7 @@
 	$T_NO_HISTORY = "Cronologia non presente.";
 	$T_RESTORE = "Ripristina";
 	$T_REV_DIFF = "<b>Differenze tra le revisioni a partire dalla {REVISION1} e dalla {REVISION2}.</b>";
-	$T_REVISION = "'''Questa revisione risale a {TIME}. Potete {RESTORE} rla.'''\n";
+	$T_REVISION = "'''Questa revisione risale a {TIME}. Potete {RESTORE} rla.'''\n\n";
 	$T_PASSWORD = "Password";
 	$T_EDIT_SUMMARY = "Modifica indice";
 	$T_ERASE_COOKIE = "Cancella i cookies";

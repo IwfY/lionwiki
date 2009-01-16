@@ -3,6 +3,9 @@
 	 Based on WiKiss, http://wikiss.tuxfamily.org, itself based on TigerWiki
 	 Licensed under GPL v2, http://www.gnu.org/licenses/gpl-2.0.html */
 
+	foreach($_REQUEST as $key => $value)	
+		unset($$key); // register_globals = off
+
 	// SETTINGS - fallback settings when no config file exists.
 
 	$WIKI_TITLE = "My new wiki"; // name of the site
@@ -29,15 +32,14 @@
 	
 	// END OF SETTINGS
 	
-	$TIME_FORMAT = "%Y/%m/%d %R";
+	$DATE_FORMAT = "Y/m/d H:i";
 	
-	$LOCAL_HOUR = "0"; // +1 for most of the Europe, -5 for eastern USA, etc.
+	$LOCAL_HOUR = "0";
 	
 	$EDIT_SUMMARY_LEN = "128"; // don't play with this!!!
 	
 	@error_reporting(E_ERROR | E_WARNING | E_PARSE);
-	@ini_set("register_globals", "0");
-	
+
 	set_magic_quotes_runtime(0); // turn off magic quotes
 	
 	if(get_magic_quotes_gpc()) { // magic_quotes_gpc can't be turned off
@@ -57,11 +59,10 @@
 	if(empty($PASSWORD_MD5) && !empty($PASSWORD))
 		$PASSWORD_MD5 = md5($PASSWORD);
 
-	$WIKI_VERSION = "LionWiki 2.1";
+	$WIKI_VERSION = "LionWiki 2.2beta1";
 	$PAGES_DIR = $BASE_DIR . "pages/";
 	$HISTORY_DIR = $BASE_DIR . "history/";
 	$PLUGINS_DIR = "plugins/";
-	$PLUGINS_DATA_DIR = "data/"; // should be writable, always under plugin directory
 	$LANG_DIR = "lang/";
 	
 	umask(0); // sets default mask
@@ -70,7 +71,6 @@
 
 	$T_HOME = "Main page";
 	$T_SYNTAX = "Syntax";
-	$T_EDIT = "Edit";
 	$T_DONE = "Save changes";
 	$T_PREVIEW = "Preview";
 	$T_SEARCH = "Search";
@@ -82,9 +82,13 @@
 	$T_NO_HISTORY = "No history.";
 	$T_RESTORE = "Restore";
 	$T_REV_DIFF = "<b>Difference between revisions from {REVISION1} and {REVISION2}.</b>";
-	$T_REVISION = "'''This revision is from {TIME}. You can {RESTORE} it.'''\n";
+	$T_REVISION = "'''This revision is from {TIME}. You can {RESTORE} it.'''\n\n";
 	$T_PASSWORD = "Password";
+	$T_EDIT = "Edit";
 	$T_EDIT_SUMMARY = "Edit summary";
+	$T_EDIT_CONFLICT = "Edit conflict: somebody saved this page after you started editing. It is strongly encouraged to see last {DIFF} before saving it. After reviewing and possibly merging changes, you can save page by clicking on save button.";
+	$T_SHOW_SOURCE = "Show source";
+	$T_SHOW_PAGE = "Show page";
 	$T_ERASE_COOKIE = "Erase cookies";
 	$T_WIKI_CODE = "Wiki code";
 	$T_MOVE_TEXT = "New name";
@@ -92,7 +96,6 @@
 	$T_DIFF = "diff";
 	$T_CREATE_PAGE = "Create page";
 	$T_PROTECTED_READ = "You need to enter password to view content of site: ";
-	$T_EDIT_CONFLICT = "Edit conflict: somebody saved this page after you started editing. It is strongly encouraged to see last {DIFF} before saving it. After reviewing and possibly merging changes, you can save page by clicking on save button.";
 	$TE_WRONG_PASSWORD = "Password is incorrect.";
 	
 	// Default character set for auto content header
@@ -155,7 +158,7 @@
 	plugin_call_method("pluginsLoaded");
 
 	// list of variables for UTF-8 conversion and export
-	$req_conv = array("action", "query", "sc", "content", "page", "moveto", "restore", "f1", "f2", "error", "time", "esum", "preview", "last_changed", "econfprot");
+	$req_conv = array("action", "query", "sc", "content", "page", "moveto", "restore", "f1", "f2", "error", "time", "esum", "preview", "last_changed", "econfprot", "gtime", "showsource");
 
 	if(extension_loaded("mbstring")) { // Conversion to UTF-8
 		@ini_set("mbstring.language", "Neutral"); 
@@ -175,7 +178,7 @@
 	
 	if(!empty($preview)) {
 		$action = "edit";
-		$CON = "\n" . $content;
+		$CON = $content;
 	}
 
 	// setting $PAGE_TITLE
@@ -197,8 +200,6 @@
 
 	if(version_compare(phpversion(), "5.1.0") >= 0)
 		@date_default_timezone_set($TIME_ZONE);
-		
-	$datetw = date("Y/m/d H:i", mktime(date("H") + $LOCAL_HOUR));
 	
 	// does user need password to read content of site. If yes, ask for it.
 	if(!authentified() && $PROTECTED_READ) {
@@ -209,7 +210,9 @@
 	else if($action == "save" && authentified()) { // do we have page to save?
 		$LAST_CHANGED_TIMESTAMP = @filemtime($PAGES_DIR . $page . ".txt");
 		
-		if($last_changed < $LAST_CHANGED_TIMESTAMP && $econfprot) {
+		if(trim($content) == "")
+			@unlink($PAGES_DIR . $page . ".txt");
+		elseif($last_changed < $LAST_CHANGED_TIMESTAMP && $econfprot) {
 			$action = "edit";
 			$error = str_replace("{DIFF}", "<a href=\"?page=".urlencode($page)."&amp;action=diff\">$T_DIFF</a>", $T_EDIT_CONFLICT);
 		}
@@ -226,7 +229,7 @@
 				if(!is_dir($complete_dir))
 					mkdir($complete_dir);
 
-				$rightnow = date("Ymd-Hi-s", mktime(date("H") + $LOCAL_HOUR));
+				$rightnow = date("Ymd-Hi-s", time() + $LOCAL_HOUR * 3600);
 
 				$filename = $complete_dir . "/" . $rightnow . ".bak";
 
@@ -257,13 +260,13 @@
 			header("Location:?page=" . urlencode($page) . ($error ? ("&error=" . urlencode($error)) : ""));
 			die();
 		} else { // there's some problem with page, give user a chance to fix it (do not throw away submitted content)
-			$CON = "\n" . $content;
+			$CON = $content;
 			$action = "edit";
 		}
 	} else if($action == "save") { // wrong password, give user another chance (do not throw away submitted content)
 		$error = $TE_WRONG_PASSWORD;
 		
-		$CON = "\n" . $content;
+		$CON = $content;
 		$action = "edit";
 	}
 		
@@ -302,41 +305,32 @@
 	
 		// Restoring old version of page
 		if($gtime && ($restore || $action == "rev") && ($file = @lwopen($HISTORY_DIR . $page . "/" . $gtime, "r"))) {
-			if($action != "edit" && $action != "preview") {				
+			if($action == "rev") { 
 				$rev_restore = "[$T_RESTORE|./?page=" . urlencode($page) . "&amp;action=edit&amp;gtime=" . $gtime . "&amp;restore=1]";
-				
+
 				$CON = str_replace(array("{TIME}", "{RESTORE}"), array(revTime($gtime), $rev_restore), $T_REVISION);
-				
-				$RESTORE = "<a href=\"?page=" . urlencode($page) . "&amp;action=edit&amp;gtime=" . $gtime . "&amp;restore=1\">$T_RESTORE</a>";
 			}
-			else
-				$CON = "";
-		
+
 			$CON .= @lwread($file);
 			@lwclose($file);
 		}
 		else {
 			$CON = @file_get_contents($PAGES_DIR . $page . ".txt");
-		
+
 			if(substr($CON, 0, 10) == "{redirect:" && $action == "") {
-				header("Location:?page=" . substr($CON, 10, strpos($CON, "}") - 10));
+				header("Location:?page=" . substr($CON, 10, strpos($CON, "}") - 10)); // urlencode?
 				die();
 			}
-		
-			$CON = "\n" . $CON . "\n";
 		}
 	}
 	
-	if($action == "edit") {
-		if(!authentified()) { // if not logged on, require password
+	if($action == "edit") {	
+		if(!authentified() && !$showsource) { // if not logged on, require password
 			$FORM_PASSWORD = $T_PASSWORD;
 			$FORM_PASSWORD_INPUT = "<input id=\"passwordInput\" type=\"password\" name=\"sc\" />";
 		}
 
-		$EDIT_SUMMARY_TEXT = $T_EDIT_SUMMARY;
-		$EDIT_SUMMARY = "<input type=\"text\" name=\"esum\" id=\"esum\" value=\"\" />";
-
-		if(empty($preview)) {
+		if(!$preview && !$showsource) {
 			$RENAME_FORM_BEGIN = "<form id=\"renameForm\" method=\"post\" action=\"\">";
 			$RENAME_FORM_END = "</form>";
 	
@@ -345,7 +339,7 @@
 			$RENAME_SUBMIT = "<input type=\"hidden\" name=\"page\" value=\"$page\" /><input id=\"renameSubmit\" class=\"submit\" type=\"submit\" value=\"$T_MOVE\" />";
 		}
 
-		$CON_FORM_BEGIN = "<form id=\"contentForm\" method=\"post\" action=\"./\"><input type=\"hidden\" name=\"action\" value=\"save\" /><input type=\"hidden\" name=\"last_changed\" value=\"$LAST_CHANGED_TIMESTAMP\" />";
+		$CON_FORM_BEGIN = "<form id=\"contentForm\" method=\"post\" action=\"./\"><input type=\"hidden\" name=\"action\" value=\"save\" /><input type=\"hidden\" name=\"last_changed\" value=\"$LAST_CHANGED_TIMESTAMP\" /><input type=\"hidden\" name=\"showsource\" value=\"$showsource\" />";
 		
 		if(empty($econfprot))
 			$CON_FORM_BEGIN .= "<input type=\"hidden\" name=\"econfprot\" value=\"1\" />";
@@ -353,17 +347,21 @@
 		$CON_FORM_END = "</form>";
 
 		$CON_TEXTAREA = "<textarea id=\"contentTextarea\" name=\"content\" cols=\"83\" rows=\"30\">" . htmlspecialchars($CON) . "</textarea><input type=\"hidden\" name=\"page\" value=\"$page\" />";
+		
+		if(!$showsource) {
+			$CON_SUBMIT = "<input id=\"contentSubmit\" class=\"submit\" type=\"submit\" value=\"$T_DONE\" />";
 			
-		$CON_SUBMIT = "<input id=\"contentSubmit\" class=\"submit\" type=\"submit\" value=\"$T_DONE\" />";
+			$EDIT_SUMMARY_TEXT = $T_EDIT_SUMMARY;
+			$EDIT_SUMMARY = "<input type=\"text\" name=\"esum\" id=\"esum\" value=\"\" />";
+		}
+			
 		$CON_PREVIEW = "<input id=\"contentPreview\" class=\"submit\" type=\"submit\" name=\"preview\" value=\"$T_PREVIEW\" />";
 		
 		if($preview)
 			$action = "";
-	} elseif($action == "rev" && !empty($gtime)) { // show old revision of page
-		$complete_dir = $HISTORY_DIR . $page . "/";
-
+	} elseif($action == "rev" && !empty($gtime)) // show old revision of page
 		$action = "";
-	} elseif($action == "history") { // show whole history of page
+	elseif($action == "history") { // show whole history of page
 		$complete_dir = $HISTORY_DIR . $page . "/";
 		
 		if($opening_dir = @opendir($complete_dir)) {
@@ -399,7 +397,7 @@
 				$CON .= "<a href=\"?page=" . urlencode($page) . "&amp;action=rev&amp;gtime=" . $fname . "\" rel=\"nofollow\">" . revTime($fname) . "</a> $size $ip <i>$esum</i><br />";
 			}
 			
-			$CON .= "<input type=\"submit\" class=\"submit\" value=\"$T_DIFF\" /></form>";
+			$CON .= "<input id=\"diffButton\" type=\"submit\" class=\"submit\" value=\"$T_DIFF\" /></form>";
 		} else
 			$CON = $NO_HISTORY;
 	}
@@ -426,19 +424,28 @@
 		
 		// offer to create page if it doesn't exist
 		if($query && !file_exists($PAGES_DIR . $query . ".txt"))
-			$CON = "<p><a href=\"?action=edit&amp;page=" . urlencode($query) . "\" rel=\"nofollow\">$T_CREATE_PAGE $query</a>.</p><br />";
+			$CON = "<p><i><a href=\"?action=edit&amp;page=" . urlencode($query) . "\" rel=\"nofollow\">$T_CREATE_PAGE $query</a>.</i></p><br />";
 		
 		$files = array();
 		
 		while($file = readdir($dir))
 			if(preg_match("/\.txt$/", $file) && (@$con = file_get_contents($PAGES_DIR . $file)))
-				if(empty($query) || stripos($con, $query) !== false || stripos($file, $query) !== false)
+				if(empty($query) || stristr($con, $query) !== false || stristr($file, $query) !== false)
 					$files[] = substr($file, 0, strlen($file) - 4);
 		
 		sort($files);
 			
-		foreach($files as $file)
-			$CON .= "<a href=\"?page=".urlencode($file)."\" rel=\"nofollow\">" . htmlspecialchars($file) . "</a> (<a href=\"?page=".urlencode($file)."&amp;action=edit\">$T_EDIT</a>)<br />";
+		foreach($files as $file) {
+			if(is_writable($PAGES_DIR . $file . ".txt")) {
+				$link_text = $T_EDIT;
+				$s_source = "";
+			} else {
+				$link_text = $T_SHOW_SOURCE;
+				$s_source = "&amp;showsource=1";
+			}
+		
+			$CON .= "<a href=\"?page=".urlencode($file)."\" rel=\"nofollow\">" . htmlspecialchars($file) . "</a> (<a href=\"?page=".urlencode($file)."&amp;action=edit$s_source\">$link_text</a>)<br />";
+		}
 		
 		$TITLE .= " (" . count($files) . ")";
 	} elseif($action == "recent") { // recent changes
@@ -465,25 +472,25 @@
 			} else
 				$ip = $size = $esum = "";
 			
-			$CON .= "<a href=\"./?page=" . urlencode($filename) . "\">" . htmlspecialchars($filename) . "</a> (" . strftime($TIME_FORMAT, $timestamp + $LOCAL_HOUR * 3600) . " - <a href=\"./?page=".urlencode($filename)."&amp;action=diff\">$T_DIFF</a>) $size $ip <i>$esum</i><br />";
+			$CON .= "<a href=\"./?page=" . urlencode($filename) . "\">" . htmlspecialchars($filename) . "</a> (" . date($DATE_FORMAT, $timestamp + $LOCAL_HOUR * 3600) . " - <a href=\"./?page=".urlencode($filename)."&amp;action=diff\">$T_DIFF</a>) $size $ip <i>$esum</i><br />";
 		}
 		
 	} else if(!plugin_call_method("action", $action) && $action != "view-html")
 			$action = "";
 
 	if($action == "") { // substituting $CON to be viewed as HTML
-		$CON = "\n" . $CON;
+		$CON = "\n" . $CON . "\n";
 	
 		// Subpages
-		while(preg_match("/[^\^]{include:([^}]+)}/Um", $CON, $match)) {
-			if(!strcmp($match[1], $page)) // limited recursion protection
+		while(preg_match("/([^\^]){include:([^}]+)}/Um", $CON, $match)) {
+			if(!strcmp($match[2], $page)) // limited recursion protection
 				$CON = str_replace($match[0], "'''Warning: subpage recursion!'''", $CON);
-			elseif(file_exists($PAGES_DIR . $match[1] . ".txt")) {
-				$tpl = file_get_contents($PAGES_DIR . $match[1] . ".txt");
+			elseif(file_exists($PAGES_DIR . $match[2] . ".txt")) {
+				$tpl = file_get_contents($PAGES_DIR . $match[2] . ".txt");
 				
-				$CON = str_replace($match[0], $tpl, $CON);
+				$CON = str_replace($match[0], $match[1] . $tpl, $CON);
 			} else
-				$CON = str_replace($match[0], "'''Warning: subpage $match[1] was not found!'''", $CON);
+				$CON = str_replace($match[0], "'''Warning: subpage $match[2] was not found!'''", $CON);
 		}
 	
 		// save content not intended for substitutions ({html} tag)
@@ -618,13 +625,13 @@
 		
 		$CON = preg_replace('/(-----*)/m', '<hr />', $CON); // horizontal line
 		
-		$CON = str_replace("--", "&mdash;", $CON); // --
-		
 		$CON = preg_replace("/<\/([uo])l>\n\n/Us", "</$1l>", $CON);
 
 		$CON = preg_replace('#(</h[23456]>)<br />#', "$1", $CON);
 
 		$CON = preg_replace("/'--(.*)--'/Um", '<del>$1</del>', $CON); // strikethrough
+
+		$CON = str_replace("--", "&mdash;", $CON); // --
 
 		$CON = preg_replace("/'__(.*)__'/Um", '<u>$1</u>', $CON); // underlining
 		$CON = preg_replace("/'''''(.*)'''''/Um", '<strong><em>$1</em></strong>', $CON); // bold and italic
@@ -663,7 +670,7 @@
 		plugin_call_method("formatEnd");
 	}
 
-	if(!empty($preview))
+	if($preview)
 		$html = preg_replace("/\{RENAME_FORM\}.*\{\/RENAME_FORM\}/Um", "", $html);
 
 	// including pages in pure HTML
@@ -679,6 +686,8 @@
 
 	if($editable && is_writable($PAGES_DIR . $page . ".txt"))
 		$EDIT = "<a href=\"./?page=" . urlencode($page) . "&amp;action=edit\" rel=\"nofollow\">$T_EDIT</a>";
+	else if($editable)
+		$EDIT = "<a href=\"./?page=" . urlencode($page) . "&amp;action=edit&showsource=1\" rel=\"nofollow\">$T_SHOW_SOURCE</a>";
 
 	$tpl_subs = array(
 		array("HEAD", $HEAD),
@@ -694,8 +703,9 @@
 		array("PAGE_TITLE_HEAD", htmlspecialchars($page_nolang == $START_PAGE ? "" : $TITLE)),
 		array("EDIT", $EDIT),
 		array("WIKI_TITLE", $WIKI_TITLE),
-		array("LAST_CHANGED_TEXT", $T_LAST_CHANGED),
+		array("LAST_CHANGED_TEXT", $LAST_CHANGED ? $T_LAST_CHANGED : ""),
 		array("LAST_CHANGED", $LAST_CHANGED),
+		array("TOC", $TOC), // must be before replacing CONTENT_FORM
 		array("CONTENT", $action != "edit" ? $CON : ""),
 		array("CONTENT_FORM", $CON_FORM_BEGIN),
 		array("\/CONTENT_FORM", $CON_FORM_END),
@@ -714,10 +724,10 @@
 		array("LANG", $LANG),
 		array("LIST_OF_ALL_PAGES", "<a href=\"?action=search\">$T_LIST_OF_ALL_PAGES</a>"),
 		array("WIKI_VERSION", $WIKI_VERSION),
-		array("DATE", $datetw),
+		array("DATE", date("Y/m/d H:i", time() + $LOCAL_HOUR * 3600)),
 		array("IP", $_SERVER['REMOTE_ADDR']),
-		array("TOC", $TOC),
 		array("SYNTAX", $action == "edit" || $preview ? "<a href=\"./?page=" . urlencode($SYNTAX_PAGE) . "\" rel=\"nofollow\">$T_SYNTAX</a>" : ""),
+		array("SHOW_PAGE", $action == "edit" || $preview ?  "<a href=\"index.php?page=".urlencode($page)."\">$T_SHOW_PAGE</a>" : ""),
 		array("COOKIE", '<a href="./?page=' . urlencode($page) . '&amp;action='. urlencode($action) .'&amp;erasecookie=1" rel="nofollow">' . $T_ERASE_COOKIE . '</a>')
 	);
 
@@ -732,26 +742,40 @@
 		return preg_replace("/\{(([^}]*) )?$what( ([^}]*))?\}/U", empty($subs) ? "" : "\${2}".trim($subs)."\${4}", $where);
 	}
 	
-	function template_match($what, $where, &$dest) {
+	function template_match($what, $where, &$dest = NULL) {
 		return preg_match("/\{(([^}]*) )?$what( ([^}]*))?\}/U", $where, $dest);
 	}
 	
 	function revTime($time) {
+		global $DATE_FORMAT, $LOCAL_HOUR;
+	
 		preg_match("/([0-9][0-9][0-9][0-9])([0-9][0-9])([0-9][0-9])-([0-9][0-9])([0-9][0-9])-([0-9][0-9])/U", $time, $m);
-				
-		return strftime("%d. %m. %Y %R", mktime($m[4], $m[5], $m[6], $m[2], $m[3], $m[1]));
+		
+		return date($DATE_FORMAT, mktime($m[4], $m[5], $m[6], $m[2], $m[3], $m[1]));
 	}
 	
-	function diff($f1, $f2, $short_diff = 0) {
+	function diff($f1, $f2) {
 		global $page, $HISTORY_DIR;
 	
-		$complete_dir = $HISTORY_DIR . $page . "/";
-
 		if($f2 < $f1)
 			list($f1, $f2) = array($f2, $f1);
+	
+		$complete_dir = $HISTORY_DIR . $page . "/";
+		
+		if(plugin_call_method("diff", $complete_dir . $f1, $complete_dir . $f2, $diff)) {
+			global $plugin_ret_diff;
+		
+			$diff = $plugin_ret_diff;
+		}
+		else
+			$diff = diff_builtin($complete_dir . $f1, $complete_dir . $f2);
+			
+		return $diff;
+	}
 
-		$s1 = lwopen($complete_dir . $f1, "r");
-		$s2 = lwopen($complete_dir . $f2, "r");
+	function diff_builtin($f1, $f2) {
+		$s1 = lwopen($f1, "r");
+		$s2 = lwopen($f2, "r");
 
 		$a1 = explode("\n", @lwread($s1));
 		$a2 = explode("\n", @lwread($s2));
@@ -767,7 +791,7 @@
 		for($i = 0; $i <= max(sizeof($a2), sizeof($a1)); $i++) {
 			if($r1 = array_key_exists($i, $d1)) $ret .= "<del>".htmlspecialchars(trim($d1[$i]))."</del>\n";
 			if($r2 = array_key_exists($i, $d2)) $ret .= "<ins>".htmlspecialchars(trim($d2[$i]))."</ins>\n";
-			if(!$r1 && !$r2 && !$short_diff) $ret .= "<span class=\"orig\">".htmlspecialchars(trim($a2[$i]))."</span>\n";
+			if(!$r1 && !$r2 && !$short_diff) $ret .= htmlspecialchars(trim($a2[$i])) . "\n";
 		}
 
 		return $ret . "</pre>";
@@ -927,11 +951,10 @@ textarea{padding:3px;}
 	<tr><td colspan="3"><hr /></td></tr>
 	<tr>
 		<td><div>{SEARCH_FORM}{SEARCH_INPUT}{SEARCH_SUBMIT}{/SEARCH_FORM}</div></td>
-		<td>Powered by <a href="http://lionwiki.0o.cz/">{WIKI_VERSION}</a>. {LAST_CHANGED_TEXT}: {LAST_CHANGED} {COOKIE}</td>
+		<td>Powered by <a href="http://lionwiki.0o.cz/">LionWiki</a>. {LAST_CHANGED_TEXT}: {LAST_CHANGED} {COOKIE}</td>
 		<td style="text-align : right;">{EDIT} {SYNTAX} {HISTORY}</td>
 	</tr>
 </table>
 </body>
-</html>
-'; }
+</html>'; }
 ?>

@@ -6,6 +6,7 @@ class SelectLanguage
 		);
 
 	var $lang_names = array(
+		"ar" => "العربية",
 		"bg" => "Български",
 		"ca" => "Català",
 		"cs" => "Čeština",
@@ -17,6 +18,7 @@ class SelectLanguage
 		"fr" => "Français",
 		"hr" => "Hrvatski",
 		"hu" => "Magyar",
+		"it" => "Italiano",
 		"nl" => "Nederlands",
 		"pl" => "Polski",
 		"pt" => "Português",

@@ -1,7 +1,7 @@
 <?php
 class Install
 {
-	function __construct()
+	function Install()
 	{
 		global $PLUGINS_DIR, $PLUGINS_DATA_DIR, $PAGES_DIR, $HISTORY_DIR, $USE_HISTORY, $HISTORY_COMPRESSION;
 	
@@ -49,12 +49,6 @@ class Install
 				$plugins[] = "$file[0] plugin is installed but $PLUGINS_DATA_DIR/$file[1] is not writable. Create it (if it doesn't exist yet) and make it writable (using command chmod 777).";
 		if(file_exists($PLUGINS_DIR . "wkp_RSS.php") && !is_writable("data"))
 			$plugins[] = "Upload plugin is installed but \"data\" dir doesn't exist or is not writable. Create it (if it doesn't exist yet) and make it writable (using command chmod 777).";
-	}
-	
-	function Tags() // PHP 4 contructor/destructor emulation
-	{
-		$argcv = func_get_args();
-		call_user_func_array(array(&$this, '__construct'), $argcv); // constructor
 	}
 }
 ?>

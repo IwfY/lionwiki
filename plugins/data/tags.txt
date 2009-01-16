@@ -12,3 +12,5 @@ Syntax reference.cs
 Syntax
 Slimbox plugin
 plugin,syntax
+Main page
+LionWiki,lionwiki,LIONWIKI

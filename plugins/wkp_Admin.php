@@ -16,22 +16,14 @@ class Admin
 		)
 	);
 	
-	function __construct()
+	function Admin()
 	{
 		global $PLUGINS_DATA_DIR;
 	
 		if(empty($this->PASSWORD_MD5) && !empty($this->PASSWORD))
 		  $this->PASSWORD_MD5 = md5($this->PASSWORD);
 		  
-		$this->dir = getcwd() . "/" . $PLUGINS_DATA_DIR;
-	}
-	
-	function Admin() // PHP 4 contructor/destructor emulation
-	{
-		$argcv = func_get_args();
-		call_user_func_array(array(&$this, '__construct'), $argcv); // constructor
-	
-		//register_shutdown_function(array(&$this, '__destruct')); // destructor
+		$this->dir = dirname(__FILE__) . "/data/";
 	}
 	
 	// just for printing "menu"

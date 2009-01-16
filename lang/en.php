@@ -6,7 +6,6 @@
 	
 	$T_HOME = "Main page";
 	$T_SYNTAX = "Syntax";
-	$T_EDIT = "Edit";
 	$T_DONE = "Save changes";
 	$T_PREVIEW = "Preview";
 	$T_SEARCH = "Search";
@@ -18,9 +17,13 @@
 	$T_NO_HISTORY = "No history.";
 	$T_RESTORE = "Restore";
 	$T_REV_DIFF = "<b>Difference between revisions from {REVISION1} and {REVISION2}.</b>";
-	$T_REVISION = "'''This revision is from {TIME}. You can {RESTORE} it.'''\n";
+	$T_REVISION = "'''This revision is from {TIME}. You can {RESTORE} it.'''\n\n";
 	$T_PASSWORD = "Password";
+	$T_EDIT = "Edit";
 	$T_EDIT_SUMMARY = "Edit summary";
+	$T_EDIT_CONFLICT = "Edit conflict: somebody saved this page after you started editing. It is strongly encouraged to see last {DIFF} before saving it. After reviewing and possibly merging changes, you can save page by clicking on save button.";
+	$T_SHOW_SOURCE = "Show source";
+	$T_SHOW_PAGE = "Show page";
 	$T_ERASE_COOKIE = "Erase cookies";
 	$T_WIKI_CODE = "Wiki code";
 	$T_MOVE_TEXT = "New name";
@@ -28,6 +31,5 @@
 	$T_DIFF = "diff";
 	$T_CREATE_PAGE = "Create page";
 	$T_PROTECTED_READ = "You need to enter password to view content of site: ";
-	$T_EDIT_CONFLICT = "Edit conflict: somebody saved this page after you started editing. It is strongly encouraged to see last {DIFF} before saving it. After reviewing and possibly merging changes, you can save page by clicking on save button.";
 	$TE_WRONG_PASSWORD = "Password is incorrect.";
 ?>

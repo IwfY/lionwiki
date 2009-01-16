@@ -17,11 +17,12 @@ class ListPlugins
 	{
 	  $ret = "";
 	  
-    foreach($arr as $line)
-	    if(is_array($line[0]))
-	      $ret .= "<ul>\n" . $this->getUL($line) . "</ul>\n";
-			else
-			  $ret .= "<li>" . $line[0] . " " . $line[1] . "</li>\n";
+	  if(is_array($arr))
+      foreach($arr as $line)
+  	    if(is_array($line[0]))
+  	      $ret .= "<ul>\n" . $this->getUL($line) . "</ul>\n";
+  			else
+  			  $ret .= "<li>" . $line[0] . " " . $line[1] . "</li>\n";
 
 		return $ret;
 	}

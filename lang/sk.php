@@ -21,5 +21,5 @@
 	$T_PROTECTED_READ = "Na zobrazenie obsahu stránok je potrebné zadať heslo: ";
 	$TE_WRONG_PASSWORD = "Zadané heslo nie je správne.";
 	
-	$TIME_FORMAT = "%d. %m. %Y %R";
+	$DATE_FORMAT = "d. m. Y H:i";
 ?>

@@ -19,7 +19,7 @@ class Captcha
   var $permanent = true; // remember first correct answer and don't ask again
 	var $cookie_password;
 
-	function __construct()
+	function Captcha()
 	{
 	  global $LANG, $PLUGINS_DATA_DIR;
 	
@@ -31,14 +31,6 @@ class Captcha
 		  $this->question_file .= "en_questions.txt";
 		  
     $this->cookie_password = md5($_SERVER["SCRIPT_FILENAME"]); // pseudo random string
-	}
-	
-	function Captcha() // PHP 4 contructor/destructor emulation
-	{
-		$argcv = func_get_args();
-		call_user_func_array(array(&$this, '__construct'), $argcv); // constructor
-	
-		//register_shutdown_function(array(&$this, '__destruct')); // destructor
 	}
 
   /*
