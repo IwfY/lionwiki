@@ -6,7 +6,7 @@ if ! [ -d "pages" ]; then
 	echo "Core: Directory 'pages' was created and set to 777 permissions."
 fi
 
-chmod 777 "pages"
+chmod -R 777 "pages"
 
 if ! [ -d "history" ]; then
 	mkdir "history"
@@ -14,7 +14,7 @@ if ! [ -d "history" ]; then
 	echo "Core: Directory 'history' was created and set to 777 permissions."
 fi
 
-chmod 777 "history"
+chmod -R 777 "history"
 
 if [ -d "plugins" ]; then
 	FILES=`ls plugins`
@@ -50,7 +50,7 @@ if [ -d "plugins" ]; then
 				mkdir "data"
 			fi
 
-			chmod 777 "data"
+			chmod -R 777 "data"
 		fi
 	done
 fi
