@@ -156,7 +156,7 @@ class Tags
 	  
 	  $CON = preg_replace("/\{tags:.+\}/U", "", $CON);
 	  
-	  if(template_match("plugin:TAG_LIST", $html) || template_match("TAG_LIST", $CON)) {
+	  if(template_match("plugin:TAG_LIST", $html, $null) || template_match("TAG_LIST", $CON, $null)) {
 			$tags = $this->getTags($page);
 					
 			$tag_array = array();
@@ -173,7 +173,7 @@ class Tags
 			$html = template_replace("plugin:TAG_LIST", $t, $html);
 		}
 		
-	  if(template_match("plugin:TAG_CLOUD", $html) || template_match("TAG_CLOUD", $CON)) {
+	  if(template_match("plugin:TAG_CLOUD", $html, $null) || template_match("TAG_CLOUD", $CON, $null)) {
 			$f = @fopen($this->tagfile, "rb");
 			
 			if(!$f) {

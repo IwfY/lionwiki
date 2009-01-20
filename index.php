@@ -63,6 +63,7 @@
 	$PAGES_DIR = $BASE_DIR . "pages/";
 	$HISTORY_DIR = $BASE_DIR . "history/";
 	$PLUGINS_DIR = "plugins/";
+	$PLUGINS_DATA_DIR = "plugins/data/";
 	$LANG_DIR = "lang/";
 	
 	umask(0); // sets default mask
@@ -215,6 +216,7 @@
 		elseif($last_changed < $LAST_CHANGED_TIMESTAMP && $econfprot) {
 			$action = "edit";
 			$error = str_replace("{DIFF}", "<a href=\"?page=".urlencode($page)."&amp;action=diff\">$T_DIFF</a>", $T_EDIT_CONFLICT);
+			$CON = $content;
 		}
 		else if(!plugin_call_method("writingPage") || $plugin_saveok) { // are plugins happy with page? (no - spam, etc)
 			if(!$file = @fopen($PAGES_DIR . $page . ".txt", "w"))
@@ -742,7 +744,7 @@
 		return preg_replace("/\{(([^}]*) )?$what( ([^}]*))?\}/U", empty($subs) ? "" : "\${2}".trim($subs)."\${4}", $where);
 	}
 	
-	function template_match($what, $where, &$dest = NULL) {
+	function template_match($what, $where, &$dest) {
 		return preg_match("/\{(([^}]*) )?$what( ([^}]*))?\}/U", $where, $dest);
 	}
 	

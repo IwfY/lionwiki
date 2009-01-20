@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# This is installation script for LionWiki - minimalist wiki engine (http://lionwiki.0o.cz)
+# It just creates neccessary directories and sets them writable.
+# (c) 2009 Adam Zivner, <adam.zivner@gmail.com>
+
 if ! [ -d "pages" ]; then
 	mkdir "pages"
 	
@@ -27,6 +31,12 @@ if [ -d "plugins" ]; then
 			fi
 
 			chmod 777 "plugins/data"
+
+			# if they exist, chmod'd them, if not, don't bother
+			chmod 777 "plugins/data/admin-blockip.txt" 2> /dev/null
+			chmod 777 "plugins/data/admin-blacklist.txt" 2> /dev/null
+			chmod 777 "plugins/data/admin-pages.txt" 2> /dev/null
+			chmod 777 "plugins/data/admin-plugins.txt" 2> /dev/null
 		elif [ $file = "wkp_RSS.php" ]; then
 			if ! [ -f "rss.xml" ]; then
 				touch "rss.xml"
@@ -40,11 +50,8 @@ if [ -d "plugins" ]; then
 
 			chmod 777 "plugins/data"
 
-			if ! [ -f "plugins/data/tags.txt" ]; then
-				mkdir "plugins/data/tags.txt"
-			fi
-
-			chmod 777 "plugins/data/tags.txt"
+			# if it exists, chmod it, if not, don't bother
+			chmod 777 "plugins/data/tags.txt" 2> /dev/null
 		elif [ $file = "wkp_Upload.php" ]; then
 			if ! [ -d "data" ]; then
 				mkdir "data"

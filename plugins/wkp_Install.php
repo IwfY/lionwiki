@@ -1,8 +1,15 @@
 <?php
 class Install
 {
+	var $desc = array(
+		array("Install", "is installation helper plugin.")
+	);
+
 	function Install()
 	{
+		//if(PHP_OS == "WINNT" || PHP_OS=="WIN32" || PHP_OS == "Windows")
+			return;
+		
 		global $PLUGINS_DIR, $PLUGINS_DATA_DIR, $PAGES_DIR, $HISTORY_DIR, $USE_HISTORY, $HISTORY_COMPRESSION;
 	
 		$core = array();
@@ -49,6 +56,71 @@ class Install
 				$plugins[] = "$file[0] plugin is installed but $PLUGINS_DATA_DIR/$file[1] is not writable. Create it (if it doesn't exist yet) and make it writable (using command chmod 777).";
 		if(file_exists($PLUGINS_DIR . "wkp_RSS.php") && !is_writable("data"))
 			$plugins[] = "Upload plugin is installed but \"data\" dir doesn't exist or is not writable. Create it (if it doesn't exist yet) and make it writable (using command chmod 777).";
+		
+		if(empty($core) && empty($plugins))
+			$html = $this->html_ok;
+		else {
+			if(!empty($core)) {
+				$html = $this->html_core_failed;
+				
+				$html .= "<ul>\n";
+			
+				foreach($core as $item)
+					$html .= "<li>" . $item . "</li>\n";
+					
+				$html .= "</ul>\n";
+			}
+			
+			if(!empty($plugins)) {
+				$html = $this->html_plugins_failed;
+				
+				$html .= "<ul>\n";
+			
+				foreach($plugins as $item)
+					$html .= "<li>" . $item . "</li>\n";
+					
+				$html .= "</ul>\n";
+			}
+			
+			$html .= $this->html_delete;
+		}
+		
+		die($this->html_head . $html . $this->html_foot);
 	}
+	
+	var $html_head = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="{LANG}" lang="{LANG}">
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<title>LionWiki installation</title>
+	<style>
+* {font-family:sans-serif;}
+body {width:800px;margin:auto;}
+h1 {color:#006600;}
+		
+		
+	</style>
+</head>
+<body>
+	<h1>LionWiki installation</h2>
+	';
+	
+	var $html_foot = '
+</body>
+</html>';
+
+	var $html_ok = '
+<p>Everything is ok! Now, last step is to delete this installation file which is located in <b>plugins/wkp_Install.php</b>. After you delete this file, you can click on the "Reload" button below.</p>
+
+<form action="" method="get">
+	<input type="submit" value="Reload" />
+</form>';
+
+	var $html_core_failed = '<p>We registered some problems with core LionWiki and we will need your help to solve them. Solving these problems are essential to run LionWiki without problems.</p>';
+	
+	var $html_plugins_failed = '<p>We registered some problems with LionWiki plugins. These plugins are not essential to run LionWiki but extends its functionality. If you don\' need some plugins, you can delete them (they are stored in plugins/ directory.';
+	
+	var $html_delete = '<p>Even computers make mistakes, i.e. it\' possible that some registered problems are actually false alarms or they aren\'t important for you. If this is the case, you can skip this installation by deleting file plugins/wkp_Install.php and reloading the page.</p>';
 }
 ?>

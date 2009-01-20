@@ -37,8 +37,11 @@ class ListPlugins
 
 			$CON = "<ul>\n";
 
-	    foreach($plugins as $p)
+	    foreach($plugins as $p) {	    
 	      $CON .= $this->getUL($p->desc);
+	      
+	      $p = array();
+	    }
 
 			$CON .= "</ul>\n";
 

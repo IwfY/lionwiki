@@ -4,7 +4,7 @@
 	*/
 
 	$WIKI_TITLE = "My new wiki"; // name of the site
-	$PASSWORD = ""; // if left blank, no password is required to edit. Consider also $PASSWORD_MD5 below
+	$PASSWORD = "aaa"; // if left blank, no password is required to edit. Consider also $PASSWORD_MD5 below
 	$USE_AUTOLANG = true; // should we try to detect language from browser?
 	$LANG = "en"; // language code you want to use, used only when $USE_AUTOLANG = false
 	$TEMPLATE = "template_dandelion.html";

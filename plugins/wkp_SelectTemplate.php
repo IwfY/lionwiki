@@ -7,6 +7,7 @@ class SelectTemplate
 		);
 
 	var $tpls = array(
+		"template_dandelion.html" => "Dandelion",
 		"template_hide.html" => "Red panel",
 		"template_minimal.html" => "Minimal",
 		"template_terminal.html" => "Green terminal",

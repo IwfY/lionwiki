@@ -78,7 +78,7 @@ class Upload
 
         // list of files
         if($opening_dir = @opendir($curdir)) {
-          $CON .= '<h2>' . $this->TP_DIRECTORY . " " . $curdir . '</h2><table id=\"upload-list\" style="float : left;width : 500px;"><col span="2" style="color : red;" /><col /><col style="text-align : right;" /><col style="text-align : center;" /><tr><th>' . $this->TP_FILE_NAME . '</th><th>' . $this->TP_FILE_TYPE . '</th><th>' . $this->TP_FILE_SIZE . '</th><th>' . $this->TP_DELETE . '</th></tr>';
+          $CON .= '<h2>' . $this->TP_DIRECTORY . " " . $curdir . '</h2><table id="fileTable" style="min-width : 600px;"><col span="2" style="color : red;" /><col /><col style="text-align : right;" /><col style="text-align : center;" /><tr><th>' . $this->TP_FILE_NAME . '</th><th>' . $this->TP_FILE_TYPE . '</th><th>' . $this->TP_FILE_SIZE . '</th><th>' . $this->TP_DELETE . '</th></tr>';
 
           $files = array();
 
@@ -109,10 +109,12 @@ class Upload
             if(is_dir($path))
               $CON = $CON . '<td><a href="./?action=' . $action . '&curdir=' . urlencode($path) . '">[' . $file[0] . ']</a></td><td>' . $this->TP_DIRECTORY . '</td><td>-</td>';
             else
-              $CON = $CON . '<td><a href="' . $path . '">' . $file[0] . '</a></td><td>' . $this->TP_FILE . '</td><td>'.@filesize($path) . '</td>';
+              $CON = $CON . '<td><a href="' . $path . '">' . $file[0] . '</a></td><td>' . $this->TP_FILE . '</td><td>'.@number_format(@filesize($path), 0, ".", " ") . ' B</td>';
 
             if((authentified()) && ($file[0] != '..'))
               $CON .= '<td><a title="delete" href="./?action=upload&del=' . urlencode($path) . "&curdir=" . urlencode($curdir) . '">&times;</a></td>';
+            else
+            	$CON .= "<td>&nbsp;</td>";
 
             $CON .= "</tr>\n";
           }
@@ -121,22 +123,36 @@ class Upload
         }
 
         $CON .= '
-<div id=\"upload-form\" style="float:right;">
+<h2>Upload</h2>
+        
+<div id="upload-form">
   <form method="post" action="./?action=' . $action . '" enctype= "multipart/form-data">
   <input type="hidden" name="curdir" value="' . $curdir . '" />
-    <table>
 ';
-        $CON .= "<tr><td>$this->TP_FILE:</td><td><input type=\"file\" name=\"file\" /></td></tr>\n";
-        $CON .= "<tr><td>$this->TP_CREATE_DIRECTORY:</td><td><input type=\"text\" name=\"dir2create\" /></td></tr>\n";
-
+        $CON .= "$this->TP_FILE: <input type=\"file\" name=\"file\" />\n";
+        
         if(!authentified())
-          $CON .= "<tr><td>$T_PASSWORD:</td><td><input type=\"password\" name=\"sc\" /></td></tr>\n";
+          $CON .= "$T_PASSWORD: <input type=\"password\" name=\"sc\" />\n";
+        
+        $CON .= "<input type=\"submit\" value=\"$this->TP_UPLOAD\" />";
+        
+        $CON .= "</form>";
+        
+        $CON .= "<p><em>$this->TP_MAXIMUM_SIZE_IS " . ini_get('upload_max_filesize') . "</em></p>";
+        
+        $CON .= '
+	<form method="post" action="./?action=' . $action . '" enctype= "multipart/form-data">
+  <input type="hidden" name="curdir" value="' . $curdir . '" />';
+        
+        $CON .= "$this->TP_CREATE_DIRECTORY: <input type=\"text\" name=\"dir2create\" />\n";
 
-        $CON .= "<tr><td>&nbsp;</td><td><input type=\"submit\" value=\"$this->TP_UPLOAD\" accesskey=\"s\" /></td></tr>
-    </table>
-</form>
-</div>\n";
-        $CON .= "<br style=\"clear:both;\" /><br /><br /><div>$this->TP_MAXIMUM_SIZE_IS " . ini_get('upload_max_filesize') . "</div>";
+				if(!authentified())
+          $CON .= "$T_PASSWORD: <input type=\"password\" name=\"sc\" />\n";
+
+				$CON .= "<input type=\"submit\" value=\"$this->TP_CREATE\" />";
+        
+        $CON .= "</form></div>";
+
       } else
         $CON = "<div class=\"error\">$this->TP_NO_DATA_DIR ($this->datadir).</div>";
 
@@ -165,6 +181,7 @@ class Upload
 		array("TP_FILE", "Soubor"),
 		array("TP_DIRECTORY", "Adresář"),
 		array("TP_CREATE_DIRECTORY", "Vytvořit adresář"),
+		array("TP_CREATE", "Vytvořit"),
 		array("TP_UPLOAD", "Nahrát"),
 		array("TP_MAXIMUM_SIZE_IS", "Maximální velikost souboru je"),
 		array("TP_NO_DATA_DIR", "Adresář pro data neexistuje"),
@@ -182,6 +199,7 @@ class Upload
 		array("TP_FILE", "File"),
 		array("TP_DIRECTORY", "Directory"),
 		array("TP_CREATE_DIRECTORY", "Create directory"),
+		array("TP_CREATE", "Create"),
 		array("TP_UPLOAD", "Upload"),
 		array("TP_MAXIMUM_SIZE_IS", "Maximum size of uploaded file is"),
 		array("TP_NO_DATA_DIR", "Data directory doesn't exist"),

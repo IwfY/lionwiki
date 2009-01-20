@@ -14,3 +14,19 @@ Slimbox plugin
 plugin,syntax
 Main page
 LionWiki,lionwiki,LIONWIKI
+UserGuide: Syntax
+Syntax
+UserGuide: Syntax cheatsheet
+Syntax
+UserGuide: Text styles
+Syntax
+UserGuide: Images
+Syntax
+UserGuide: Links
+Syntax
+UserGuide: Redirects
+Syntax
+UserGuide: Subpages
+Syntax
+UserGuide: Miscellaneous syntax
+Syntax
