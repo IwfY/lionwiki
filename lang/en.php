@@ -1,4 +1,4 @@
-<?
+<?php
 	/*
 		This file is actually never used but provides easier access to translators as they will
 		probably translate from english.

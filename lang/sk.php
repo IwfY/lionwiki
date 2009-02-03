@@ -1,4 +1,4 @@
-<?
+<?php
 	$T_HOME = "Hlavná strana";
 	$T_SYNTAX = "Syntaxe";
 	$T_EDIT = "Editovať";

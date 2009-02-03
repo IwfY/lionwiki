@@ -1,4 +1,4 @@
-<?
+<?php
 	$T_HOME = "Hauptseite"; 
 	$T_EDIT = "Editieren";
 	$T_DONE = "Speichern"; // event. Änderungen speichern

@@ -18,6 +18,10 @@ class Upload
 	var $datadir;
 	
 	var $blacklist = array(".php", ".phtml", ".php3", ".php4", ".js", ".shtml", ".pl" ,".py", ".asp", ".jsp", ".sh", ".cgi"); // forbidden file extensions
+	
+	// permissions of uploaded files and directories. Leading zeroes are necessary!
+	var $chmod_dir = 0755;
+	var $chmod_file = 0644;
 
   function Upload()
   {
@@ -38,7 +42,7 @@ class Upload
     global $CON, $TITLE, $editable, $T_PASSWORD, $TE_WRONG_PASSWORD, $error;
 
     $curdir = "";
-
+    
     if($action == "upload") {
       $CON = "";
       
@@ -52,7 +56,7 @@ class Upload
 
         if(authentified()) {
           if(!empty($_POST['dir2create']))
-            @mkdir($curdir . '/' . $this->cleanInput($_POST['dir2create']));
+            @mkdir($curdir . '/' . $this->cleanInput($_POST['dir2create']), $this->chmod_dir);
           elseif(!empty($_FILES['file']['tmp_name'])) { // anything to upload?
             if(is_uploaded_file($_FILES['file']['tmp_name'])) {
 							foreach($this->blacklist as $file) // executable files not allowed
@@ -62,8 +66,10 @@ class Upload
 									break;
 							}
 
-							if(empty($error))
+							if(empty($error)) {
 								@move_uploaded_file($_FILES['file']['tmp_name'], $curdir . '/' . $_FILES['file']['name']);
+								@chmod($curdir . '/' . $_FILES['file']['name'], $this->chmod_file);
+							}
             }
           } elseif($_FILES['file']['error'] != UPLOAD_ERR_OK)
             $error = "$this->TP_ERROR_UPLOADING ($_FILES[file][error])";
