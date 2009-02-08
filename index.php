@@ -3,21 +3,22 @@
 	 Based on WiKiss, http://wikiss.tuxfamily.org, itself based on TigerWiki
 	 Licensed under GPL v2, http://www.gnu.org/licenses/gpl-2.0.html */
 
-	foreach($_REQUEST as $key => $value)	
+	foreach($_REQUEST as $key => $value)
 		unset($$key); // register_globals = off
 
 	// SETTINGS - fallback settings when no config file exists.
 
 	$WIKI_TITLE = "My new wiki"; // name of the site
 	$PASSWORD = ""; // if left blank, no password is required to edit. Consider also $PASSWORD_MD5 below
-	$USE_AUTOLANG = true; // should we try to detect language from browser?
-	$LANG = "en"; // language code you want to use, used only when $USE_AUTOLANG = false
-	$TEMPLATE = "template_new.html"; // Page template
-
 	// More secure way to use password protection, just insert MD5 hash into $PASSWORD_MD5
 	// if not empty, $PASSWORD is ignored and $PASSWORD_MD5 is used instead
 	$PASSWORD_MD5 = "";
+	$USE_AUTOLANG = true; // should we try to detect language from browser?
+	$LANG = "en"; // language code you want to use, used only when $USE_AUTOLANG = false
+	$TEMPLATE = "template_dandelion.html"; // Page template
+	
 	$PROTECTED_READ = false; // if true, you need to fill password for reading pages too
+	
 	$HISTORY_COMPRESSION = "gzip"; // possible values: bzip2, gzip and plain
 	$NO_HTML = false; // XSS protection, meaningful only when password protection is enabled
 
@@ -42,6 +43,8 @@
 
 	set_magic_quotes_runtime(0); // turn off magic quotes
 	
+	$self = $_SERVER['PHP_SELF'];
+	
 	if(get_magic_quotes_gpc()) { // magic_quotes_gpc can't be turned off
 		foreach($_GET as $k => $v) $_GET[$k] = stripslashes($v);
 		foreach($_POST as $k => $v) $_POST[$k] = stripslashes($v);
@@ -59,11 +62,11 @@
 	if(empty($PASSWORD_MD5) && !empty($PASSWORD))
 		$PASSWORD_MD5 = md5($PASSWORD);
 
-	$WIKI_VERSION = "LionWiki 2.2";
+	$WIKI_VERSION = "LionWiki 2.2.1";
 	$PAGES_DIR = $BASE_DIR . "pages/";
 	$HISTORY_DIR = $BASE_DIR . "history/";
 	$PLUGINS_DIR = "plugins/";
-	$PLUGINS_DATA_DIR = "plugins/data/";
+	$PLUGINS_DATA_DIR = "data/";
 	$LANG_DIR = "lang/";
 	
 	umask(0); // sets default mask
@@ -204,7 +207,7 @@
 	
 	// does user need password to read content of site. If yes, ask for it.
 	if(!authentified() && $PROTECTED_READ) {
-		$CON = "<form action=\"\" method=\"post\"><p>$T_PROTECTED_READ <input id=\"passworInput\" type=\"password\" name=\"sc\" /> <input class=\"submit\" type=\"submit\" /></p></form>";
+		$CON = "<form action=\"$self\" method=\"post\"><p>$T_PROTECTED_READ <input id=\"passworInput\" type=\"password\" name=\"sc\" /> <input class=\"submit\" type=\"submit\" /></p></form>";
 	
 		$action = "view-html";
 	}
@@ -215,7 +218,7 @@
 			@unlink($PAGES_DIR . $page . ".txt");
 		elseif($last_changed < $LAST_CHANGED_TIMESTAMP && $econfprot) {
 			$action = "edit";
-			$error = str_replace("{DIFF}", "<a href=\"?page=".urlencode($page)."&amp;action=diff\">$T_DIFF</a>", $T_EDIT_CONFLICT);
+			$error = str_replace("{DIFF}", "<a href=\"$self?page=".urlencode($page)."&amp;action=diff\">$T_DIFF</a>", $T_EDIT_CONFLICT);
 			$CON = $content;
 		}
 		else if(!plugin_call_method("writingPage") || $plugin_saveok) { // are plugins happy with page? (no - spam, etc)
@@ -303,12 +306,12 @@
 		$LAST_CHANGED_TIMESTAMP = @filemtime($PAGES_DIR . $page . ".txt");
 		$LAST_CHANGED = date("Y/m/d H:i", $LAST_CHANGED_TIMESTAMP + $LOCAL_HOUR * 3600);
 	
-		$HISTORY = "<a href=\"?page=" . urlencode($page) . "&amp;action=history\" rel=\"nofollow\">" . $T_HISTORY . "</a>";
+		$HISTORY = "<a href=\"$self?page=" . urlencode($page) . "&amp;action=history\" rel=\"nofollow\">" . $T_HISTORY . "</a>";
 	
 		// Restoring old version of page
 		if($gtime && ($restore || $action == "rev") && ($file = @lwopen($HISTORY_DIR . $page . "/" . $gtime, "r"))) {
-			if($action == "rev") { 
-				$rev_restore = "[$T_RESTORE|./?page=" . urlencode($page) . "&amp;action=edit&amp;gtime=" . $gtime . "&amp;restore=1]";
+			if($action == "rev") {
+				$rev_restore = "[$T_RESTORE|./$self?page=" . urlencode($page) . "&amp;action=edit&amp;gtime=" . $gtime . "&amp;restore=1]";
 
 				$CON = str_replace(array("{TIME}", "{RESTORE}"), array(revTime($gtime), $rev_restore), $T_REVISION);
 			}
@@ -333,7 +336,7 @@
 		}
 
 		if(!$preview && !$showsource) {
-			$RENAME_FORM_BEGIN = "<form id=\"renameForm\" method=\"post\" action=\"\">";
+			$RENAME_FORM_BEGIN = "<form action=\"$self\" id=\"renameForm\" method=\"post\">";
 			$RENAME_FORM_END = "</form>";
 	
 			$RENAME_TEXT = $T_MOVE_TEXT;
@@ -341,7 +344,7 @@
 			$RENAME_SUBMIT = "<input type=\"hidden\" name=\"page\" value=\"$page\" /><input id=\"renameSubmit\" class=\"submit\" type=\"submit\" value=\"$T_MOVE\" />";
 		}
 
-		$CON_FORM_BEGIN = "<form id=\"contentForm\" method=\"post\" action=\"./\"><input type=\"hidden\" name=\"action\" value=\"save\" /><input type=\"hidden\" name=\"last_changed\" value=\"$LAST_CHANGED_TIMESTAMP\" /><input type=\"hidden\" name=\"showsource\" value=\"$showsource\" />";
+		$CON_FORM_BEGIN = "<form action=\"$self\" id=\"contentForm\" method=\"post\"><input type=\"hidden\" name=\"action\" value=\"save\" /><input type=\"hidden\" name=\"last_changed\" value=\"$LAST_CHANGED_TIMESTAMP\" /><input type=\"hidden\" name=\"showsource\" value=\"$showsource\" />";
 		
 		if(empty($econfprot))
 			$CON_FORM_BEGIN .= "<input type=\"hidden\" name=\"econfprot\" value=\"1\" />";
@@ -373,7 +376,7 @@
 					
 			rsort($files);
 			
-			$CON = "<form method=\"get\" action=\"./\">\n<input type=\"hidden\" name=\"action\" value=\"diff\" /><input type=\"hidden\" name=\"page\" value=\"$page\" />";
+			$CON = "<form action=\"$self\" method=\"get\">\n<input type=\"hidden\" name=\"action\" value=\"diff\" /><input type=\"hidden\" name=\"page\" value=\"$page\" />";
 
 			if($USE_META)
 				$meta = @fopen($complete_dir . "meta.dat", "rb");
@@ -396,7 +399,7 @@
 					$ip = $size = $esum = "";
 			
 				$CON .= "<input type=\"radio\" name=\"f1\" value=\"$fname\" /><input type=\"radio\" name=\"f2\" value=\"$fname\" />";
-				$CON .= "<a href=\"?page=" . urlencode($page) . "&amp;action=rev&amp;gtime=" . $fname . "\" rel=\"nofollow\">" . revTime($fname) . "</a> $size $ip <i>$esum</i><br />";
+				$CON .= "<a href=\"$self?page=" . urlencode($page) . "&amp;action=rev&amp;gtime=" . $fname . "\" rel=\"nofollow\">" . revTime($fname) . "</a> $size $ip <i>$esum</i><br />";
 			}
 			
 			$CON .= "<input id=\"diffButton\" type=\"submit\" class=\"submit\" value=\"$T_DIFF\" /></form>";
@@ -415,8 +418,8 @@
 			die();
 		}
 
-		$r1 = "<a href=\"?page=".urlencode($page)."&action=rev&gtime=$f1\" rel=\"nofollow\">".revTime($f1)."</a>";
-		$r2 = "<a href=\"?page=".urlencode($page)."&action=rev&gtime=$f2\" rel=\"nofollow\">".revTime($f2)."</a>";
+		$r1 = "<a href=\"$self?page=".urlencode($page)."&action=rev&gtime=$f1\" rel=\"nofollow\">".revTime($f1)."</a>";
+		$r2 = "<a href=\"$self?page=".urlencode($page)."&action=rev&gtime=$f2\" rel=\"nofollow\">".revTime($f2)."</a>";
 
 		$CON = str_replace(array("{REVISION1}", "{REVISION2}"), array($r1, $r2), $T_REV_DIFF);
 
@@ -426,7 +429,7 @@
 		
 		// offer to create page if it doesn't exist
 		if($query && !file_exists($PAGES_DIR . $query . ".txt"))
-			$CON = "<p><i><a href=\"?action=edit&amp;page=" . urlencode($query) . "\" rel=\"nofollow\">$T_CREATE_PAGE $query</a>.</i></p><br />";
+			$CON = "<p><i><a href=\"$self?action=edit&amp;page=" . urlencode($query) . "\" rel=\"nofollow\">$T_CREATE_PAGE $query</a>.</i></p><br />";
 		
 		$files = array();
 		
@@ -446,7 +449,7 @@
 				$s_source = "&amp;showsource=1";
 			}
 		
-			$CON .= "<a href=\"?page=".urlencode($file)."\" rel=\"nofollow\">" . htmlspecialchars($file) . "</a> (<a href=\"?page=".urlencode($file)."&amp;action=edit$s_source\">$link_text</a>)<br />";
+			$CON .= "<a href=\"$self?page=".urlencode($file)."\" rel=\"nofollow\">" . htmlspecialchars($file) . "</a> (<a href=\"$self?page=".urlencode($file)."&amp;action=edit$s_source\">$link_text</a>)<br />";
 		}
 		
 		$TITLE .= " (" . count($files) . ")";
@@ -474,7 +477,7 @@
 			} else
 				$ip = $size = $esum = "";
 			
-			$CON .= "<a href=\"./?page=" . urlencode($filename) . "\">" . htmlspecialchars($filename) . "</a> (" . date($DATE_FORMAT, $timestamp + $LOCAL_HOUR * 3600) . " - <a href=\"./?page=".urlencode($filename)."&amp;action=diff\">$T_DIFF</a>) $size $ip <i>$esum</i><br />";
+			$CON .= "<a href=\"$self?page=" . urlencode($filename) . "\">" . htmlspecialchars($filename) . "</a> (" . date($DATE_FORMAT, $timestamp + $LOCAL_HOUR * 3600) . " - <a href=\"$self?page=".urlencode($filename)."&amp;action=diff\">$T_DIFF</a>) $size $ip <i>$esum</i><br />";
 		}
 		
 	} else if(!plugin_call_method("action", $action) && $action != "view-html")
@@ -581,9 +584,9 @@
 				$match[3] = "#" . preg_replace("/[^\da-z]/i", "_", urlencode(substr($match[3], 1, strlen($match[3]) - 1)));
 		
 			if(file_exists($PAGES_DIR . "$match[2].txt"))
-				$CON = str_replace($match[0], '<a href="./?page=' . urlencode($match[2]) . $match[3] . '">' . $match[1] . '</a>', $CON);
+				$CON = str_replace($match[0], '<a href="'.$self.'?page=' . urlencode($match[2]) . $match[3] . '">' . $match[1] . '</a>', $CON);
 			else
-				$CON = str_replace($match[0], '<a href="./?page=' . urlencode($match[2]) . '&amp;action=edit" class="pending" rel=\"nofollow\">' . $match[1] . '</a>', $CON);
+				$CON = str_replace($match[0], '<a href="'.$self.'?page=' . urlencode($match[2]) . '&amp;action=edit" class="pending" rel=\"nofollow\">' . $match[1] . '</a>', $CON);
 		}
 
 		$CON = preg_replace('#([0-9a-zA-Z\./~\-_]+@[0-9a-z\./~\-_]+)#i', '<a href="mailto:$0">$0</a>', $CON); // mail recognition
@@ -647,7 +650,7 @@
 
 			if(!empty($headings))
 			foreach($headings as $h)
-				$TOC .= str_repeat("<ul>", $h[0] - 2) . '<li><a href="#' . urlencode($h[1]) . '">' . remove_a($h[2]) . '</a></li>' . str_repeat("</ul>", $h[0] - 2);
+				$TOC .= str_repeat("<ul>", $h[0] - 2) . '<li><a href="'.$self.'#' . urlencode($h[1]) . '">' . remove_a($h[2]) . '</a></li>' . str_repeat("</ul>", $h[0] - 2);
 				
 			for($i = 0; $i < 5; $i++) // five possible headings
 				$TOC = preg_replace('/<\/ul>\n*<ul>/', "", $TOC);
@@ -687,18 +690,18 @@
 	$html = preg_replace("/\{([^}]* )?plugin:.+( [^}]*)?\}/U", "", $html); // getting rid of absent plugin tags
 
 	if($editable && is_writable($PAGES_DIR . $page . ".txt"))
-		$EDIT = "<a href=\"./?page=" . urlencode($page) . "&amp;action=edit\" rel=\"nofollow\">$T_EDIT</a>";
+		$EDIT = "<a href=\"$self?page=" . urlencode($page) . "&amp;action=edit\" rel=\"nofollow\">$T_EDIT</a>";
 	else if($editable)
-		$EDIT = "<a href=\"./?page=" . urlencode($page) . "&amp;action=edit&showsource=1\" rel=\"nofollow\">$T_SHOW_SOURCE</a>";
+		$EDIT = "<a href=\"$self?page=" . urlencode($page) . "&amp;action=edit&showsource=1\" rel=\"nofollow\">$T_SHOW_SOURCE</a>";
 
 	$tpl_subs = array(
 		array("HEAD", $HEAD),
-		array("SEARCH_FORM", "<form method=\"get\" id=\"searchForm\" action=\"\"><span><input type=\"hidden\" name=\"action\" value=\"search\" /><input type=\"submit\" style=\"display:none;\" />"),
+		array("SEARCH_FORM", "<form action=\"$self\" method=\"get\" id=\"searchForm\"><span><input type=\"hidden\" name=\"action\" value=\"search\" /><input type=\"submit\" style=\"display:none;\" />"),
 		array("\/SEARCH_FORM", "</span></form>"),
 		array("SEARCH_INPUT", "<input type=\"text\" id=\"searchInput\" name=\"query\" value=\"" . htmlspecialchars($query) . "\" tabindex=\"1\" />"),
 		array("SEARCH_SUBMIT", "<input class=\"submit\" type=\"submit\" value=\"$T_SEARCH\" />"),
-		array("HOME", "<a href=\"./?page=" . urlencode($START_PAGE) . "\">$T_HOME</a>"),
-		array("RECENT_CHANGES", "<a href=\"./?action=recent\">$T_RECENT_CHANGES</a>"),
+		array("HOME", "<a href=\"$self?page=" . urlencode($START_PAGE) . "\">$T_HOME</a>"),
+		array("RECENT_CHANGES", "<a href=\"$self?action=recent\">$T_RECENT_CHANGES</a>"),
 		array("ERROR",	$error),
 		array("HISTORY", $HISTORY),
 		array("PAGE_TITLE", htmlspecialchars($page_nolang == $START_PAGE ? $WIKI_TITLE : $TITLE)),
@@ -724,13 +727,13 @@
 		array("FORM_PASSWORD", $FORM_PASSWORD),
 		array("FORM_PASSWORD_INPUT", $FORM_PASSWORD_INPUT),
 		array("LANG", $LANG),
-		array("LIST_OF_ALL_PAGES", "<a href=\"?action=search\">$T_LIST_OF_ALL_PAGES</a>"),
+		array("LIST_OF_ALL_PAGES", "<a href=\"$self?action=search\">$T_LIST_OF_ALL_PAGES</a>"),
 		array("WIKI_VERSION", $WIKI_VERSION),
 		array("DATE", date("Y/m/d H:i", time() + $LOCAL_HOUR * 3600)),
 		array("IP", $_SERVER['REMOTE_ADDR']),
-		array("SYNTAX", $action == "edit" || $preview ? "<a href=\"./?page=" . urlencode($SYNTAX_PAGE) . "\" rel=\"nofollow\">$T_SYNTAX</a>" : ""),
-		array("SHOW_PAGE", $action == "edit" || $preview ?  "<a href=\"index.php?page=".urlencode($page)."\">$T_SHOW_PAGE</a>" : ""),
-		array("COOKIE", '<a href="./?page=' . urlencode($page) . '&amp;action='. urlencode($action) .'&amp;erasecookie=1" rel="nofollow">' . $T_ERASE_COOKIE . '</a>')
+		array("SYNTAX", $action == "edit" || $preview ? "<a href=\"$self?page=" . urlencode($SYNTAX_PAGE) . "\" rel=\"nofollow\">$T_SYNTAX</a>" : ""),
+		array("SHOW_PAGE", $action == "edit" || $preview ?  "<a href=\"$self?page=".urlencode($page)."\">$T_SHOW_PAGE</a>" : ""),
+		array("COOKIE", '<a href="'.$self.'?page=' . urlencode($page) . '&amp;action='. urlencode($action) .'&amp;erasecookie=1" rel="nofollow">' . $T_ERASE_COOKIE . '</a>')
 	);
 
 	foreach($tpl_subs as $subs) // substituting values
@@ -848,7 +851,9 @@
 	function authentified() {
 		global $PASSWORD_MD5, $sc;
 		
-		if(empty($PASSWORD_MD5) || $_COOKIE['LW_AUT'] == $PASSWORD_MD5 || md5($sc) == $PASSWORD_MD5) {
+		if(empty($PASSWORD_MD5) 
+			|| !strcasecmp($_COOKIE['LW_AUT'], $PASSWORD_MD5) 
+			|| !strcasecmp(md5($sc), $PASSWORD_MD5)) {
 			setcookie('LW_AUT', $PASSWORD_MD5, time() + $PROTECTED_READ ? $COOKIE_LIFE_READ : $COOKIE_LIFE_WRITE);
 			$_COOKIE['LW_AUT'] = $PASSWORD_MD5;
 			

@@ -6,24 +6,24 @@ class Admin
 	var $PASSWORD_MD5 = ""; // if set, $PASSWORD is ignored
 	var $dir;
 	
-  var $desc = array(
-		array("Admin plugin", "provides advanced administration functions protected by password"),
-		array(
-			array("<a href=\"?action=admin-blockip\" rel=\"nofollow\">IP blocking</a>", "Blocks specified IP addresses from editing"),
-			array("<a href=\"?action=admin-blacklist\" rel=\"nofollow\">Black list</a>", "List of expressions forbidden in pages"),
-			array("<a href=\"?action=admin-pages\" rel=\"nofollow\">Read-only pages</a>", "Can set certain pages as unwritable"),
-			array("<a href=\"?action=admin-plugins\" rel=\"nofollow\">Disabled plugins</a>", "List of disabled plugins")
-		)
-	);
-	
 	function Admin()
 	{
-		global $PLUGINS_DATA_DIR;
+		global $PLUGINS_DATA_DIR, $self;
 	
 		if(empty($this->PASSWORD_MD5) && !empty($this->PASSWORD))
 		  $this->PASSWORD_MD5 = md5($this->PASSWORD);
 		  
 		$this->dir = dirname(__FILE__) . "/data/";
+		
+		$this->desc = array(
+			array("Admin plugin", "provides advanced administration functions protected by password"),
+			array(
+				array("<a href=\"$self?action=admin-blockip\" rel=\"nofollow\">IP blocking</a>", "Blocks specified IP addresses from editing"),
+				array("<a href=\"$self?action=admin-blacklist\" rel=\"nofollow\">Black list</a>", "List of expressions forbidden in pages"),
+				array("<a href=\"$self?action=admin-pages\" rel=\"nofollow\">Read-only pages</a>", "Can set certain pages as unwritable"),
+				array("<a href=\"$self?action=admin-plugins\" rel=\"nofollow\">Disabled plugins</a>", "List of disabled plugins")
+			)
+		);
 	}
 	
 	// just for printing "menu"
@@ -67,7 +67,7 @@ class Admin
 		$ret .= "<p>$comment</p>\n";
 
     $ret .= "
-<form action=\"\" method=\"post\">
+<form action=\"$self\" method=\"post\">
 <input type=\"hidden\" name=\"action\" value=\"$action\" />
 <table width=\"600px\">
 <tr><td><textarea name=\"$dataname\" rows=\"15\" style=\"width : 100%;\">" . (!empty($_POST["$dataname"]) ? $_POST["$dataname"] : @file_get_contents($filename)) . "</textarea></td></tr>
@@ -261,10 +261,10 @@ Password: <input type=\"password\" name=\"sc\" />
   	global $html;
   
 		$tpl_subs = array(
-			array("plugin:ADMIN_BLOCKED_IPS", "<a href=\"?action=admin-blockip\" rel=\"nofollow\">Blocked IPs</a>"),
-			array("plugin:ADMIN_BLACKLIST", "<a href=\"?action=admin-blacklist\" rel=\"nofollow\">Blacklist</a>"),
-			array("plugin:ADMIN_READONLY_PAGES", "<a href=\"?action=admin-pages\" rel=\"nofollow\">Read-only pages</a>"),
-			array("plugin:ADMIN_DISABLED_PLUGINS", "<a href=\"?action=admin-plugins\" rel=\"nofollow\">Disabled plugins</a>")
+			array("plugin:ADMIN_BLOCKED_IPS", "<a href=\"$self?action=admin-blockip\" rel=\"nofollow\">Blocked IPs</a>"),
+			array("plugin:ADMIN_BLACKLIST", "<a href=\"$self?action=admin-blacklist\" rel=\"nofollow\">Blacklist</a>"),
+			array("plugin:ADMIN_READONLY_PAGES", "<a href=\"$self?action=admin-pages\" rel=\"nofollow\">Read-only pages</a>"),
+			array("plugin:ADMIN_DISABLED_PLUGINS", "<a href=\"$self?action=admin-plugins\" rel=\"nofollow\">Disabled plugins</a>")
 		);
 		
 		foreach($tpl_subs as $subs) // substituting values

@@ -42,7 +42,7 @@ class SelectLanguage
 		sort($langs);
 		
 		$select = "
-<form id=\"formSelectLanguage\" action=\"\" method=\"get\">
+<form action=\"$self\" id=\"formSelectLanguage\" method=\"get\">
 <input type=\"hidden\" name=\"page\" value=\"" . htmlspecialchars($page_nolang) . "\" />
 <input type=\"hidden\" name=\"action\" value=\"" . htmlspecialchars($action) . "\" />
 <select name=\"lang\" id=\"selectLanguage\" onchange=\"this.form.submit();\">

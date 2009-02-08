@@ -19,7 +19,7 @@ class SelectTemplate
 	  global $html, $page, $action, $TEMPLATE;
 		
 		$select = "
-<form action=\"\" method=\"get\">
+<form action=\"$self\" method=\"get\">
 <input type=\"hidden\" name=\"page\" value=\"" . htmlspecialchars($page) . "\" />
 <input type=\"hidden\" name=\"action\" value=\"" . htmlspecialchars($action) . "\" />
 <input type=\"hidden\" name=\"permanent\" value=\"1\" />

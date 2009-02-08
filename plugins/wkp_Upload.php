@@ -10,10 +10,6 @@ class Upload
    * input: path
    * return corrected path
    */
-  
-  var $desc = array(
-		array("<a href=\"?action=upload\" rel=\"nofollow\">Upload plugin</a>", "provides uploading files to the server.")
-	);
 	
 	var $datadir;
 	
@@ -25,11 +21,15 @@ class Upload
 
   function Upload()
   {
-  	global $BASE_DIR;
+  	global $BASE_DIR, $self;
   
   	$this->datadir = $BASE_DIR . "data/";
   
     $this->localize();
+    
+    $this->desc = array(
+			array("<a href=\"$self?action=upload\" rel=\"nofollow\">Upload plugin</a>", "provides uploading files to the server.")
+		);
   }
 
   function cleanInput($input)
@@ -113,12 +113,12 @@ class Upload
             $CON .= "<tr>";
 
             if(is_dir($path))
-              $CON = $CON . '<td><a href="./?action=' . $action . '&curdir=' . urlencode($path) . '">[' . $file[0] . ']</a></td><td>' . $this->TP_DIRECTORY . '</td><td>-</td>';
+              $CON = $CON . '<td><a href="'.$self.'?action=' . $action . '&curdir=' . urlencode($path) . '">[' . $file[0] . ']</a></td><td>' . $this->TP_DIRECTORY . '</td><td>-</td>';
             else
               $CON = $CON . '<td><a href="' . $path . '">' . $file[0] . '</a></td><td>' . $this->TP_FILE . '</td><td>'.@number_format(@filesize($path), 0, ".", " ") . ' B</td>';
 
             if((authentified()) && ($file[0] != '..'))
-              $CON .= '<td><a title="delete" href="./?action=upload&del=' . urlencode($path) . "&curdir=" . urlencode($curdir) . '">&times;</a></td>';
+              $CON .= '<td><a title="delete" href="'.$self.'?action=upload&del=' . urlencode($path) . "&curdir=" . urlencode($curdir) . '">&times;</a></td>';
             else
             	$CON .= "<td>&nbsp;</td>";
 
@@ -132,7 +132,7 @@ class Upload
 <h2>Upload</h2>
         
 <div id="upload-form">
-  <form method="post" action="./?action=' . $action . '" enctype= "multipart/form-data">
+  <form method="post" action="'.$self.'?action=' . $action . '" enctype= "multipart/form-data">
   <input type="hidden" name="curdir" value="' . $curdir . '" />
 ';
         $CON .= "$this->TP_FILE: <input type=\"file\" name=\"file\" />\n";
@@ -147,7 +147,7 @@ class Upload
         $CON .= "<p><em>$this->TP_MAXIMUM_SIZE_IS " . ini_get('upload_max_filesize') . "</em></p>";
         
         $CON .= '
-	<form method="post" action="./?action=' . $action . '" enctype= "multipart/form-data">
+	<form method="post" action="'.$self.'?action=' . $action . '" enctype= "multipart/form-data">
   <input type="hidden" name="curdir" value="' . $curdir . '" />';
         
         $CON .= "$this->TP_CREATE_DIRECTORY: <input type=\"text\" name=\"dir2create\" />\n";
@@ -172,7 +172,7 @@ class Upload
   {				
   	global $html;
 	  
-		$html = template_replace("plugin:UPLOAD", "<a href=\"?action=upload\" rel=\"nofollow\">Upload</a>", $html);
+		$html = template_replace("plugin:UPLOAD", "<a href=\"$self?action=upload\" rel=\"nofollow\">Upload</a>", $html);
 	}
   
   // Localization strings

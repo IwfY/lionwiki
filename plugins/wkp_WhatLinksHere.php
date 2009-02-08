@@ -31,7 +31,7 @@ class WhatLinksHere
 	      sort($files);
 
 	      foreach($files as $file)
-	        $CON .= "<a href=\"./?page=" . $file . "\">" . $file . "</a><br />";
+	        $CON .= "<a href=\"$self?page=" . $file . "\">" . $file . "</a><br />";
 	    }
 
 	    $TITLE = "What links to $page? (" . count($files) . ")";
@@ -47,7 +47,7 @@ class WhatLinksHere
 	  global $html, $page;
 
 		if(!empty($page))		
-			$html = template_replace("plugin:WHAT_LINKS_HERE", "<a href=\"?action=whatlinkshere&amp;page=".urlencode($page)."\" rel=\"nofollow\">What links here?</a>", $html);
+			$html = template_replace("plugin:WHAT_LINKS_HERE", "<a href=\"$self?action=whatlinkshere&amp;page=".urlencode($page)."\" rel=\"nofollow\">What links here?</a>", $html);
 	}
 }
 

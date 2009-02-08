@@ -55,7 +55,7 @@ class ListPlugins
 	{
 	  global $html;
 
-		$html = template_replace("plugin:LIST_OF_PLUGINS", "<a href=\"?action=listplugins\" rel=\"nofollow\">List of installed plugins</a>", $html);
+		$html = template_replace("plugin:LIST_OF_PLUGINS", "<a href=\"$self?action=listplugins\" rel=\"nofollow\">List of installed plugins</a>", $html);
 	}
 }
 ?>

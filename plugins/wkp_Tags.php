@@ -88,7 +88,7 @@ class Tags
 			$CON = "<ul>\n";
 			
 			foreach($results as $r)
-				$CON .= "	<li><a href=\"?page=".urlencode($r)."\">".htmlspecialchars($r)."</a></li>\n";
+				$CON .= "	<li><a href=\"$self?page=".urlencode($r)."\">".htmlspecialchars($r)."</a></li>\n";
 				
 			$CON .= "</ul>\n";
 			
@@ -162,7 +162,7 @@ class Tags
 			$tag_array = array();
 				
 			foreach($tags as $tag)
-				$tag_array[] = "<a class=\"tagLink\" href=\"?action=tagsearch&amp;tag=".urlencode(trim($tag))."\">".htmlspecialchars($tag)."</a>";
+				$tag_array[] = "<a class=\"tagLink\" href=\"$self?action=tagsearch&amp;tag=".urlencode(trim($tag))."\">".htmlspecialchars($tag)."</a>";
 				
 			if(empty($tag_array))
 				$t = "";
@@ -228,7 +228,7 @@ class Tags
 				else
 					$tagsize = floor(($tag["count"] - $count_min) / ($count_max - $count_min) * ($this->font_max - $this->font_min) + $this->font_min);
 			
-				$t .= "<a class=\"tagCloudLink\" style=\"font-size:${tagsize}px\" href=\"?action=tagsearch&amp;tag=".urlencode($tag["name"])."\">".htmlspecialchars($tag["name"])."</a>\n";
+				$t .= "<a class=\"tagCloudLink\" style=\"font-size:${tagsize}px\" href=\"$self?action=tagsearch&amp;tag=".urlencode($tag["name"])."\">".htmlspecialchars($tag["name"])."</a>\n";
 			}
 			
 			$t .= "</div>\n";

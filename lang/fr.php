@@ -1,6 +1,6 @@
 <?php
 	$T_HOME = "Accueil";
-	$T_SYNTAX = "Syntaxe";
+	$T_SYNTAX = "Aide Syntaxe";
 	$T_EDIT = "Éditer";
 	$T_DONE = "Enregistrer";
 	$T_PREVIEW = "Prévisualiser";
@@ -15,9 +15,11 @@
 	$T_REV_DIFF = "<b>Différence entre les versions {REVISION1} et {REVISION2}.</b>";
 	$T_REVISION = "'''Cette version date du {TIME}. Vous pouvez la {RESTORE}.'''\n\n";
 	$T_PASSWORD = "Mot de passe";
-	$T_EDIT_SUMMARY = "Sous-titre ou résumé pour cette page :";
+	$T_EDIT_SUMMARY = "Sous-titre ou résumé :";
 	$T_ERASE_COOKIE = "Eff. cookie";
 	$T_WIKI_CODE = "Code wiki";
+	$T_SHOW_SOURCE = "Montrer la source";
+	$T_SHOW_PAGE = "Montrer la page";
 	$T_MOVE_TEXT = "Nouveau nom";
 	$T_MOVE = "Modifier";
 	$T_DIFF = "Comparer";
