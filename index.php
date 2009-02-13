@@ -62,7 +62,7 @@
 	if(empty($PASSWORD_MD5) && !empty($PASSWORD))
 		$PASSWORD_MD5 = md5($PASSWORD);
 
-	$WIKI_VERSION = "LionWiki 2.2.1";
+	$WIKI_VERSION = "LionWiki 2.2.2";
 	$PAGES_DIR = $BASE_DIR . "pages/";
 	$HISTORY_DIR = $BASE_DIR . "history/";
 	$PLUGINS_DIR = "plugins/";
@@ -414,7 +414,7 @@
 					
 			rsort($files);
 			
-			header("Location: ?action=diff&page=" . urlencode($page) . "&f1=$files[0]&f2=$files[1]");	
+			header("Location: ?action=diff&page=" . urlencode($page) . "&f1=$files[0]&f2=$files[1]");
 			die();
 		}
 
@@ -650,7 +650,7 @@
 
 			if(!empty($headings))
 			foreach($headings as $h)
-				$TOC .= str_repeat("<ul>", $h[0] - 2) . '<li><a href="'.$self.'#' . urlencode($h[1]) . '">' . remove_a($h[2]) . '</a></li>' . str_repeat("</ul>", $h[0] - 2);
+				$TOC .= str_repeat("<ul>", $h[0] - 2) . '<li><a href="'.$self.'?page='.urlencode($page).'#' . urlencode($h[1]) . '">' . remove_a($h[2]) . '</a></li>' . str_repeat("</ul>", $h[0] - 2);
 				
 			for($i = 0; $i < 5; $i++) // five possible headings
 				$TOC = preg_replace('/<\/ul>\n*<ul>/', "", $TOC);

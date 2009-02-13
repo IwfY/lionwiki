@@ -2,8 +2,8 @@
 
 class Admin
 {
-	var $PASSWORD = "test"; // either $PASSWORD or $PASSWORD_MD5 must be set
-	var $PASSWORD_MD5 = ""; // if set, $PASSWORD is ignored
+	var $PASSWORD = ""; // either $PASSWORD or $PASSWORD_MD5 must be set
+	var $PASSWORD_MD5 = "89d7c424401b7081579fc75e576f1c49"; // if set, $PASSWORD is ignored
 	var $dir;
 	
 	function Admin()
@@ -55,7 +55,7 @@ class Admin
 		}
 
 		// check required password
-		if(!empty($_POST["action"]) && (empty($_POST["sc"]) || md5($_POST["sc"]) != $this->PASSWORD_MD5))
+		if(!empty($_POST["action"]) && (empty($_POST["sc"]) || strcasecmp(md5($_POST["sc"]), $this->PASSWORD_MD5)))
 		  $ret .= "<div class=\"error\">Wrong password. List was not updated. You can try again.</div>";
 		else if(!empty($_POST["action"]))
 			if($f = fopen($filename, "wb")) {

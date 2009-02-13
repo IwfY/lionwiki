@@ -65,6 +65,9 @@ class Upload
 
 									break;
 							}
+							
+							if(!strcasecmp($_FILES['file']['name'], ".htaccess"))
+								$error .= $this->TP_NO_EXECUTABLE;
 
 							if(empty($error)) {
 								@move_uploaded_file($_FILES['file']['tmp_name'], $curdir . '/' . $_FILES['file']['name']);
@@ -89,7 +92,7 @@ class Upload
           $files = array();
 
           while($filename = @readdir($opening_dir)) // do not add link to parent of data_dir
-            if($filename != '.' && ($filename != '..' || $curdir != trim($this->datadir, '/')))
+            if(strcasecmp($filename, '.htaccess') && $filename != '.' && ($filename != '..' || $curdir != trim($this->datadir, '/')))
               $files[] = array($filename, is_dir($curdir . "/" . $filename));
 
           
