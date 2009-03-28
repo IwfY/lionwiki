@@ -31,6 +31,12 @@ class Captcha
 		  $this->question_file .= "en_questions.txt";
 		  
     $this->cookie_password = md5($_SERVER["SCRIPT_FILENAME"]); // pseudo random string
+  }
+  
+  function actionBegin()
+  {
+    if($_REQUEST["qid"])
+    	$this->checkCaptcha();
 	}
 
   /*
@@ -117,6 +123,8 @@ class Captcha
 	    if(!strcasecmp(trim($a), $answer)) {
 	      $equals = true;
 	      
+	      $_COOKIE['LW_CAPTCHA'] = $this->cookie_password;
+	      
 	      if($this->permanent)
 	      	setcookie('LW_CAPTCHA', $this->cookie_password, time() + 365 * 24 * 3600);
 
@@ -147,7 +155,7 @@ class Captcha
   	$question_text = trim($this->getQuestion($question_id, 1));
 
 		$html = template_replace("plugin:CAPTCHA_QUESTION", $question_text, $html);
-		$html = template_replace("plugin:CAPTCHA_INPUT", "<input type=\"hidden\" name=\"qid\" value=\"$question_id\" /><input type=\"text\" id=\"captcha-input\" name=\"ans\" class=\"input\" value=\"\" />", $html);
+		$html = template_replace("plugin:CAPTCHA_INPUT", "<input type=\"hidden\" id=\"captcha-id\" name=\"qid\" value=\"$question_id\" /><input type=\"text\" id=\"captcha-input\" name=\"ans\" class=\"input\" value=\"\" />", $html);
 	}
 }
 

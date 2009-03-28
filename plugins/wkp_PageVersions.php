@@ -30,6 +30,7 @@ class PageVersions
 		"fr" => "Français",
 		"hr" => "Hrvatski",
 		"hu" => "Magyar",
+		"it" => "Italiano",
 		"nl" => "Nederlands",
 		"pl" => "Polski",
 		"pt" => "Português",

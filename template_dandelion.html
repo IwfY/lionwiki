@@ -22,9 +22,9 @@ a.pending{color:#c174a0;}
 a:hover{text-decoration:underline;}
 a img{border:none;}
 input,textarea{font-size:94%;border:1px solid #999;background:#fff;color:#666;outline:0.2em solid #eee;padding:0px;line-height:1.2;margin:0.5em;vertical-align:middle;}
-textarea{display:block;margin:0.5em auto;height:22em;width:97%;}
+textarea{display:block;margin:0.5em auto;width:97%;}
 pre{outline:0.4em solid #eee;padding:0.5em;margin:0.5em;border:1px solid #e0d78a;background:#fef4a4;color:#644e22;width:640px;}
-img{border:1px solid #ccc;outline:0.25em solid #eee;padding:0.25em;float:right;margin:0.25em 0 0.25em 0.5em;background:#fff;}
+img{border:1px solid #ccc;outline:0.25em solid #eee;padding:0.25em;margin:0.25em 0 0.25em 0.5em;background:#fff;}
 hr{height:0;border:none;color:#fff;background:transparent;border-bottom:1px solid #ccc; margin:0.5em 0;}
 #diff {outline:none;border:none;}
 #diff ins{color:green;text-decoration:none;font-weight:bold;}
@@ -33,7 +33,7 @@ hr{height:0;border:none;color:#fff;background:transparent;border-bottom:1px soli
 hr{margin:10px 0 10px 0;height:0px;overflow:hidden;border:0px;border-top:2px solid #1474CA;}
 .error{color:#F25A5A;font-weight:bold;}
 form{display:inline;}
-#contentTextarea{width:100%;height:500px;}
+#contentTextarea{height:44em;}
 #toc{margin:5px 0 5px 10px;padding:6px 5px 7px 0px;float:right;list-style:none;outline:0.4em solid #eee;background:#fef4a4;border:1px solid #e0d78a;}
 #toc ul{list-style:none;padding:3px 0 3px 10px;}
 #toc li{font-size:11px;padding-left:10px;}
@@ -48,6 +48,8 @@ form{display:inline;}
 .tagCloud{float:right;width:200px;padding:0.5em;margin:1em;border:1px dashed #e0d78a;background:#fef4a4;color:#644e22;}
 #fileTable{border-collapse:collapse;}
 #fileTable td{border:1px solid #FEF4A4;padding:2px 6px 2px 6px;}
+h2 span.par-edit, h3 span.par-edit, h4 span.par-edit, h5 span.par-edit, h6 span.par-edit {display:none;}
+h2:hover span.par-edit, h3:hover span.par-edit, h4:hover span.par-edit, h5:hover span.par-edit, h6:hover span.par-edit {display:inline;font-size:x-small;}
 	</style>
   {HEAD}
 </head>
@@ -57,13 +59,13 @@ form{display:inline;}
 		<div align="right">{HOME} {&nbsp;&nbsp; RECENT_CHANGES}</div>
 	</div>
 	<div id="content">
-		<h1>{PAGE_TITLE} {<span class="pageVersionsList">( plugin:VERSIONS_LIST )</span>}</h1>
+		<h1 id="page-title">{PAGE_TITLE} {<span class="pageVersionsList">( plugin:VERSIONS_LIST )</span>}</h1>
 		{<div class="error"> ERROR </div>}
 {CONTENT}
 {plugin:TAG_LIST}
-{RENAME_FORM} {RENAME_TEXT} {RENAME_INPUT} {FORM_PASSWORD} {FORM_PASSWORD_INPUT} {RENAME_SUBMIT} {/RENAME_FORM} <div style="float:right">{SHOW_PAGE} &nbsp; {SYNTAX}</div>
+{CONTENT_FORM} <div style="float:left">{RENAME_TEXT} {RENAME_INPUT}</div> <div style="float:right">{SHOW_PAGE} &nbsp; {SYNTAX}</div>
 <div class="clear"></div>
-{CONTENT_FORM} {CONTENT_TEXTAREA} {<p style="float:right;"> FORM_PASSWORD} {FORM_PASSWORD_INPUT} {plugin:CAPTCHA_QUESTION} {plugin:CAPTCHA_INPUT} {EDIT_SUMMARY_TEXT} {EDIT_SUMMARY_INPUT} {CONTENT_SUBMIT} {CONTENT_PREVIEW </p>} {/CONTENT_FORM}
+ {CONTENT_TEXTAREA} {<p style="float:right;"> FORM_PASSWORD} {FORM_PASSWORD_INPUT} {plugin:CAPTCHA_QUESTION} {plugin:CAPTCHA_INPUT} {EDIT_SUMMARY_TEXT} {EDIT_SUMMARY_INPUT} {CONTENT_SUBMIT} {CONTENT_PREVIEW </p>} {/CONTENT_FORM}
 	
 	<div class="clear"></div>
 	</div>

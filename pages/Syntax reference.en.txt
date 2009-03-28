@@ -6,6 +6,10 @@ Example:
 !!Heading H3
 !!!Heading H4}}
 
+{html}
+!Heading H2
+!!Heading H3
+!!!Heading H4{/html}
 !Heading H2
 !!Heading H3
 !!!Heading H4

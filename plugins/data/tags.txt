@@ -1,2 +1,34 @@
-Main page
-LionWiki,lionwiki,LIONWIKI
+A. aceti
+microbe, bacteria
+A. oryaze
+microbe, yeast, fungus, mold
+A. sojae
+microbe
+Bacillus halodurans
+microbe
+Chapter 01
+chapter
+Episode 01
+episode
+Hasegawa Haruka
+character
+Itsuki Keizou
+character
+L. bulgaricus
+microbe
+L. plantarum
+microbe
+L. yogurti
+microbe
+Pediococcus halophilus
+microbe
+S. lactis
+microbe
+Sawaki Tadayasu
+character
+Trichophyton
+microbe
+Yuuki Kei
+character 
+UserGuide: Images
+images,syntax,userguide

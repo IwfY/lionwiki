@@ -13,9 +13,11 @@
 	// More secure way to use password protection, just insert MD5 hash into $PASSWORD_MD5
 	// if not empty, $PASSWORD is ignored and $PASSWORD_MD5 is used instead
 	$PASSWORD_MD5 = "";
+	
+	$TEMPLATE = "template_dandelion.html"; // Page template
+	
 	$USE_AUTOLANG = true; // should we try to detect language from browser?
 	$LANG = "en"; // language code you want to use, used only when $USE_AUTOLANG = false
-	$TEMPLATE = "template_dandelion.html"; // Page template
 	
 	$PROTECTED_READ = false; // if true, you need to fill password for reading pages too
 	
@@ -62,7 +64,7 @@
 	if(empty($PASSWORD_MD5) && !empty($PASSWORD))
 		$PASSWORD_MD5 = md5($PASSWORD);
 
-	$WIKI_VERSION = "LionWiki 2.2.2";
+	$WIKI_VERSION = "LionWiki 2.3";
 	$PAGES_DIR = $BASE_DIR . "pages/";
 	$HISTORY_DIR = $BASE_DIR . "history/";
 	$PLUGINS_DIR = "plugins/";
@@ -76,6 +78,7 @@
 	$T_HOME = "Main page";
 	$T_SYNTAX = "Syntax";
 	$T_DONE = "Save changes";
+	$T_DISCARD_CHANGES = "Discard changes";
 	$T_PREVIEW = "Preview";
 	$T_SEARCH = "Search";
 	$T_SEARCH_RESULTS = "Search results";
@@ -83,7 +86,6 @@
 	$T_RECENT_CHANGES = "Recent changes";
 	$T_LAST_CHANGED = "Last changed";
 	$T_HISTORY = "History";
-	$T_NO_HISTORY = "No history.";
 	$T_RESTORE = "Restore";
 	$T_REV_DIFF = "<b>Difference between revisions from {REVISION1} and {REVISION2}.</b>";
 	$T_REVISION = "'''This revision is from {TIME}. You can {RESTORE} it.'''\n\n";
@@ -94,9 +96,7 @@
 	$T_SHOW_SOURCE = "Show source";
 	$T_SHOW_PAGE = "Show page";
 	$T_ERASE_COOKIE = "Erase cookies";
-	$T_WIKI_CODE = "Wiki code";
 	$T_MOVE_TEXT = "New name";
-	$T_MOVE = "Move";
 	$T_DIFF = "diff";
 	$T_CREATE_PAGE = "Create page";
 	$T_PROTECTED_READ = "You need to enter password to view content of site: ";
@@ -159,10 +159,11 @@
 			$plugins[] = new $matches[1]();
 		}
 		
-	plugin_call_method("pluginsLoaded");
+	plugin_call_method("pluginsLoaded"); // for admin plugin
+	plugin_call_method("pluginsLoaded2"); // second pass ("for ordinary plugins")
 
 	// list of variables for UTF-8 conversion and export
-	$req_conv = array("action", "query", "sc", "content", "page", "moveto", "restore", "f1", "f2", "error", "time", "esum", "preview", "last_changed", "econfprot", "gtime", "showsource");
+	$req_conv = array("action", "query", "sc", "content", "page", "moveto", "restore", "f1", "f2", "error", "time", "esum", "preview", "last_changed", "econfprot", "gtime", "showsource", "par");
 
 	if(extension_loaded("mbstring")) { // Conversion to UTF-8
 		@ini_set("mbstring.language", "Neutral"); 
@@ -177,13 +178,13 @@
 	
 	foreach($req_conv as $req) // export variables to main namespace
 		$$req = trim($_REQUEST[$req]);
-
-	$editable = $page || empty($action); // should be on the page "edit" link?
 	
 	if(!empty($preview)) {
 		$action = "edit";
 		$CON = $content;
 	}
+
+	plugin_call_method("actionBegin");
 
 	// setting $PAGE_TITLE
 	if($page || empty($action)) {
@@ -191,7 +192,7 @@
 		
 		if($action == "" && file_exists($PAGES_DIR . $page . ".$LANG.txt")) // language variant
 			$page = $TITLE = $page_nolang . "." . $LANG;
-		else if(!file_exists($PAGES_DIR . $page . ".txt") && $action != "save")
+		else if(!file_exists($PAGES_DIR . $page . ".txt") && $action == "")
 			$action = "edit"; // create page if it doesn't exist
 			
 		if(!empty($preview))
@@ -201,15 +202,13 @@
 		$TITLE = empty($query) ? $T_LIST_OF_ALL_PAGES : "$T_SEARCH_RESULTS $query";
 	elseif($action == "recent")
 		$TITLE = $T_RECENT_CHANGES;
-
-	if(version_compare(phpversion(), "5.1.0") >= 0)
-		@date_default_timezone_set($TIME_ZONE);
 	
 	// does user need password to read content of site. If yes, ask for it.
 	if(!authentified() && $PROTECTED_READ) {
 		$CON = "<form action=\"$self\" method=\"post\"><p>$T_PROTECTED_READ <input id=\"passworInput\" type=\"password\" name=\"sc\" /> <input class=\"submit\" type=\"submit\" /></p></form>";
 	
 		$action = "view-html";
+		$error = "error"; // so we know that something went wrong
 	}
 	else if($action == "save" && authentified()) { // do we have page to save?
 		$LAST_CHANGED_TIMESTAMP = @filemtime($PAGES_DIR . $page . ".txt");
@@ -222,6 +221,13 @@
 			$CON = $content;
 		}
 		else if(!plugin_call_method("writingPage") || $plugin_saveok) { // are plugins happy with page? (no - spam, etc)
+			if($par && is_numeric($par)) {
+				$c = @file_get_contents($PAGES_DIR . $page . ".txt");
+		
+				$par_content = $content;
+				$content = str_replace(getParagraph($c, $par), $content, $c);
+			}
+			
 			if(!$file = @fopen($PAGES_DIR . $page . ".txt", "w"))
 				die("Could not write page $PAGES_DIR$page.txt!");
 
@@ -262,8 +268,25 @@
 
 			plugin_call_method("pageWritten", $file);
 			
-			header("Location:?page=" . urlencode($page) . ($error ? ("&error=" . urlencode($error)) : ""));
-			die();
+			if($moveto != $page && !empty($moveto)) {
+				if(!rename($PAGES_DIR . $page . ".txt", $PAGES_DIR . $moveto . ".txt"))
+					die("Moving page was not succesful! Page was not moved.");
+				else if(!rename($HISTORY_DIR . $page, $HISTORY_DIR . $moveto)) {
+					rename($PAGES_DIR . $moveto, $PAGES_DIR . $page); // revert previous change
+					die("Moving history of the page was not succesful! Page was not moved.");
+				}
+				else {
+					@touch($PAGES_DIR . $moveto . ".txt"); // moved page should be at the top of recent ch.
+					$page = $moveto;
+				}
+			}
+			
+			if(!($_REQUEST["ajax"] && $par)) {
+				header("Location:?page=" . urlencode($page) . ($error ? ("&error=" . urlencode($error)) : ""));
+				die();
+			}
+			else
+				$CON = $par_content;
 		} else { // there's some problem with page, give user a chance to fix it (do not throw away submitted content)
 			$CON = $content;
 			$action = "edit";
@@ -275,53 +298,16 @@
 		$action = "edit";
 	}
 		
-	if($moveto && authentified()) { // moving/renaming page
-		plugin_call_method("renamingPage");
-		
-		if($plugin_saveok) {
-			if(!rename($PAGES_DIR . $page . ".txt", $PAGES_DIR . $moveto . ".txt"))
-				die("Moving page was not succesful! Page was not moved.");
-			else if(!rename($HISTORY_DIR . $page, $HISTORY_DIR . $moveto)) {
-				rename($PAGES_DIR . $moveto, $PAGES_DIR . $page); // revert previous change
-				die("Moving history of the was not succesful! Page was not moved.");
-			}
-			else {
-				@touch($PAGES_DIR . $moveto . ".txt"); // moved page should be at the top of recent ch.
-				header("Location:?page=" . urlencode($moveto));
-				die();
-			}
-		}
-	} else if($moveto)
-		$error = $TE_WRONG_PASSWORD;
-
-	// lets check first subsite specific template, then common, then fallback
-	if(file_exists($BASE_DIR . $TEMPLATE))
-		$html = file_get_contents($BASE_DIR . $TEMPLATE);
-	elseif(file_exists($TEMPLATE))
-		$html = file_get_contents($TEMPLATE);
-	else // there's no template file, we'll use default minimal template
-		$html = fallback_template();
-
-	if(!$CON && @file_exists($PAGES_DIR . $page . ".txt")) {
+	if(@file_exists($PAGES_DIR . $page . ".txt")) {
 		$LAST_CHANGED_TIMESTAMP = @filemtime($PAGES_DIR . $page . ".txt");
 		$LAST_CHANGED = date("Y/m/d H:i", $LAST_CHANGED_TIMESTAMP + $LOCAL_HOUR * 3600);
-	
-		$HISTORY = "<a href=\"$self?page=" . urlencode($page) . "&amp;action=history\" rel=\"nofollow\">" . $T_HISTORY . "</a>";
-	
-		// Restoring old version of page
-		if($gtime && ($restore || $action == "rev") && ($file = @lwopen($HISTORY_DIR . $page . "/" . $gtime, "r"))) {
-			if($action == "rev") {
-				$rev_restore = "[$T_RESTORE|./$self?page=" . urlencode($page) . "&amp;action=edit&amp;gtime=" . $gtime . "&amp;restore=1]";
-
-				$CON = str_replace(array("{TIME}", "{RESTORE}"), array(revTime($gtime), $rev_restore), $T_REVISION);
-			}
-
-			$CON .= @lwread($file);
-			@lwclose($file);
-		}
-		else {
+		
+		if(!$CON) {
 			$CON = @file_get_contents($PAGES_DIR . $page . ".txt");
-
+			
+			if($par && is_numeric($par))			
+				$CON = getParagraph($CON, $par);
+	
 			if(substr($CON, 0, 10) == "{redirect:" && $action == "") {
 				header("Location:?page=" . substr($CON, 10, strpos($CON, "}") - 10)); // urlencode?
 				die();
@@ -329,35 +315,46 @@
 		}
 	}
 	
+		// Restoring old version of page
+	if($gtime && ($restore || $action == "rev") && ($file = @lwopen($HISTORY_DIR . $page . "/" . $gtime, "r"))) {
+		if($action == "rev") {
+			$rev_restore = "[$T_RESTORE|./$self?page=" . urlencode($page) . "&amp;action=edit&amp;gtime=" . $gtime . "&amp;restore=1]";
+
+			$CON = str_replace(array("{TIME}", "{RESTORE}"), array(revTime($gtime), $rev_restore), $T_REVISION);
+		}
+
+		$CON .= @lwread($file);
+		
+		@lwclose($file);
+	}
+	
+	plugin_call_method("pageLoaded");
+	
 	if($action == "edit") {	
 		if(!authentified() && !$showsource) { // if not logged on, require password
 			$FORM_PASSWORD = $T_PASSWORD;
 			$FORM_PASSWORD_INPUT = "<input id=\"passwordInput\" type=\"password\" name=\"sc\" />";
 		}
 
-		if(!$preview && !$showsource) {
-			$RENAME_FORM_BEGIN = "<form action=\"$self\" id=\"renameForm\" method=\"post\">";
-			$RENAME_FORM_END = "</form>";
-	
+		if(!$showsource && !$par) {	
 			$RENAME_TEXT = $T_MOVE_TEXT;
 			$RENAME_INPUT = "<input id=\"renameInput\" type=\"text\" name=\"moveto\" value=\"" . $page . "\" />";
-			$RENAME_SUBMIT = "<input type=\"hidden\" name=\"page\" value=\"$page\" /><input id=\"renameSubmit\" class=\"submit\" type=\"submit\" value=\"$T_MOVE\" />";
 		}
 
-		$CON_FORM_BEGIN = "<form action=\"$self\" id=\"contentForm\" method=\"post\"><input type=\"hidden\" name=\"action\" value=\"save\" /><input type=\"hidden\" name=\"last_changed\" value=\"$LAST_CHANGED_TIMESTAMP\" /><input type=\"hidden\" name=\"showsource\" value=\"$showsource\" />";
+		$CON_FORM_BEGIN = "<form action=\"$self\" id=\"contentForm\" method=\"post\"><input type=\"hidden\" name=\"action\" value=\"save\" /><input type=\"hidden\" name=\"last_changed\" value=\"$LAST_CHANGED_TIMESTAMP\" /><input type=\"hidden\" name=\"showsource\" value=\"$showsource\" /><input type=\"hidden\" name=\"par\" value=\"$par\" /><input type=\"hidden\" name=\"page\" value=\"$page\" />";
 		
 		if(empty($econfprot))
 			$CON_FORM_BEGIN .= "<input type=\"hidden\" name=\"econfprot\" value=\"1\" />";
 		
 		$CON_FORM_END = "</form>";
 
-		$CON_TEXTAREA = "<textarea id=\"contentTextarea\" name=\"content\" cols=\"83\" rows=\"30\">" . htmlspecialchars($CON) . "</textarea><input type=\"hidden\" name=\"page\" value=\"$page\" />";
+		$CON_TEXTAREA = "<textarea id=\"contentTextarea\" name=\"content\" cols=\"83\" rows=\"30\">" . htmlspecialchars($CON) . "</textarea>";
 		
 		if(!$showsource) {
 			$CON_SUBMIT = "<input id=\"contentSubmit\" class=\"submit\" type=\"submit\" value=\"$T_DONE\" />";
 			
 			$EDIT_SUMMARY_TEXT = $T_EDIT_SUMMARY;
-			$EDIT_SUMMARY = "<input type=\"text\" name=\"esum\" id=\"esum\" value=\"\" />";
+			$EDIT_SUMMARY = "<input type=\"text\" name=\"esum\" id=\"esum\" value=\"".htmlspecialchars($esum)."\" />";
 		}
 			
 		$CON_PREVIEW = "<input id=\"contentPreview\" class=\"submit\" type=\"submit\" name=\"preview\" value=\"$T_PREVIEW\" />";
@@ -533,12 +530,10 @@
 		$CON = preg_replace("/^([^!\*#\n][^\n]+)$/Um", "<p>$1</p>", $CON);
 		
 		// sup and sub
-		
 		$CON = preg_replace("/\{sup\}(.*)\{\/sup\}/U", "<sup>$1</sup>", $CON);
 		$CON = preg_replace("/\{sub\}(.*)\{\/sub\}/U", "<sub>$1</sub>", $CON);
 		
 		// small
-		
 		$CON = preg_replace("/\{small\}(.*)\{\/small\}/U", "<small>$1</small>", $CON);
 
 		// TODO: verif & / &amp;
@@ -563,6 +558,8 @@
 		$CON = preg_replace('#\[' . $rg_img_local . '\|' . $rg_link_http . '(\|(right|left))?\]#U', '<a href="xx$3" class="url"><img src="$1" alt="xx$3" title="xx$3" style="float:$5;"/></a>', $CON);
 		// [local|local]
 		$CON = preg_replace('#\[' . $rg_img_local . '\|' . $rg_link_local . '(\|(right|left))?\]#U', '<a href="$3" class="url"><img src="$1" alt="$3" title="$3" style="float:$5;"/></a>', $CON);
+		
+		$CON = preg_replace('#([0-9a-zA-Z\./~\-_]+@[0-9a-z/~\-_]+\.[0-9a-z\./~\-_]+)#i', '<a href="mailto:$0">$0</a>', $CON); // mail recognition
 
 		// LINKS
 		$CON = preg_replace('#\[([^\]]+)\|' . $rg_link_http . '\]#U', '<a href="xx$2" class="url">$1</a>', $CON);
@@ -589,8 +586,6 @@
 				$CON = str_replace($match[0], '<a href="'.$self.'?page=' . urlencode($match[2]) . '&amp;action=edit" class="pending" rel=\"nofollow\">' . $match[1] . '</a>', $CON);
 		}
 
-		$CON = preg_replace('#([0-9a-zA-Z\./~\-_]+@[0-9a-z\./~\-_]+)#i', '<a href="mailto:$0">$0</a>', $CON); // mail recognition
-
 		// LIST, ordered, unordered
 		$CON = preg_replace('/^\*\*\*(.*)(\n)/Um', "<ul><ul><ul><li>$1</li></ul></ul></ul>$2", $CON);
 		$CON = preg_replace('/^\*\*(.*)(\n)/Um', "<ul><ul><li>$1</li></ul></ul>$2", $CON);
@@ -616,11 +611,30 @@
 		}
 		// remove_a
 
+		$heading_id = 1;
+		$head_stack = array();
+
 		function name_title($matches) // replace headings
 		{
-			global $headings;
+			global $headings, $heading_id, $head_stack, $T_EDIT, $page;
+			
 			$headings[] = $h = array(strlen($matches[1]) + 1, preg_replace("/[^\da-z]/i", "_", remove_a($matches[2])), $matches[2]);
-			return "<h" . $h[0] . "><a name=\"" . $h[1] . "\">" . $h[2] . "</a></h" . $h[0] . ">";
+			
+			$ret = "";
+			
+			while(!empty($head_stack) && $head_stack[count($head_stack) - 1] >= (int) $h[0]) {
+				array_pop($head_stack);
+				
+				$ret .= "</div>";
+			}
+			
+			$head_stack[] = (int) $h[0];
+			
+			$ret .= "<div class=\"par-div\" id=\"par-$heading_id\"><h$h[0]><a class=\"section-edit\" name=\"" . $h[1] . "\">" . $h[2] . "</a> <span class=\"par-edit\">(<a href=\"$self?action=edit&amp;page=".urlencode($page)."&amp;par=$heading_id\">$T_EDIT</a>)</span></h" . $h[0] . ">";
+			
+			$heading_id++;
+			
+			return $ret;
 		}
 		
 		$CON = preg_replace_callback('/^(!+?)(.*)$/Um', "name_title", $CON);
@@ -645,24 +659,22 @@
 		
 		$CON = str_replace("{br}", "<br style=\"clear:both;\" />", $CON); // new line
 
-		if(strpos($CON, "{TOC}") || strpos($html, "{TOC}")) {
-			$TOC = "";
+		$TOC = "";
 
-			if(!empty($headings))
-			foreach($headings as $h)
-				$TOC .= str_repeat("<ul>", $h[0] - 2) . '<li><a href="'.$self.'?page='.urlencode($page).'#' . urlencode($h[1]) . '">' . remove_a($h[2]) . '</a></li>' . str_repeat("</ul>", $h[0] - 2);
-				
-			for($i = 0; $i < 5; $i++) // five possible headings
-				$TOC = preg_replace('/<\/ul>\n*<ul>/', "", $TOC);
-				
-			$TOC = "<ul id=\"toc\">" . $TOC . "</ul>";
-				
-			$TOC = preg_replace('/<\/li><ul>/', "<ul>", $TOC);
-			$TOC = preg_replace('/<\/ul><li>/', "</ul></li><li>", $TOC);
-			$TOC = preg_replace('/<(\/?)ul><\/?ul>/', "<$1ul><$1li><$1ul>", $TOC);
+		if(!empty($headings))
+		foreach($headings as $h)
+			$TOC .= str_repeat("<ul>", $h[0] - 2) . '<li><a href="'.$self.'?page='.urlencode($page).'#' . urlencode($h[1]) . '">' . remove_a($h[2]) . '</a></li>' . str_repeat("</ul>", $h[0] - 2);
 			
-			$CON = str_replace("{TOC}", $TOC, $CON);
-		}
+		for($i = 0; $i < 5; $i++) // five possible headings
+			$TOC = preg_replace('/<\/ul>\n*<ul>/', "", $TOC);
+			
+		$TOC = "<ul id=\"toc\">" . $TOC . "</ul>";
+			
+		$TOC = preg_replace('/<\/li><ul>/', "<ul>", $TOC);
+		$TOC = preg_replace('/<\/ul><li>/', "</ul></li><li>", $TOC);
+		$TOC = preg_replace('/<(\/?)ul><\/?ul>/', "<$1ul><$1li><$1ul>", $TOC);
+		
+		$CON = str_replace("{TOC}", $TOC, $CON);
 		
 		// returning content of {{CODE}}
 		if($nbcode > 0) 
@@ -672,11 +684,24 @@
 		if($NO_HTML == false && $n_htmlcodes > 0)
 			$CON = preg_replace(array_fill(0, $n_htmlcodes, "/{HTML}/Us"), $htmlcodes[1], $CON, 1);
 		
+		while(array_pop($head_stack))
+			$CON .= "</div>";
+		
 		plugin_call_method("formatEnd");
 	}
+	
+	// lets check first subsite specific template, then common, then fallback
+	if(file_exists($BASE_DIR . $TEMPLATE))
+		$html = file_get_contents($BASE_DIR . $TEMPLATE);
+	elseif(file_exists($TEMPLATE))
+		$html = file_get_contents($TEMPLATE);
+	else // there's no template file, we'll use default minimal template
+		$html = fallback_template();
 
-	if($preview)
-		$html = preg_replace("/\{RENAME_FORM\}.*\{\/RENAME_FORM\}/Um", "", $html);
+	if($showsource) {
+		$html = template_replace("RENAME_INPUT", "", $html);
+		$html = template_replace("RENAME_TEXT", "", $html);
+	}
 
 	// including pages in pure HTML
 	while(preg_match("/{include:([^}]+)}/U", $html, $match)) {
@@ -689,10 +714,11 @@
 	
 	$html = preg_replace("/\{([^}]* )?plugin:.+( [^}]*)?\}/U", "", $html); // getting rid of absent plugin tags
 
-	if($editable && is_writable($PAGES_DIR . $page . ".txt"))
-		$EDIT = "<a href=\"$self?page=" . urlencode($page) . "&amp;action=edit\" rel=\"nofollow\">$T_EDIT</a>";
-	else if($editable)
-		$EDIT = "<a href=\"$self?page=" . urlencode($page) . "&amp;action=edit&showsource=1\" rel=\"nofollow\">$T_SHOW_SOURCE</a>";
+	if($page || empty($action))
+		if(is_writable($PAGES_DIR . $page . ".txt"))
+			$EDIT = "<a href=\"$self?page=" . urlencode($page) . "&amp;action=edit\" rel=\"nofollow\">$T_EDIT</a>";
+		else
+			$EDIT = "<a href=\"$self?page=" . urlencode($page) . "&amp;action=edit&showsource=1\" rel=\"nofollow\">$T_SHOW_SOURCE</a>";
 
 	$tpl_subs = array(
 		array("HEAD", $HEAD),
@@ -703,7 +729,7 @@
 		array("HOME", "<a href=\"$self?page=" . urlencode($START_PAGE) . "\">$T_HOME</a>"),
 		array("RECENT_CHANGES", "<a href=\"$self?action=recent\">$T_RECENT_CHANGES</a>"),
 		array("ERROR",	$error),
-		array("HISTORY", $HISTORY),
+		array("HISTORY", !empty($page) ? "<a href=\"$self?page=" . urlencode($page) . "&amp;action=history\" rel=\"nofollow\">" . $T_HISTORY . "</a>" : ""),
 		array("PAGE_TITLE", htmlspecialchars($page_nolang == $START_PAGE ? $WIKI_TITLE : $TITLE)),
 		array("PAGE_TITLE_HEAD", htmlspecialchars($page_nolang == $START_PAGE ? "" : $TITLE)),
 		array("EDIT", $EDIT),
@@ -711,21 +737,18 @@
 		array("LAST_CHANGED_TEXT", $LAST_CHANGED ? $T_LAST_CHANGED : ""),
 		array("LAST_CHANGED", $LAST_CHANGED),
 		array("TOC", $TOC), // must be before replacing CONTENT_FORM
-		array("CONTENT", $action != "edit" ? $CON : ""),
 		array("CONTENT_FORM", $CON_FORM_BEGIN),
 		array("\/CONTENT_FORM", $CON_FORM_END),
 		array("CONTENT_TEXTAREA", $CON_TEXTAREA),
 		array("CONTENT_SUBMIT", $CON_SUBMIT),
 		array("CONTENT_PREVIEW", $CON_PREVIEW),
-		array("RENAME_FORM", $RENAME_FORM_BEGIN),
-		array("\/RENAME_FORM", $RENAME_FORM_END),
 		array("RENAME_TEXT", $RENAME_TEXT),
 		array("RENAME_INPUT", $RENAME_INPUT),
-		array("RENAME_SUBMIT", $RENAME_SUBMIT),
 		array("EDIT_SUMMARY_TEXT", $USE_META ? $EDIT_SUMMARY_TEXT : ""),
 		array("EDIT_SUMMARY_INPUT", $USE_META ? $EDIT_SUMMARY : ""),
 		array("FORM_PASSWORD", $FORM_PASSWORD),
 		array("FORM_PASSWORD_INPUT", $FORM_PASSWORD_INPUT),
+		array("CONTENT", $action != "edit" ? $CON : ""),
 		array("LANG", $LANG),
 		array("LIST_OF_ALL_PAGES", "<a href=\"$self?action=search\">$T_LIST_OF_ALL_PAGES</a>"),
 		array("WIKI_VERSION", $WIKI_VERSION),
@@ -738,6 +761,8 @@
 
 	foreach($tpl_subs as $subs) // substituting values
 		$html = template_replace($subs[0], $subs[1], $html);
+
+	plugin_call_method("finished");
 
 	echo $html; // voila
 	
@@ -757,6 +782,56 @@
 		preg_match("/([0-9][0-9][0-9][0-9])([0-9][0-9])([0-9][0-9])-([0-9][0-9])([0-9][0-9])-([0-9][0-9])/U", $time, $m);
 		
 		return date($DATE_FORMAT, mktime($m[4], $m[5], $m[6], $m[2], $m[3], $m[1]));
+	}
+	
+	// Get number of exclamation marks at the beginning of the line
+	function exclNum($line)
+	{					
+		$line_count = strlen($line);
+		
+		for($i = 1; $i < $line_count && $line[$i] == "!"; $i++);
+			
+		return $i;
+	}
+	
+	// get paragraph number $par_id. 
+	function getParagraph($text, $par_id)
+	{	
+		$par = array(); // paragraph
+		
+		$count = 1; // paragraph count
+		$par_excl = 0; // importance (number of !) desired paragraph
+		
+		$inside_html = false; // exclamation marks inside {{}} and {html}{/html} are not headings
+		$inside_code = false;
+		
+		$lines = explode("\n", $text);
+		
+		foreach($lines as $line) {		
+			if($line[0] == "!" && !$inside_html && !$inside_code) {
+				if($count == $par_id) {
+					$par[] = $line;
+					
+					$par_excl = exclNum($line);
+				}
+				else if($par_excl)
+					if(exclNum($line) > $par_excl)
+						$par[] = $line;
+					else
+						break;
+				
+				$count++;
+			}
+			else if($par_excl)
+				$par[] = $line;
+				
+			if(strpos($line, "{html}") !== false) $inside_html = true;
+			if(strpos($line, "{/html}") !== false) $inside_html = false;
+			if(strpos($line, "{{") !== false) $inside_code = true;
+			if(strpos($line, "}}") !== false) $inside_code = false;
+		}
+			
+		return implode("\n", $par);
 	}
 	
 	function diff($f1, $f2) {
@@ -904,7 +979,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="{LANG}" lang="{LANG}">
 <head>
 	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
-	<title>{WIKI_TITLE} {- PAGE_TITLE_HEAD}</title>
+	<title>{WIKI_TITLE} {-  PAGE_TITLE_HEAD}</title>
 	<style type="text/css">
 *{margin:0;padding:0;}
 body{font-size:12px;line-height:16px;padding:10px 20px 20px 20px;}
@@ -946,13 +1021,12 @@ textarea{padding:3px;}
 		<td colspan="2">{HOME} {RECENT_CHANGES}</td>
 		<td style="text-align : right;">{EDIT} {SYNTAX} {HISTORY}</td>
 	</tr>
-	<tr><th colspan="3"><hr /><h1>{PAGE_TITLE}</h1></th></tr>
+	<tr><th colspan="3"><hr /><h1 id="page-title">{PAGE_TITLE}</h1></th></tr>
 	<tr>
 		<td id="mainContent" colspan="3">
 			{<div class="error"> ERROR </div>}
 {CONTENT}
-{RENAME_FORM} {RENAME_TEXT} {RENAME_INPUT} {FORM_PASSWORD} {FORM_PASSWORD_INPUT} {RENAME_SUBMIT} {/RENAME_FORM}
-{CONTENT_FORM} {CONTENT_TEXTAREA}<p style="float:right;margin:6px">{FORM_PASSWORD} {FORM_PASSWORD_INPUT} {plugin:CAPTCHA_QUESTION} {plugin:CAPTCHA_INPUT} {EDIT_SUMMARY_TEXT} {EDIT_SUMMARY_INPUT} {CONTENT_SUBMIT} {CONTENT_PREVIEW}</p> {/CONTENT_FORM}
+{CONTENT_FORM} {RENAME_TEXT} {RENAME_INPUT} <br /><br /> {CONTENT_TEXTAREA}<p style="float:right;margin:6px">{FORM_PASSWORD} {FORM_PASSWORD_INPUT} {plugin:CAPTCHA_QUESTION} {plugin:CAPTCHA_INPUT} {EDIT_SUMMARY_TEXT} {EDIT_SUMMARY_INPUT} {CONTENT_SUBMIT} {CONTENT_PREVIEW}</p> {/CONTENT_FORM}
 		</td>
 	</tr>
 	<tr><td colspan="3"><hr /></td></tr>
@@ -963,5 +1037,6 @@ textarea{padding:3px;}
 	</tr>
 </table>
 </body>
-</html>'; }
+</html>
+'; }
 ?>

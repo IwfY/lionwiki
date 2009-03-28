@@ -8,9 +8,11 @@
 	// More secure way to use password protection, just insert MD5 hash into $PASSWORD_MD5
 	// if not empty, $PASSWORD is ignored and $PASSWORD_MD5 is used instead
 	$PASSWORD_MD5 = "";
+	
+	$TEMPLATE = "template_dandelion.html"; // Page template
+	
 	$USE_AUTOLANG = true; // should we try to detect language from browser?
 	$LANG = "en"; // language code you want to use, used only when $USE_AUTOLANG = false
-	$TEMPLATE = "template_dandelion.html"; // Page template
 	
 	$PROTECTED_READ = false; // if true, you need to fill password for reading pages too
 	
