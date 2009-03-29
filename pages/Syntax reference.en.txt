@@ -1,6 +1,6 @@
 This document explains all syntax features of core LionWiki. Syntax of tables (provided by plugin) is on separate page: [Tables plugin].
 
-!Headings
+!Headings;
 Example:
 {{!Heading H2
 !!Heading H3
@@ -11,10 +11,22 @@ Example:
 !!Heading H3
 !!!Heading H4{/html}
 !Heading H2
+
 !!Heading H3
+
 !!!Heading H4
 
 More exclamation marks you use, smaller heading is (up to 5 exclamation marks). This is different from WiKiss (possibly also TigerWiki), ! is used for H2, because H1 should be reserved for title. Exclamation marks has to be exactly at the start of the line.
+
+
+
+
+
+
+
+
+
+
 
 !Lists
 !!Unordered list

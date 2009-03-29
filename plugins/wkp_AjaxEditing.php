@@ -21,12 +21,17 @@ class AjaxEditing
 	
 	/**
 	 * Substitute edit template
-	 */	 	
+	 */
 
-	function editTemplate()
+	function formatFinished()
 	{
-		global $CON, $html, $self, $showsource, $page, $econfprot, $esum, $error, $preview, $par;
+		global $CON, $content, $self, $showsource, $page, $econfprot, $esum, $error, $preview, $par, $action;
 		global $T_PASSWORD, $T_MOVE_TEXT, $T_EDIT_SUMMARY, $LAST_CHANGED_TIMESTAMP, $T_PREVIEW, $T_DONE, $T_DISCARD_CHANGES;
+		
+		if(!$_REQUEST["ajax"])
+			return;
+		else if($action != "edit" && !$preview)
+			die($CON);
 		
 		$rows = count(explode("\n", $CON));
 		
@@ -52,7 +57,7 @@ class AjaxEditing
 		
 		$CON_FORM_END = "</form>";
 
-		$CON_TEXTAREA = "<textarea name=\"content\" class=\"ajaxContentTextarea\" cols=\"83\" rows=\"$rows\">" . htmlspecialchars($CON) . "</textarea><input type=\"hidden\" id=\"ajaxPage\" name=\"page\" value=\"$page\" />";
+		$CON_TEXTAREA = "<textarea name=\"content\" class=\"ajaxContentTextarea\" cols=\"83\" rows=\"$rows\">" . htmlspecialchars($content ? $content : $CON) . "</textarea><input type=\"hidden\" id=\"ajaxPage\" name=\"page\" value=\"$page\" />";
 		
 		if(!$showsource) {
 			$CON_SUBMIT = "<input class=\"submit ajaxContentSubmit\" onclick=\"ajaxAction($par, 'save');return false;\" type=\"submit\" value=\"$T_DONE\" />";
@@ -85,26 +90,9 @@ class AjaxEditing
 			
 		$html = preg_replace("/\{([^}]* )?plugin:.+( [^}]*)?\}/U", "", $html); // getting rid of absent plugin tags
 		
-		if(!$preview)
-			die($html);
+		die(($preview ? $CON : "") . $html);
 	}
 	
-	function pageLoaded()
-	{
-		global $action, $CON;
-		
-		if($_REQUEST["ajax"] && $action == "edit")		
-			$this->editTemplate();
-	}
-	
-	function formatEnd()
-	{
-		global $CON, $html;
-		
-		if($_REQUEST["ajax"])
-			die($CON . $html);
-	}
-
 	function formatBegin() {
 		global $HEAD;
 	

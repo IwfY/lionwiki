@@ -83,8 +83,25 @@ function ajaxAction(par_id, action)
 		}, function(str) {		
 		replaceContent("par-" + par_id, "div", "par-" + par_id, str);
 		
+		if(str.search("ajaxContentTextarea")) // no editing area found => saving was succesful
+			renumberHeadings();
+		
 		registerAjax(document.getElementById("par-" + par_id));
 	});
+}
+
+/**
+ * After saving paragraph into the file, heading numbers may change
+ */ 
+
+function renumberHeadings()
+{
+	var headings = document.getElementsByClassName("par-div");
+	
+	var heading_id = 1;
+	
+	for(key in headings)
+			headings[key].id = "par-" + heading_id++;
 }
 
 /**

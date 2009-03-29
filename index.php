@@ -64,7 +64,7 @@
 	if(empty($PASSWORD_MD5) && !empty($PASSWORD))
 		$PASSWORD_MD5 = md5($PASSWORD);
 
-	$WIKI_VERSION = "LionWiki 2.3";
+	$WIKI_VERSION = "LionWiki 2.3.1";
 	$PAGES_DIR = $BASE_DIR . "pages/";
 	$HISTORY_DIR = $BASE_DIR . "history/";
 	$PLUGINS_DIR = "plugins/";
@@ -177,7 +177,7 @@
 	} // if mbstring is not supported, nothing bad should happen
 	
 	foreach($req_conv as $req) // export variables to main namespace
-		$$req = trim($_REQUEST[$req]);
+		$$req = $_REQUEST[$req];
 	
 	if(!empty($preview)) {
 		$action = "edit";
@@ -611,7 +611,7 @@
 		}
 		// remove_a
 
-		$heading_id = 1;
+		$heading_id = $par ? $par : 1;
 		$head_stack = array();
 
 		function name_title($matches) // replace headings
@@ -689,6 +689,8 @@
 		
 		plugin_call_method("formatEnd");
 	}
+	
+	plugin_call_method("formatFinished");
 	
 	// lets check first subsite specific template, then common, then fallback
 	if(file_exists($BASE_DIR . $TEMPLATE))
