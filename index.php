@@ -64,7 +64,7 @@
 	if(empty($PASSWORD_MD5) && !empty($PASSWORD))
 		$PASSWORD_MD5 = md5($PASSWORD);
 
-	$WIKI_VERSION = "LionWiki 2.3.1";
+	$WIKI_VERSION = "LionWiki 2.3.2";
 	$PAGES_DIR = $BASE_DIR . "pages/";
 	$HISTORY_DIR = $BASE_DIR . "history/";
 	$PLUGINS_DIR = "plugins/";
@@ -213,7 +213,7 @@
 	else if($action == "save" && authentified()) { // do we have page to save?
 		$LAST_CHANGED_TIMESTAMP = @filemtime($PAGES_DIR . $page . ".txt");
 		
-		if(trim($content) == "")
+		if(trim($content) == "" && !$par)
 			@unlink($PAGES_DIR . $page . ".txt");
 		elseif($last_changed < $LAST_CHANGED_TIMESTAMP && $econfprot) {
 			$action = "edit";
@@ -317,6 +317,8 @@
 	
 		// Restoring old version of page
 	if($gtime && ($restore || $action == "rev") && ($file = @lwopen($HISTORY_DIR . $page . "/" . $gtime, "r"))) {
+		$CON = "";
+	
 		if($action == "rev") {
 			$rev_restore = "[$T_RESTORE|./$self?page=" . urlencode($page) . "&amp;action=edit&amp;gtime=" . $gtime . "&amp;restore=1]";
 

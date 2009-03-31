@@ -1,15 +1,10 @@
 This document explains all syntax features of core LionWiki. Syntax of tables (provided by plugin) is on separate page: [Tables plugin].
 
-!Headings;
+!Headings
 Example:
 {{!Heading H2
 !!Heading H3
 !!!Heading H4}}
-
-{html}
-!Heading H2
-!!Heading H3
-!!!Heading H4{/html}
 !Heading H2
 
 !!Heading H3

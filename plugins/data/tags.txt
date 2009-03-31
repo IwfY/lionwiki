@@ -32,3 +32,5 @@ Yuuki Kei
 character 
 UserGuide: Images
 images,syntax,userguide
+Main page
+LionWiki
