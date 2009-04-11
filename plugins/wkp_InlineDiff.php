@@ -15,6 +15,15 @@ class InlineDiff
 		array("InlineDiff", "provides inline diff which is much better than default built-in")
 	);
 	
+	protected function mapNewline($arr) {
+		$ret = array();
+		
+		foreach($arr as $row)
+			$ret[] = $row . "\n";
+			
+		return $ret;
+	}
+	
 	function diff($f1, $f2, &$ret)
 	{
 		require_once 'InlineDiff/diff.php';
@@ -35,17 +44,8 @@ class InlineDiff
 		$lines1 = empty($c1) ? array() : explode("\n", $c1);
 		$lines2 = empty($c2) ? array() : explode("\n", $c2);
 		
-		function mapNewline($arr) {
-			$ret = array();
-			
-			foreach($arr as $row)
-				$ret[] = $row . "\n";
-				
-			return $ret;
-		}
-		
-		$lines1 = mapNewline($lines1);
-		$lines2 = mapNewline($lines2);
+		$lines1 = $this->mapNewline($lines1);
+		$lines2 = $this->mapNewline($lines2);
 		
 		// Create the Diff object. 
 		$diff = new Text_Diff($lines1, $lines2);

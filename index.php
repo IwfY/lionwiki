@@ -64,7 +64,7 @@
 	if(empty($PASSWORD_MD5) && !empty($PASSWORD))
 		$PASSWORD_MD5 = md5($PASSWORD);
 
-	$WIKI_VERSION = "LionWiki 2.3.2";
+	$WIKI_VERSION = "LionWiki 2.3.3";
 	$PAGES_DIR = $BASE_DIR . "pages/";
 	$HISTORY_DIR = $BASE_DIR . "history/";
 	$PLUGINS_DIR = "plugins/";
@@ -108,7 +108,7 @@
 	
 	// consider only first language, don't consider language variant (like en-us or pt-br)
 	if($USE_AUTOLANG)
-		$LANG = substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2);
+		$LANG = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
 
 	$LANG = !empty($_COOKIE["LW_LANG"]) ? $_COOKIE["LW_LANG"] : $LANG;
 
@@ -117,8 +117,10 @@
 		setcookie('LW_LANG', $LANG, time() + 365 * 86400);
 	}
 	
-	if($LANG != "en" && @file_exists($LANG_DIR . $LANG . ".php"))
+	if(@file_exists($LANG_DIR . $LANG . ".php"))
 		@include $LANG_DIR . $LANG . ".php";
+	else if(@file_exists($LANG_DIR . substr($LANG, 0, 2) . ".php"))
+		@include $LANG_DIR . substr($LANG, 0, 2) . ".php";
 	else
 		$LANG = "en";
 	
@@ -428,7 +430,7 @@
 		
 		// offer to create page if it doesn't exist
 		if($query && !file_exists($PAGES_DIR . $query . ".txt"))
-			$CON = "<p><i><a href=\"$self?action=edit&amp;page=" . urlencode($query) . "\" rel=\"nofollow\">$T_CREATE_PAGE $query</a>.</i></p><br />";
+			$CON = "<p><i><a href=\"$self?action=edit&amp;page=" . urlencode($query) . "\" rel=\"nofollow\">$T_CREATE_PAGE " . htmlspecialchars($query) . "</a>.</i></p><br />";
 		
 		$files = array();
 		
@@ -585,7 +587,7 @@
 			if(file_exists($PAGES_DIR . "$match[2].txt"))
 				$CON = str_replace($match[0], '<a href="'.$self.'?page=' . urlencode($match[2]) . $match[3] . '">' . $match[1] . '</a>', $CON);
 			else
-				$CON = str_replace($match[0], '<a href="'.$self.'?page=' . urlencode($match[2]) . '&amp;action=edit" class="pending" rel=\"nofollow\">' . $match[1] . '</a>', $CON);
+				$CON = str_replace($match[0], '<a href="'.$self.'?page=' . urlencode($match[2]) . '&amp;action=edit" class="pending" rel="nofollow">' . $match[1] . '</a>', $CON);
 		}
 
 		// LIST, ordered, unordered
@@ -632,8 +634,13 @@
 			
 			$head_stack[] = (int) $h[0];
 			
-			$ret .= "<div class=\"par-div\" id=\"par-$heading_id\"><h$h[0]><a class=\"section-edit\" name=\"" . $h[1] . "\">" . $h[2] . "</a> <span class=\"par-edit\">(<a href=\"$self?action=edit&amp;page=".urlencode($page)."&amp;par=$heading_id\">$T_EDIT</a>)</span></h" . $h[0] . ">";
-			
+			$ret .= "<div class=\"par-div\" id=\"par-$heading_id\"><h$h[0]><a class=\"section-edit\" name=\"" . $h[1] . "\">" . $h[2] . "</a>";
+
+			if(is_writable($PAGES_DIR . $page . ".txt"))
+				$ret .=  "<span class=\"par-edit\">(<a href=\"$self?action=edit&amp;page=".urlencode($page)."&amp;par=$heading_id\">$T_EDIT</a>)</span>";
+
+			$ret .= "</h" . $h[0] . ">";
+
 			$heading_id++;
 			
 			return $ret;
@@ -929,8 +936,8 @@
 	// checks autentification
 	function authentified() {
 		global $PASSWORD_MD5, $sc;
-		
-		if(empty($PASSWORD_MD5) 
+
+		if(empty($PASSWORD_MD5)
 			|| !strcasecmp($_COOKIE['LW_AUT'], $PASSWORD_MD5) 
 			|| !strcasecmp(md5($sc), $PASSWORD_MD5)) {
 			setcookie('LW_AUT', $PASSWORD_MD5, time() + $PROTECTED_READ ? $COOKIE_LIFE_READ : $COOKIE_LIFE_WRITE);

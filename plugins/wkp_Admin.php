@@ -2,8 +2,8 @@
 
 class Admin
 {
-	var $PASSWORD = ""; // either $PASSWORD or $PASSWORD_MD5 must be set
-	var $PASSWORD_MD5 = "89d7c424401b7081579fc75e576f1c49"; // if set, $PASSWORD is ignored
+	var $PASSWORD = "test"; // either $PASSWORD or $PASSWORD_MD5 must be set
+	var $PASSWORD_MD5 = ""; // if set, $PASSWORD is ignored
 	var $dir;
 	
 	function Admin()
@@ -12,7 +12,7 @@ class Admin
 	
 		if(empty($this->PASSWORD_MD5) && !empty($this->PASSWORD))
 			$this->PASSWORD_MD5 = md5($this->PASSWORD);
-			
+
 		$this->dir = dirname(__FILE__) . "/data/";
 		
 		$this->desc = array(
@@ -178,12 +178,31 @@ Password: <input type=\"password\" name=\"sc\" />
 		
 		return true;
 	}
+
+	/*
+	 * With admin-pages, we can make some pages read-only. But this applies to
+	 * administrator too which is not we usually want. This way, if we detect that
+	 * user wants to edit read only page, we will include password input into the
+	 * template even if the user is "logged". Then user can fill admin password
+	 * and in that case, page will be saved.
+	 */
+
+	function pageLoaded()
+	{
+		global $PASSWORD_MD5, $action;
+
+		if($action == "edit" && $this->checkPages(false) == false) {
+			// with this, user will be thought as unlogged, so password input will appear
+			$_COOKIE["LW_AUT"] = "1";
+			$PASSWORD_MD5 = "2";
+		}
+	}
 	
 	// check if page is not set as "read-only"
-	function checkPages()
+	function checkPages($echo = true)
 	{
-		global $page;
-	
+		global $page, $error, $sc;
+
 		$pages = @file_get_contents($this->dir . "Admin_pages.txt");
 
 		if(!empty($pages)) {
@@ -193,9 +212,14 @@ Password: <input type=\"password\" name=\"sc\" />
 
 			foreach($arr as $line)
 				if(!strcmp($page, trim($line))) {
-					$error .= "This page is read-only. Page was not saved.";
+					if(!strcasecmp(md5($sc), $this->PASSWORD_MD5))
+						return true;
+					else {
+						if($echo)
+							$error .= "This page is read-only. Page was not saved.";
 
-					return false;
+						return false;
+					}
 			}
 		}
 		
