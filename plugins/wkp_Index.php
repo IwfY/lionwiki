@@ -2,9 +2,9 @@
 /*
 	Written by Swen Wetzel <xanatoswetzel@web.de> for LionWiki, minor changes made by Adam Zivner
 	
-	With {INDEX_COMMA} or {INDEX_LIST}, you can insert list of all pages into the page.
+	With {plugin:INDEX_COMMA} or {plugin:INDEX_LIST}, you can insert list of all pages into the page.
 	
-	{INDEX_COMMA} gives you comma separated list, {INDEX_LIST} <ul> HTML list
+	{plugin:INDEX_COMMA} gives you comma separated list, {plugin:INDEX_LIST} <ul> HTML list
 */
 
 class Index
@@ -44,8 +44,8 @@ class Index
   {
     global $CON;
     
-    $CON = template_replace("INDEX_COMMA", $this->pages_list("comma"), $CON);
-    $CON = template_replace("INDEX_LIST", $this->pages_list("list"), $CON);
+    $CON = template_replace("plugin:INDEX_COMMA", $this->pages_list("comma"), $CON);
+    $CON = template_replace("plugin:INDEX_LIST", $this->pages_list("list"), $CON);
   }
 }
 ?>
