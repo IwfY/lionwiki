@@ -146,96 +146,110 @@ class Tags
 			fclose($f);
 		}
 	}
-
-	function template()
+	
+	function tagList()
 	{
-	  global $CON, $html, $page, $action;
+		global $page, $self;
+	
+		$tags = $this->getTags($page);
+					
+		$tag_array = array();
+				
+		foreach($tags as $tag)
+			$tag_array[] = "<a class=\"tagLink\" href=\"$self?action=tagsearch&amp;tag=".urlencode(trim($tag))."\">".htmlspecialchars($tag)."</a>";
+			
+		return empty($tag_array) ? "" : "<div class=\"tagList\">Tags: \n" . implode(", ", $tag_array) . "</div>\n";
+	}
+	
+	function tagCloud()
+	{
+		global $self;
+	
+		$f = @fopen($this->tagfile, "rb");
+		
+		if(!$f)
+			return "";
+		
+		$tag_counts = array();
+		
+		while(fgets($f)) {
+			$tags = explode(",", @fgets($f));
+			
+			foreach($tags as $tag) {
+				$tag = trim($tag);
+			
+				$arr_count = count($tag_counts);
+				
+				for($i = 0; $i < $arr_count; $i++)
+					if(!strcasecmp($tag_counts[$i]["name"], $tag)) {
+						$tag_counts[$i]["count"]++;
+						
+						break;
+					}
+					
+				if($i == $arr_count)
+					$tag_counts[] = array("name" => $tag, "count" => 1);
+			}
+		}
+		
+		if(empty($tag_counts))
+			return;
+		
+		$count_max = 0;
+		$count_min = 999999999; // some big number
+		
+		foreach($tag_counts as $tag) {
+			if($tag["count"] > $count_max)
+				$count_max = $tag["count"];
+		
+			if($tag["count"] < $count_min)
+				$count_min = $tag["count"];
+		}
+
+		shuffle($tag_counts);			
+					
+		$t = "<div class=\"tagCloud\"><b>Tag cloud</b><br />\n";
+		
+		foreach($tag_counts as $tag) {
+			if($count_max == $count_min)
+				$tagsize = 11;
+			else
+				$tagsize = floor(($tag["count"] - $count_min) / ($count_max - $count_min) * ($this->font_max - $this->font_min) + $this->font_min);
+		
+			$t .= "<a class=\"tagCloudLink\" style=\"font-size:${tagsize}px\" href=\"$self?action=tagsearch&amp;tag=".urlencode($tag["name"])."\">".htmlspecialchars($tag["name"])."</a>\n";
+		}
+		
+		return $t . "</div>\n";
+	}
+	
+	function formatEnd()
+	{
+	  global $CON, $action;
 	  
 	  if(!empty($action))
 	  	return;
 	  
 	  $CON = preg_replace("/\{tags:.+\}/U", "", $CON);
 	  
-	  if(template_match("plugin:TAG_LIST", $html, $null) || template_match("TAG_LIST", $CON, $null)) {
-			$tags = $this->getTags($page);
-					
-			$tag_array = array();
-				
-			foreach($tags as $tag)
-				$tag_array[] = "<a class=\"tagLink\" href=\"$self?action=tagsearch&amp;tag=".urlencode(trim($tag))."\">".htmlspecialchars($tag)."</a>";
-				
-			if(empty($tag_array))
-				$t = "";
-			else
-				$t = "<div class=\"tagList\">Tags: \n" . implode(", ", $tag_array) . "</div>\n";
-			
-			$CON = template_replace("TAG_LIST", $t, $CON);
-			$html = template_replace("plugin:TAG_LIST", $t, $html);
-		}
+	  if(template_match("TAG_LIST", $CON, $null))
+			$CON = template_replace("TAG_LIST", $this->tagList(), $CON);
 		
-	  if(template_match("plugin:TAG_CLOUD", $html, $null) || template_match("TAG_CLOUD", $CON, $null)) {
-			$f = @fopen($this->tagfile, "rb");
-			
-			if(!$f) {
-				$CON = template_replace("TAG_CLOUD", "", $CON);
-				
-				return;
-			}
-			
-			$tag_counts = array();
-			
-			while(fgets($f)) {
-				$tags = explode(",", @fgets($f));
-				
-				foreach($tags as $tag) {
-					$tag = trim($tag);
-				
-					$arr_count = count($tag_counts);
-					
-					for($i = 0; $i < $arr_count; $i++)
-						if(!strcasecmp($tag_counts[$i]["name"], $tag)) {
-							$tag_counts[$i]["count"]++;
-							
-							break;
-						}
-						
-					if($i == $arr_count)
-						$tag_counts[] = array("name" => $tag, "count" => 1);
-				}
-			}
-			
-			if(empty($tag_counts))
-				return;
-			
-			$count_max = 0;
-			$count_min = 999999999; // some big number
-			
-			foreach($tag_counts as $tag) {
-				if($tag["count"] > $count_max)
-					$count_max = $tag["count"];
-			
-				if($tag["count"] < $count_min)
-					$count_min = $tag["count"];
-			}
+	  if(template_match("TAG_CLOUD", $CON, $null))
+			$CON = template_replace("TAG_CLOUD", $this->tagCloud(), $CON);
+	}
 
-			shuffle($tag_counts);			
-						
-			$t = "<div class=\"tagCloud\"><b>Tag cloud</b><br />\n";
-			
-			foreach($tag_counts as $tag) {
-				if($count_max == $count_min)
-					$tagsize = 11;
-				else
-					$tagsize = floor(($tag["count"] - $count_min) / ($count_max - $count_min) * ($this->font_max - $this->font_min) + $this->font_min);
-			
-				$t .= "<a class=\"tagCloudLink\" style=\"font-size:${tagsize}px\" href=\"$self?action=tagsearch&amp;tag=".urlencode($tag["name"])."\">".htmlspecialchars($tag["name"])."</a>\n";
-			}
-			
-			$t .= "</div>\n";
-			
-			$html = template_replace("plugin:TAG_CLOUD", $t, $html);
-			$CON = template_replace("TAG_CLOUD", $t, $CON);
-		}
+	function template()
+	{
+	  global $html, $action;
+	  
+	  if(!empty($action))
+	  	return;
+	  
+	  if(template_match("plugin:TAG_LIST", $html, $null))
+			$html = template_replace("plugin:TAG_LIST", $this->tagList(), $html);
+		
+	  if(template_match("plugin:TAG_CLOUD", $html, $null))
+			$html = template_replace("plugin:TAG_CLOUD", $this->tagCloud(), $html);
 	}
 	
 	function inCaseArray($needle, $arr)

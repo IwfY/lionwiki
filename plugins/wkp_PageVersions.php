@@ -19,10 +19,12 @@ class PageVersions
 	var $default_lang = "en"; // what language is it if no lang code is given?
 
 	var $lang_names = array(
+		"ar" => "العربية",
 		"bg" => "Български",
 		"ca" => "Català",
-		"cs" => "Česky",
+		"cs" => "Čeština",
 		"de" => "Deutsch",
+		"de-ch" => "Schweizerdeutsch",
 		"da" => "Dansk",
 		"en" => "English",
 		"es" => "Español",
@@ -34,9 +36,10 @@ class PageVersions
 		"nl" => "Nederlands",
 		"pl" => "Polski",
 		"pt" => "Português",
+		"pt-br" => "Português brasileiro",
 		"ro" => "Română",
 		"ru" => "Русский",
-		"sk" => "Slovensky",
+		"sk" => "Slovenština",
 		"sv" => "Svenska"
 	);
 

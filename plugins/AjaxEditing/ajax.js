@@ -39,7 +39,8 @@ function ajaxEdit(ret)
 		elem = elem.parentNode;
 	
 	xmlHttpPost("index.php?page=" + page + "&action=edit&ajax=1&par=" + elem.id.substr(4), "", function(content) {
-		replaceContent(elem.id, "div", elem.id, content);
+		var div = replaceContent(elem.id, "div", elem.id, content);
+		div.className = "par-div";
 	});
 	
 	return false;
@@ -54,15 +55,15 @@ function ajaxEdit(ret)
  * "" - (nothing) - go back/quit edit mode but don't save
  */ 
 
-function ajaxAction(par_id, action)
+function ajaxAction(action, obj)
 {
+	var par_id = getNearestParId(obj);
+
 	var contentDiv = document.getElementById("par-" + par_id);
 	var content = getElementsByClassName("ajaxContentTextarea", contentDiv)[0].value;
-	var econfprot = getOrNothing("ajaxEconfProt", contentDiv);
 	var esum = getOrNothing("ajaxEsum", contentDiv);
 	var password = getOrNothing("ajaxPasswordInput", contentDiv);
 	var moveto = getOrNothing("ajaxRenameInput", contentDiv);
-	var last_changed = getOrNothing("ajaxLastChanged", contentDiv);
 	var showsource = getOrNothing("ajaxShowSource", contentDiv);
 	var qid = document.getElementById("captcha-id");
 	var ans = document.getElementById("captcha-input");
@@ -71,30 +72,38 @@ function ajaxAction(par_id, action)
 	xmlHttpPost("index.php?page=Main+page&action=" + action + "&ajax=1&par=" + par_id, 
 		{
 			"content": content,
-			"econfprot": econfprot,
+			"econfprot": 0,
 			"esum": esum,
 			"sc": password,
 			"moveto": moveto,
-			"last_changed": last_changed,
 			"showsource": showsource,
 			"qid": qid == null ? "" : qid.value,
 			"ans": ans == null ? "" : ans.value,
 			"page": page
 		}, function(str) {		
-		replaceContent("par-" + par_id, "div", "par-" + par_id, str);
+		var div = replaceContent("par-" + par_id, "div", "par-" + par_id, str);
 		
-		if(str.search("ajaxContentTextarea")) // no editing area found => saving was succesful
-			renumberHeadings();
+		div.className = "par-div";
 		
-		registerAjax(document.getElementById("par-" + par_id));
+		renumberParagraphs();
+		
+		registerAjax(document.getElementById("par-" + getNearestParId(div)));
 	});
+}
+
+function getNearestParId(obj)
+{
+	while(obj.className != "par-div")
+		obj = obj.parentNode;
+		
+	return parseInt(obj.id.split("-")[1]);
 }
 
 /**
  * After saving paragraph into the file, heading numbers may change
  */ 
 
-function renumberHeadings()
+function renumberParagraphs()
 {
 	var headings = document.getElementsByClassName("par-div");
 	
@@ -178,7 +187,7 @@ function getElementsByClassName(classname, node) {
 /**
  * Standard AJAX function.
  * 
- * Copied as PD from some website. Consider this to be credit for Unknown Programmer  
+ * Copied as PD from some website. Consider this to be credit to Unknown Programmer  
  */ 
 
 function xmlHttpPost(strURL, params, func) {

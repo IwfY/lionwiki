@@ -8,7 +8,7 @@
 class AjaxEditing
 {
   var $desc = array(
-		array("AjaxEditing", "")
+		array("AjaxEditing", "Guess what. AJAX editing :)")
 	);
 	
 	/**
@@ -25,13 +25,17 @@ class AjaxEditing
 
 	function formatFinished()
 	{
-		global $CON, $content, $self, $showsource, $page, $econfprot, $esum, $error, $preview, $par, $action;
-		global $T_PASSWORD, $T_MOVE_TEXT, $T_EDIT_SUMMARY, $LAST_CHANGED_TIMESTAMP, $T_PREVIEW, $T_DONE, $T_DISCARD_CHANGES;
+		global $CON, $content, $self, $showsource, $page, $esum, $error, $preview, $par, $action;
+		global $T_PASSWORD, $T_MOVE_TEXT, $T_EDIT_SUMMARY, $T_PREVIEW, $T_DONE, $T_DISCARD_CHANGES;
 		
 		if(!$_REQUEST["ajax"])
 			return;
-		else if($action != "edit" && !$preview)
+		else if($action != "edit" && !$preview) {
+			$CON = substr($CON, strpos($CON, ">") + 1); // $CON contains <div class="pre-div"> ... </div> and we don't want this "wrapper"
+			$CON = substr($CON, 0, strlen($CON) - 6);
+			
 			die($CON);
+		}
 		
 		$rows = count(explode("\n", $CON));
 		
@@ -50,23 +54,20 @@ class AjaxEditing
 			$RENAME_INPUT = "<input class=\"ajaxRenameInput\" type=\"text\" name=\"moveto\" value=\"" . htmlspecialchars($moveto ? $moveto : $page) . "\" />";
 		}
 
-		$CON_FORM_BEGIN = "<form action=\"$self\" class=\"ajaxForm\" method=\"post\"><input type=\"hidden\" name=\"action\" value=\"save\" /><input class=\"ajaxLastChanged\" type=\"hidden\" name=\"last_changed\" value=\"$LAST_CHANGED_TIMESTAMP\" /><input class=\"ajaxShowSource\" type=\"hidden\" name=\"showsource\" value=\"$showsource\" /><input type=\"hidden\" name=\"par\" value=\"$par\" />";
-		
-		if(empty($econfprot))
-			$CON_FORM_BEGIN .= "<input type=\"hidden\" class=\"ajaxEconfProt\" name=\"econfprot\" value=\"1\" />";
+		$CON_FORM_BEGIN = "<form action=\"$self\" class=\"ajaxForm\" method=\"post\"><input type=\"hidden\" name=\"action\" value=\"save\" /><input class=\"ajaxShowSource\" type=\"hidden\" name=\"showsource\" value=\"$showsource\" />";
 		
 		$CON_FORM_END = "</form>";
 
 		$CON_TEXTAREA = "<textarea name=\"content\" class=\"ajaxContentTextarea\" cols=\"83\" rows=\"$rows\">" . htmlspecialchars($content ? $content : $CON) . "</textarea><input type=\"hidden\" id=\"ajaxPage\" name=\"page\" value=\"$page\" />";
 		
 		if(!$showsource) {
-			$CON_SUBMIT = "<input class=\"submit ajaxContentSubmit\" onclick=\"ajaxAction($par, 'save');return false;\" type=\"submit\" value=\"$T_DONE\" />";
+			$CON_SUBMIT = "<input class=\"submit ajaxContentSubmit\" onclick=\"ajaxAction('save', this);return false;\" type=\"submit\" value=\"$T_DONE\" />";
 			
 			$EDIT_SUMMARY_TEXT = $T_EDIT_SUMMARY;
 			$EDIT_SUMMARY = "<input type=\"text\" name=\"esum\" class=\"ajaxEsum\" value=\"".htmlspecialchars($esum)."\" />";
 		}
 			
-		$CON_PREVIEW = "<input class=\"ajaxContentPreview\" class=\"submit\" onclick=\"ajaxAction($par, 'edit&preview=1');return false;\" type=\"submit\" name=\"preview\" value=\"$T_PREVIEW\" /> <input type=\"submit\" onclick=\"ajaxAction($par, '');return false;\" value=\"$T_DISCARD_CHANGES\" />";
+		$CON_PREVIEW = "<input class=\"ajaxContentPreview\" class=\"submit\" onclick=\"ajaxAction('edit&preview=1', this);return false;\" type=\"submit\" name=\"preview\" value=\"$T_PREVIEW\" /> <input type=\"submit\" onclick=\"ajaxAction('', this);return false;\" value=\"$T_DISCARD_CHANGES\" />";
 		
 		$subs = array(
 			array("CONTENT_FORM", $CON_FORM_BEGIN),

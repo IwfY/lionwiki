@@ -499,11 +499,15 @@
 				$CON = str_replace($match[0], "'''Warning: subpage $match[2] was not found!'''", $CON);
 		}
 	
+		plugin_call_method("subPagesLoaded");
+	
 		// save content not intended for substitutions ({html} tag)
 		
 		if($NO_HTML == false) { // XSS protection
-			$n_htmlcodes = preg_match_all("/[^\^]\{html\}(.+)\{\/html\}/Ums", $CON, $htmlcodes, PREG_PATTERN_ORDER);
-			$CON = preg_replace("/[^\^]\{html\}(.+)\{\/html\}/Ums", "{HTML}", $CON);
+			$n_htmlcodes = preg_match_all("/[^\^](\{html\}(.+)\{\/html\})/Ums", $CON, $htmlcodes, PREG_PATTERN_ORDER);
+			
+			foreach($htmlcodes[1] as $hcode)
+				$CON = str_replace($hcode, "{HTML}", $CON);
 		}
 		
 		$CON = preg_replace("/[^\^]<!--.*-->/U", "", $CON); // internal comments
@@ -620,7 +624,7 @@
 
 		function name_title($matches) // replace headings
 		{
-			global $headings, $heading_id, $head_stack, $T_EDIT, $page;
+			global $headings, $heading_id, $head_stack, $T_EDIT, $page, $PAGES_DIR;
 			
 			$headings[] = $h = array(strlen($matches[1]) + 1, preg_replace("/[^\da-z]/i", "_", remove_a($matches[2])), $matches[2]);
 			
@@ -691,7 +695,7 @@
 		
 		// {html} tag
 		if($NO_HTML == false && $n_htmlcodes > 0)
-			$CON = preg_replace(array_fill(0, $n_htmlcodes, "/{HTML}/Us"), $htmlcodes[1], $CON, 1);
+			$CON = preg_replace(array_fill(0, $n_htmlcodes, "/{HTML}/Us"), $htmlcodes[2], $CON, 1);
 		
 		while(array_pop($head_stack))
 			$CON .= "</div>";

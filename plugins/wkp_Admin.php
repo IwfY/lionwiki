@@ -2,8 +2,8 @@
 
 class Admin
 {
-	var $PASSWORD = "test"; // either $PASSWORD or $PASSWORD_MD5 must be set
-	var $PASSWORD_MD5 = ""; // if set, $PASSWORD is ignored
+	var $PASSWORD = ""; // either $PASSWORD or $PASSWORD_MD5 must be set
+	var $PASSWORD_MD5 = "5a2531e3c240e8137dc47b1a2d8a0914"; // if set, $PASSWORD is ignored
 	var $dir;
 	
 	function Admin()
@@ -181,7 +181,7 @@ Password: <input type=\"password\" name=\"sc\" />
 
 	/*
 	 * With admin-pages, we can make some pages read-only. But this applies to
-	 * administrator too which is not we usually want. This way, if we detect that
+	 * administrator too which is not what we usually want. This way, if we detect that
 	 * user wants to edit read only page, we will include password input into the
 	 * template even if the user is "logged". Then user can fill admin password
 	 * and in that case, page will be saved.
@@ -193,7 +193,7 @@ Password: <input type=\"password\" name=\"sc\" />
 
 		if($action == "edit" && $this->checkPages(false) == false) {
 			// with this, user will be thought as unlogged, so password input will appear
-			$_COOKIE["LW_AUT"] = "1";
+			$_COOKIE["LW_AUT"] = "1"; // just keep these two different
 			$PASSWORD_MD5 = "2";
 		}
 	}
