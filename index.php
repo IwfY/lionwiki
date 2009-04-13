@@ -64,11 +64,12 @@
 	if(empty($PASSWORD_MD5) && !empty($PASSWORD))
 		$PASSWORD_MD5 = md5($PASSWORD);
 
-	$WIKI_VERSION = "LionWiki 2.3.3";
-	$PAGES_DIR = $BASE_DIR . "pages/";
-	$HISTORY_DIR = $BASE_DIR . "history/";
+	$WIKI_VERSION = "LionWiki 3.0a1";
+	$VAR_DIR = $BASE_DIR . "var/";
+	$PAGES_DIR = $VAR_DIR . "pages/";
+	$HISTORY_DIR = $VAR_DIR . "history/";
 	$PLUGINS_DIR = "plugins/";
-	$PLUGINS_DATA_DIR = "data/";
+	$PLUGINS_DATA_DIR = $VAR_DIR . "plugins/";
 	$LANG_DIR = "lang/";
 	
 	umask(0); // sets default mask
@@ -108,7 +109,7 @@
 	
 	// consider only first language, don't consider language variant (like en-us or pt-br)
 	if($USE_AUTOLANG)
-		$LANG = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
+		list($LANG) = explode(",", $_SERVER['HTTP_ACCEPT_LANGUAGE']);
 
 	$LANG = !empty($_COOKIE["LW_LANG"]) ? $_COOKIE["LW_LANG"] : $LANG;
 
@@ -575,7 +576,7 @@
 		$CON = preg_replace('#\[([^\]]+)\|\.\/' . $rg_link_local . '\]#U', '<a href="$2" class="url">$1</a>', $CON);
 		$CON = preg_replace('#' . $rg_link_http . '#i', '<a href="$0" class="url">xx$1</a>', $CON);
 		$CON = preg_replace('#xxttp#', 'http', $CON);
-		$CON = preg_replace('#\[\?(.*)\]#Ui', '<a href="http://' . $LANG . '.wikipedia.org/wiki/$1" class="url" title="Wikipedia">$1</a>', $CON); // Wikipedia
+		$CON = preg_replace('#\[\?(.*)\]#Ui', '<a href="http://' . substr($LANG, 0, 2) . '.wikipedia.org/wiki/$1" class="url" title="Wikipedia">$1</a>', $CON); // Wikipedia
 		
 		preg_match_all("/\[([^|\]]+\|)?([^\]#]+)(#[^\]]+)?\]/", $CON, $matches, PREG_SET_ORDER); // matching Wiki links
 		
