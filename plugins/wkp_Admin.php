@@ -13,7 +13,7 @@ class Admin
 		if(empty($this->PASSWORD_MD5) && !empty($this->PASSWORD))
 			$this->PASSWORD_MD5 = md5($this->PASSWORD);
 
-		$this->dir = dirname(__FILE__) . "/data/";
+		$this->dir = $PLUGINS_DATA_DIR;
 		
 		$this->desc = array(
 			array("Admin plugin", "provides advanced administration functions protected by password"),
