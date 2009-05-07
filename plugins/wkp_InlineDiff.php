@@ -11,7 +11,7 @@ class InlineDiff
 		array("InlineDiff", "provides inline diff which is much better than default built-in")
 	);
 
-	protected function mapNewline($arr) {
+	function mapNewline($arr) {
 		$ret = array();
 
 		foreach($arr as $row)
