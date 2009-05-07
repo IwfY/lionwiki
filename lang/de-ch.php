@@ -16,4 +16,3 @@
 	$T_CREATE_PAGE = "Syte erstelle mit dem Name:";
 	$T_PROTECTED_READ = "für die Inhaltsdarstellig bitte Passwort igäh: ";
 	$TE_WRONG_PASSWORD = "Passwort isch fählerhaft.";
-?>

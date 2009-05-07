@@ -27,4 +27,3 @@
 	$TE_WRONG_PASSWORD = "Zadané heslo není správné.";
 	
 	$DATE_FORMAT = "d. m. Y H:i";
-?>

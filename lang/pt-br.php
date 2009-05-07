@@ -25,4 +25,3 @@
 	$T_CREATE_PAGE = "Criar página";
 	$T_PROTECTED_READ = "Você precisa entrar com uma senha para ver o conteúdo do site: ";
 	$TE_WRONG_PASSWORD = "Senha incorreta.";
-?>

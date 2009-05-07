@@ -24,4 +24,3 @@
 	$T_CREATE_PAGE = "Nieuwe pagina";
 	$T_PROTECTED_READ = "Wachtwoord is nodig om informatie te bekijken: ";
 	$TE_WRONG_PASSWORD = "Wachtwoord is onjuist.";
-?>

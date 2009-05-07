@@ -30,4 +30,3 @@
 	$T_CREATE_PAGE = "Create page";
 	$T_PROTECTED_READ = "You need to enter password to view content of site: ";
 	$TE_WRONG_PASSWORD = "Password is incorrect.";
-?>
