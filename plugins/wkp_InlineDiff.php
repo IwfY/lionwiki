@@ -7,7 +7,7 @@
 
 class InlineDiff
 {
-  var $desc = array(
+	var $desc = array(
 		array("InlineDiff", "provides inline diff which is much better than default built-in")
 	);
 

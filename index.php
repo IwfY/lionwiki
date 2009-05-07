@@ -65,6 +65,8 @@
 	$PLUGINS_DATA_DIR = $VAR_DIR . "plugins/";
 	$LANG_DIR = "lang/";
 
+	$WIKI_VERSION = "LionWiki 3.0";
+
 	umask(0); // sets default mask
 
 	// some strings may not be translated, in that case, we'll use english translation, which should be always complete
