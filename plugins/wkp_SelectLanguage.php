@@ -42,17 +42,17 @@ class SelectLanguage
 					$langs[] = basename($file, ".php");
 
 		sort($langs);
-		
+
 		$select = "
 <form action=\"$self\" id=\"formSelectLanguage\" method=\"get\">
 <input type=\"hidden\" name=\"page\" value=\"" . htmlspecialchars($page_nolang) . "\" />
 <input type=\"hidden\" name=\"action\" value=\"" . htmlspecialchars($action) . "\" />
 <select name=\"lang\" id=\"selectLanguage\" onchange=\"this.form.submit();\">
 ";
-		
+
 		foreach($langs as $l) {
 			$selected = $l == $LANG ? " selected=\"selected\" " : "";
-			
+
 			$select .= "<option value=\"$l\"$selected>" . $this->lang_names[$l] . "</option>\n";
 		}
 

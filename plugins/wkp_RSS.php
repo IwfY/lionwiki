@@ -21,7 +21,7 @@ class RSS {
 </rss>'; // don't change template. This exact form is needed for correct functioning.
 
 	function pageWritten($file) {
-		global $WIKI_TITLE, $PAGES_DIR, $page, $HISTORY_DIR, $LANG, $TIME_FORMAT, $BASE_DIR, $USE_HISTORY;
+		global $WIKI_TITLE, $PAGES_DIR, $page, $HISTORY_DIR, $LANG, $TIME_FORMAT, $VAR_DIR, $USE_HISTORY;
 
 		if(!$USE_HISTORY)
 			return true;
@@ -29,17 +29,17 @@ class RSS {
 		// Attention, bug si https ou port différent de 80 ?
 		$pagelink = "http://" . $_SERVER["SERVER_NAME"] . $_SERVER["SCRIPT_NAME"];
 
-		preg_match("/<\/language>(.*)<\/channel>/s", @file_get_contents($BASE_DIR . "rss.xml"), $matches);
-		
+		preg_match("/<\/language>(.*)<\/channel>/s", @file_get_contents($VAR_DIR . "rss.xml"), $matches);
+
 		$items = $matches[1];
-		
+
 		$pos = -1;
-		
+
 		// count items
 		for($i = 0; $i < $this->max_changes - 1; $i++)
 			if(!($pos = strpos($items, "</item>", $pos + 1)))
 				break;
-		
+
 		if($pos) // if count is higher than $max_changes - 1, cut out the rest
 			$items = substr($items, 0, $pos + 7);
 
@@ -70,8 +70,8 @@ class RSS {
 		$rss = str_replace('{WIKI_DESCRIPTION}', "RSS feed from " . $WIKI_TITLE, $rss);
 		$rss = str_replace('{CONTENT_RSS}', $n_item . $items, $rss);
 
-		if(!$file = @fopen($BASE_DIR."rss.xml", "w")) {
-			echo "Opening file for writing RSS file is not possible! Please create file rss.xml in your base directory and make it writable (chmod 666).";
+		if(!$file = @fopen($VAR_DIR . "rss.xml", "w")) {
+			echo "Opening file for writing RSS file is not possible! Please create file rss.xml in your var directory and make it writable (chmod 666).";
 
 			return true;
 		}

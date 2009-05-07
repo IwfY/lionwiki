@@ -14,14 +14,13 @@
 	// if not empty, $PASSWORD is ignored and $PASSWORD_MD5 is used instead
 	$PASSWORD_MD5 = "";
 
-	$TEMPLATE = "template_dandelion.html";  // presentation template
+	$TEMPLATE = "templates/template_dandelion.html";  // presentation template
 
 	$USE_AUTOLANG = true; // should we try to detect language from browser?
 	$LANG = "en"; // language code you want to use, used only when $USE_AUTOLANG = false
 
 	$PROTECTED_READ = false; // if true, you need to fill password for reading pages too
 
-	$HISTORY_COMPRESSION = "gzip"; // possible values: bzip2, gzip and plain
 	$NO_HTML = false; // XSS protection, meaningful only when password protection is enabled
 
 	$USE_META = true; // use and create meta data. Small overhead, but edit summary and IP info
@@ -44,34 +43,31 @@
 
 	$self = $_SERVER['PHP_SELF'];
 
-	if(get_magic_quotes_gpc()) { // magic_quotes_gpc can't be turned off
-		foreach($_GET as $k => $v) $_GET[$k] = stripslashes($v);
-		foreach($_POST as $k => $v) $_POST[$k] = stripslashes($v);
-		foreach($_COOKIE as $k => $v) $_COOKIE[$k] = stripslashes($v);
-		foreach($_REQUEST as $k => $v) $_REQUEST[$k] = stripslashes($v);
-	}
+	if(get_magic_quotes_gpc()) // magic_quotes_gpc can't be turned off
+		for($i = 0, $_SG = array(&$_GET, &$_POST, &$_COOKIE, &$_REQUEST), $c = count($_SG); $i < $c; ++$i)
+			$_SG[$i] = array_map("stripslashes", $_SG[$i]);
 
 	$BASE_DIR = $_GET["basedir"] ? $_GET["basedir"] . "/" : "";
 
-	@include("_config.php"); // config file is not required, see settings above
+	@include("config.php"); // config file is not required, see settings above
 
 	if(!empty($BASE_DIR))
-		@include($BASE_DIR . "_config.php"); // subdomain specific settings
+		@include($BASE_DIR . "config.php"); // subdomain specific settings
 
 	if(empty($PASSWORD_MD5) && !empty($PASSWORD))
 		$PASSWORD_MD5 = md5($PASSWORD);
 
-	$WIKI_VERSION = "LionWiki 2.3.7";
-	$PAGES_DIR = $BASE_DIR . "pages/";
-	$HISTORY_DIR = $BASE_DIR . "history/";
+	$REAL_PATH = realpath(dirname(__FILE__)) . "/";
+	$VAR_DIR = $BASE_DIR . "var/";
+	$PAGES_DIR = $VAR_DIR . "pages/";
+	$HISTORY_DIR = $VAR_DIR . "history/";
 	$PLUGINS_DIR = "plugins/";
-	$PLUGINS_DATA_DIR = "data/";
+	$PLUGINS_DATA_DIR = $VAR_DIR . "plugins/";
 	$LANG_DIR = "lang/";
 
 	umask(0); // sets default mask
 
 	// some strings may not be translated, in that case, we'll use english translation, which should be always complete
-
 	$T_HOME = "Main page";
 	$T_SYNTAX = "Syntax";
 	$T_DONE = "Save changes";
@@ -121,11 +117,15 @@
 	else
 		$LANG = "en";
 
-	// Installation - create directories pages and history, if possible
+	if(!file_exists($VAR_DIR) && !mkdir(rtrim($VAR_DIR, "/")))
+		die("Can't create directory $VAR_DIR. Please create $VAR_DIR with 0777 rights.");
 
-	if(!file_exists($PAGES_DIR) && !mkdir(rtrim($PAGES_DIR, "/")))
-		die("Can't create directory $PAGES_DIR. Please create $PAGES_DIR and $HISTORY_DIR with 0777 rights.");
-
+	foreach(array($PAGES_DIR, $HISTORY_DIR, $PLUGINS_DATA_DIR) as $DIR)
+		if(!file_exists($DIR)) {
+			mkdir(rtrim($DIR, "/"), 0777);
+			$f = fopen($REAL_PATH . $DIR . ".htaccess", "w"); fwrite($f, "deny from all"); fclose($f);
+		}
+			
 	if($USE_HISTORY && !file_exists($HISTORY_DIR) && !mkdir(rtrim($HISTORY_DIR, "/")))
 		die("Can't create directory $HISTORY_DIR. Please create $HISTORY_DIR with 0777 rights or turn off history feature in config file. Turning off history now.");
 
@@ -142,7 +142,6 @@
 	$plugin_saveok = true; // is OK to save page changes (from plugins)
 
 	// We load common plugins for all subsites and then just for this subsite.
-
 	if(!empty($BASE_DIR) && ($dir = @opendir($BASE_DIR . $PLUGINS_DIR)))
 		while($file = readdir($dir))
 			$plugin_files[] = $BASE_DIR . $PLUGINS_DIR . $file;
@@ -161,19 +160,7 @@
 	plugin_call_method("pluginsLoaded"); // for admin plugin
 	plugin_call_method("pluginsLoaded2"); // second pass ("for ordinary plugins")
 
-	// list of variables for UTF-8 conversion and export
 	$req_conv = array("action", "query", "sc", "content", "page", "moveto", "restore", "f1", "f2", "error", "time", "esum", "preview", "last_changed", "gtime", "showsource", "par");
-
-	if(extension_loaded("mbstring")) { // Conversion to UTF-8
-		@ini_set("mbstring.language", "Neutral");
-		@ini_set("mbstring.internal_encoding", "UTF-8");
-		@ini_set("mbstring.http_output", "UTF-8");
-		@ini_set("mbstring.detect_order", "UTF-8,ISO8859-2,ISO-8859-1");
-		@ini_set("mbstring.func_overload", MB_OVERLOAD_STRING);
-
-		foreach($req_conv as $req_key)
-			$_REQUEST[$req_key] = mb_convert_encoding($_REQUEST[$req_key], "UTF-8", mb_detect_encoding($_REQUEST[$req_key]));
-	} // if mbstring is not supported, nothing bad should happen
 
 	foreach($req_conv as $req) // export variables to main namespace
 		$$req = $_REQUEST[$req];
@@ -243,11 +230,11 @@
 
 				$filename = $complete_dir . "/" . $rightnow . ".bak";
 
-				if(!$bak = @lwopen($filename, "w"))
+				if(!$bak = @fopen($filename, "w"))
 					die("Could not write backup $filename of page!");
 
-				lwwrite($bak, $content);
-				lwclose($bak);
+				fwrite($bak, $content);
+				fclose($bak);
 
 				if($USE_META)
 					$es = fopen($complete_dir . "/meta.dat", "ab");
@@ -314,8 +301,8 @@
 		}
 	}
 
-		// Restoring old version of page
-	if($gtime && ($restore || $action == "rev") && ($file = @lwopen($HISTORY_DIR . $page . "/" . $gtime, "r"))) {
+	// Restoring old version of page
+	if($gtime && ($restore || $action == "rev")) {
 		$CON = "";
 
 		if($action == "rev") {
@@ -324,9 +311,7 @@
 			$CON = str_replace(array("{TIME}", "{RESTORE}"), array(revTime($gtime), $rev_restore), $T_REVISION);
 		}
 
-		$CON .= @lwread($file);
-
-		@lwclose($file);
+		$CON .= lwread($HISTORY_DIR . $page . "/" . $gtime);
 	}
 
 	plugin_call_method("pageLoaded");
@@ -604,13 +589,11 @@
 		$CON = preg_replace('/<\/([uo])l><li>/', "</$1l></li><li>", $CON);
 		$CON = preg_replace('/<(\/?)([uo])l><\/?[uo]l>/', "<$1$2l><$1li><$1$2l>", $CON);
 
-		// remove anchors from a text
-		function remove_a($link)
+		function remove_a($link) // remove anchors from a text
 		{
 			preg_match_all("#(<a.+>)*([^<>]+)(</a>)*#", $link, $txt);
 			return trim(join("", $txt[2]));
 		}
-		// remove_a
 
 		$heading_id = $par ? $par : 1;
 		$head_stack = array();
@@ -678,12 +661,10 @@
 
 		$CON = str_replace("{TOC}", $TOC, $CON);
 
-		// return content of {{CODE}}
-		if($nbcode > 0)
+		if($nbcode > 0) // return content of {{CODE}}
 			$CON = preg_replace(array_fill(0, $nbcode, "/{{CODE}}/Us"), $matches_code[1], $CON, 1);
 
-		// {html} tag
-		if($NO_HTML == false && $n_htmlcodes > 0)
+		if($NO_HTML == false && $n_htmlcodes > 0) // {html} tag
 			$CON = preg_replace(array_fill(0, $n_htmlcodes, "/{HTML}/Us"), $htmlcodes[2], $CON, 1);
 
 		while(array_pop($head_stack))
@@ -833,18 +814,13 @@
 	}
 
 	function diff($f1, $f2) {
-		global $page, $HISTORY_DIR;
-
 		if($f2 < $f1)
 			list($f1, $f2) = array($f2, $f1);
 
-		$complete_dir = $HISTORY_DIR . $page . "/";
+		$complete_dir = $GLOBALS["HISTORY_DIR"] . $GLOBALS["page"] . "/";
 
-		if(plugin_call_method("diff", $complete_dir . $f1, $complete_dir . $f2, $diff)) {
-			global $plugin_ret_diff;
-
-			$diff = $plugin_ret_diff;
-		}
+		if(plugin_call_method("diff", $complete_dir . $f1, $complete_dir . $f2, $diff))
+			$diff = $GLOBALS["plugin_ret_diff"];
 		else
 			$diff = diff_builtin($complete_dir . $f1, $complete_dir . $f2);
 
@@ -852,14 +828,8 @@
 	}
 
 	function diff_builtin($f1, $f2) {
-		$s1 = lwopen($f1, "r");
-		$s2 = lwopen($f2, "r");
-
-		$a1 = explode("\n", @lwread($s1));
-		$a2 = explode("\n", @lwread($s2));
-
-		lwclose($f1);
-		lwclose($f2);
+		$a1 = explode("\n", lwread($f1));
+		$a2 = explode("\n", lwread($f2));
 
 		$d1 = array_diff($a1, $a2);
 		$d2 = array_diff($a2, $a1);
@@ -875,48 +845,10 @@
 		return $ret . "</pre>";
 	}
 
-	function lwopen($name, $par) {
-		global $HISTORY_COMPRESSION;
-
-		if($par == "r") {
-			if(file_exists($name)) return array(@fopen($name, $par), "plain");
-			elseif(file_exists($name . ".gz")) return array(@gzopen($name . ".gz", $par), "gzip");
-			elseif(file_exists($name . ".bz2")) return @bzopen($name . ".bz2", $par, "bzip2");
-		} elseif($par == "w")
-			if($HISTORY_COMPRESSION == "plain") return array(@fopen($name, $par), $HISTORY_COMPRESSION);
-			elseif($HISTORY_COMPRESSION == "gzip") return array(@gzopen($name . ".gz", $par), $HISTORY_COMPRESSION);
-			elseif($HISTORY_COMPRESSION == "bzip2") return array(@bzopen($name . ".bz2", $par), $HISTORY_COMPRESSION);
-	}
-
-	function lwclose($h) {
-		if($h[1] == "plain") return fclose($h[0]);
-		elseif($h[1] == "gzip") return gzclose($h[0]);
-		elseif($h[1] == "bzip2") return bzclose($h[0]);
-	}
-
-	function lwread($h) {
-		$ret = $buffer = "";
-
-		if($h[1] == "plain") {
-			$stat = fstat($h[0]);
-			return fread($h[0], $stat["size"]);
-		} elseif($h[1] == "gzip") {
-			while($buffer = gzread($h[0], 8192))
-				$ret .= $buffer;
-
-			return $ret;
-		} elseif($h[1] == "bzip2") {
-			while($buffer = bzread($h[0], 8192))
-				$ret .= $buffer;
-
-			return $ret;
-		}
-	}
-
-	function lwwrite($h, $data) {
-		if($h[1] == "plain") return fwrite($h[0], $data);
-		elseif($h[1] == "gzip") return gzwrite($h[0], $data);
-		elseif($h[1] == "bzip2") return bzwrite($h[0], $data);
+	function lwread($name) {
+		if(file_exists($name)) return @file_get_contents($name);
+		elseif(file_exists($name . ".gz")) return implode(@gzfile($name . ".gz"));
+		elseif(file_exists($name . ".bz2")) return bzdecompress(@file_get_contents($name . ".bz2"));
 	}
 
 	function authentified() {

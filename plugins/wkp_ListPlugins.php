@@ -2,7 +2,7 @@
 /*
 	List plugins lists all active plugins and presents functions they offer. It creates
 	unordered (possibly nested) list of plugins and their functions.
-	
+
 	It is activated by ?action=listplugins
 */
 

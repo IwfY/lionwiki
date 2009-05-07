@@ -1,24 +1,24 @@
 <?php
 /**
  * AjaxEditing plugin for LionWiki, licensed under GNU/GPL
- * 
+ *
  * (c) Adam Zivner 2009 <adam.zivner@gmail.com>
- */ 
+ */
 
 class AjaxEditing
 {
 	var $desc = array(
 		array("AjaxEditing", "Guess what. AJAX editing :)")
 	);
-	
+
 	/**
 	 * Number of rows of edit textarea reflects number of lines of edited paragraphs.
-	 * Too big or too small edit textarea wouldn't be good, so here are the limits:	 
-	 */	 	
-	
+	 * Too big or too small edit textarea wouldn't be good, so here are the limits:
+	 */
+
 	var $rows_min = 3;
 	var $rows_max = 20;
-	
+
 	/**
 	 * Substitute edit template
 	 */
@@ -27,23 +27,23 @@ class AjaxEditing
 	{
 		global $CON, $content, $self, $showsource, $page, $esum, $error, $preview, $par, $action;
 		global $T_PASSWORD, $T_MOVE_TEXT, $T_EDIT_SUMMARY, $T_PREVIEW, $T_DONE, $T_DISCARD_CHANGES;
-		
+
 		if(!$_REQUEST["ajax"])
 			return;
 		else if($action != "edit" && !$preview) {
 			$CON = substr($CON, strpos($CON, ">") + 1); // $CON contains <div class="pre-div"> ... </div> and we don't want this "wrapper"
 			$CON = substr($CON, 0, strlen($CON) - 6);
-			
+
 			die($CON);
 		}
-		
+
 		$rows = count(explode("\n", $CON));
-		
+
 		if($this->rows_min > $rows)
 			$rows = $this->rows_min;
 		else if($this->rows_max < $rows)
 			$rows = $this->rows_max;
-	
+
 		if(!authentified() && !$showsource) { // if not logged on, require password
 			$FORM_PASSWORD = $T_PASSWORD;
 			$FORM_PASSWORD_INPUT = "<input class=\"ajaxPasswordInput\" type=\"password\" name=\"sc\" />";
@@ -55,20 +55,20 @@ class AjaxEditing
 		}
 
 		$CON_FORM_BEGIN = "<form action=\"$self\" class=\"ajaxForm\" method=\"post\"><input type=\"hidden\" name=\"action\" value=\"save\" /><input class=\"ajaxShowSource\" type=\"hidden\" name=\"showsource\" value=\"$showsource\" />";
-		
+
 		$CON_FORM_END = "</form>";
 
 		$CON_TEXTAREA = "<textarea name=\"content\" class=\"ajaxContentTextarea\" cols=\"83\" rows=\"$rows\">" . htmlspecialchars($content ? $content : $CON) . "</textarea><input type=\"hidden\" id=\"ajaxPage\" name=\"page\" value=\"$page\" />";
-		
+
 		if(!$showsource) {
 			$CON_SUBMIT = "<input class=\"submit ajaxContentSubmit\" onclick=\"ajaxAction('save', this);return false;\" type=\"submit\" value=\"$T_DONE\" />";
-			
+
 			$EDIT_SUMMARY_TEXT = $T_EDIT_SUMMARY;
 			$EDIT_SUMMARY = "<input type=\"text\" name=\"esum\" class=\"ajaxEsum\" value=\"".htmlspecialchars($esum)."\" />";
 		}
-			
+
 		$CON_PREVIEW = "<input class=\"ajaxContentPreview\" class=\"submit\" onclick=\"ajaxAction('edit&preview=1', this);return false;\" type=\"submit\" name=\"preview\" value=\"$T_PREVIEW\" /> <input type=\"submit\" onclick=\"ajaxAction('', this);return false;\" value=\"$T_DISCARD_CHANGES\" />";
-		
+
 		$subs = array(
 			array("CONTENT_FORM", $CON_FORM_BEGIN),
 			array("\/CONTENT_FORM", $CON_FORM_END),
@@ -81,22 +81,22 @@ class AjaxEditing
 			array("CONTENT_PREVIEW", $CON_PREVIEW),
 			array("ERROR", $error)
 		);
-	
+
 		$html = @file_get_contents("plugins/AjaxEditing/template.html");
-		
+
 		plugin_call_method("template"); // plugin specific template substitutions
-	
+
 		foreach($subs as $s)
 			$html = template_replace($s[0], $s[1], $html);
-			
+
 		$html = preg_replace("/\{([^}]* )?plugin:.+( [^}]*)?\}/U", "", $html); // getting rid of absent plugin tags
-		
+
 		die(($preview ? $CON : "") . $html);
 	}
-	
+
 	function formatBegin() {
 		global $HEAD;
-	
+
 		$HEAD .= '<script type="text/javascript" src="plugins/AjaxEditing/ajax.js"></script>';
 	}
 }

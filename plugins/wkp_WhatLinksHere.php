@@ -1,10 +1,11 @@
-<?php 
+<?php
 class WhatLinksHere {
 	var $desc = array(
 		array("WhatLinksHere plugin", "gives list of pages linking to selected article. Function is triggered by action=\"whatlinkshere\" with properly set parameter page.")
 	);
 
-	function action($a) {
+	function action($a)
+	{
 		global $TITLE, $page, $PAGES_DIR, $CON;
 
 		if($a == "whatlinkshere") {
@@ -38,10 +39,11 @@ class WhatLinksHere {
 			return false;
 	}
 
-	function template() {
+	function template()
+	{
 		global $html, $page;
 
-		if(!empty($page))		
+		if(!empty($page))
 			$html = template_replace("plugin:WHAT_LINKS_HERE", "<a href=\"$self?action=whatlinkshere&amp;page=".urlencode($page)."\" rel=\"nofollow\">What links here?</a>", $html);
 	}
 }

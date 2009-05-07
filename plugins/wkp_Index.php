@@ -1,9 +1,9 @@
-<?php 
+<?php
 /*
 	Written by Swen Wetzel <xanatoswetzel@web.de> for LionWiki, minor changes made by Adam Zivner
-	
+
 	With {INDEX_COMMA} or {INDEX_LIST}, you can insert list of all pages into the page.
-	
+
 	{INDEX_COMMA} gives you comma separated list, {INDEX_LIST} <ul> HTML list
 */
 
@@ -38,7 +38,7 @@ class Index
 
 		return $ret;
 	}
-	
+
 	function formatBegin() {
 		global $CON;
 

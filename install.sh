@@ -6,7 +6,7 @@
 
 if ! [ -d "pages" ]; then
 	mkdir "pages"
-	
+
 	echo "Core: Directory 'pages' was created and set to 777 permissions."
 fi
 
@@ -22,7 +22,7 @@ chmod -R 777 "history"
 
 if [ -d "plugins" ]; then
 	FILES=`ls plugins`
-	
+
 	for file in $FILES
 	do
 		if [ $file = "wkp_Admin.php" ]; then

@@ -21,15 +21,15 @@ class Captcha
 
 	function Captcha()
 	{
-		global $LANG, $PLUGINS_DATA_DIR;
-	
-		$this->question_file = dirname(__FILE__) . "/" . $PLUGINS_DATA_DIR . "Captcha/";
-	
+		global $LANG, $PLUGINS_DIR;
+
+		$this->question_file = $PLUGINS_DIR . "Captcha/";
+
 		if(file_exists($this->question_file . $LANG . "_questions.txt"))
 			$this->question_file .= $LANG . "_questions.txt";
 		else
 			$this->question_file .= "en_questions.txt";
-		  
+
 		$this->cookie_password = md5($_SERVER["SCRIPT_FILENAME"]); // pseudo random string
 	}
 

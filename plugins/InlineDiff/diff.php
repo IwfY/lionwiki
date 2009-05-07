@@ -34,7 +34,7 @@ class Text_Diff {
     {
         return $this->_edits;
     }
-    
+
     /**
      * returns the number of new (added) lines in a given diff.
      * @return integer The number of new lines
@@ -50,7 +50,7 @@ class Text_Diff {
         }
         return $count;
     }
-    
+
     /**
      * Returns the number of deleted (removed) lines in a given diff.
      * @return integer The number of deleted lines

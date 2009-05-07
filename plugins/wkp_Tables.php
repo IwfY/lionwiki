@@ -1,8 +1,8 @@
 <?php
 /*
-  Tables - plugin providing flexible and powerful syntax for tables
-  
-  Programmed by TigerWiki and WiKiss programmers, thanks to them.
+	Tables - plugin providing flexible and powerful syntax for tables
+
+	Programmed by TigerWiki and WiKiss programmers, thanks to them.
 */
 
 class Tables {

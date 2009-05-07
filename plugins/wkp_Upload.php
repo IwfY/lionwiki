@@ -5,20 +5,23 @@
  */
 
 class Upload
-{	
+{
 	var $datadir;
-	
+
 	var $blacklist = array(".php", ".phtml", ".php3", ".php4", ".js", ".shtml", ".pl" ,".py", ".asp", ".jsp", ".sh", ".cgi"); // forbidden file extensions
-	
+
 	// permissions of uploaded files and directories. Leading zeroes are necessary!
 	var $chmod_dir = 0755;
 	var $chmod_file = 0644;
 
 	function Upload()
 	{
-		global $BASE_DIR, $self;
+		global $VAR_DIR, $self;
 
-		$this->datadir = $BASE_DIR . "data/";
+		$this->datadir = $VAR_DIR . "upload/";
+
+		if(!file_exists($this->datadir))
+			mkdir(rtrim($this->datadir, "/"), 0777);
 
 		$this->localize();
 
@@ -171,7 +174,7 @@ class Upload
 
 		$html = template_replace("plugin:UPLOAD", "<a href=\"$self?action=upload\" rel=\"nofollow\">Upload</a>", $html);
 	}
-  
+
 	// Localization strings
 
 	var $cs_strings = array(
@@ -242,7 +245,7 @@ class Upload
 		array('TP_NO_DATA_DIR', 'El directorio de ficheros no existe.'),
 		array('TP_NO_EXECUTABLE', 'No está permitido subir ficheros ejecutables.')
 	);
-	
+
 	var $fr_strings = array(
 		array("TP_FILE_UPLOAD", "File upload"),
 		array("TP_FILE_NAME", "Nom du fichier/dossier"),

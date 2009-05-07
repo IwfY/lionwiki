@@ -30,7 +30,7 @@ class Tags
 
 	function Tags()
 	{
-		$this->tagfile = dirname(__FILE__) . "/data/tags.txt";
+		$this->tagfile =  $GLOBALS["PLUGINS_DATA_DIR"] . "tags.txt";
 	}
 
 	// returns tag array of given page

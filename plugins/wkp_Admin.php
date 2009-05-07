@@ -5,16 +5,16 @@ class Admin
 	var $PASSWORD = ""; // either $PASSWORD or $PASSWORD_MD5 must be set
 	var $PASSWORD_MD5 = "5a2531e3c240e8137dc47b1a2d8a0914"; // if set, $PASSWORD is ignored
 	var $dir;
-	
+
 	function Admin()
 	{
 		global $PLUGINS_DATA_DIR, $self;
-	
+
 		if(empty($this->PASSWORD_MD5) && !empty($this->PASSWORD))
 			$this->PASSWORD_MD5 = md5($this->PASSWORD);
 
-		$this->dir = dirname(__FILE__) . "/data/";
-		
+		$this->dir = $GLOBALS["PLUGINS_DATA_DIR"];
+
 		$this->desc = array(
 			array("Admin plugin", "provides advanced administration functions protected by password"),
 			array(
@@ -25,7 +25,7 @@ class Admin
 			)
 		);
 	}
-	
+
 	// just for printing "menu"
 	function getUL($arr)
 	{
@@ -39,10 +39,10 @@ class Admin
 
 		return $ret;
 	}
-	
+
 	// common function used by all "filters"
 	function fileForm($action, $dataname, $comment)
-	{	
+	{
 		$filename = $this->dir . $dataname . ".txt";
 
 		$ret = "";
@@ -60,7 +60,7 @@ class Admin
 		else if(!empty($_POST["action"]))
 			if($f = fopen($filename, "wb")) {
 				fwrite($f, $_POST["$dataname"]);
-				
+
 				fclose($f);
 			}
 
@@ -90,16 +90,16 @@ Password: <input type=\"password\" name=\"sc\" />
 				$CON = "<div class=\"error\">Plugin data directory doesn't exist. Create please $this->dir and set access permissions to 777.</div>";
 				return true;
 			}
-			
+
 			$CON = "<ul>\n" . $this->getUL($this->desc) . "</ul>\n";
 		}
 
 		if($action == "admin-blockip") {
 			$TITLE = "IP blocking";
 			$comment = "List of blocked IPs. One IP per line, everything behing IP until the end of line is ignored (useful for comments, e.g. reason for block).";
-			
+
 			$CON .= $this->fileForm($action, "Admin_blockedips", $comment);
-			
+
 			return true;
 		}
 		elseif($action == "admin-blacklist") {
@@ -107,7 +107,7 @@ Password: <input type=\"password\" name=\"sc\" />
 			$comment = "List of forbidden words. One word per line, can also be (perl) regular expression (omit both //).";
 
 			$CON .= $this->fileForm($action, "Admin_blacklist", $comment);
-			
+
 			return true;
 		}
 		elseif($action == "admin-pages") {
@@ -115,7 +115,7 @@ Password: <input type=\"password\" name=\"sc\" />
 			$comment = "List of nonwritable pages, one page per line.";
 
 			$CON .= $this->fileForm($action, "Admin_pages", $comment);
-			
+
 			return true;
 		}
 		elseif($action == "admin-plugins") {
@@ -126,20 +126,20 @@ Password: <input type=\"password\" name=\"sc\" />
 
 			return true;
 		}
-		
+
 		return false;
 	}
-	
+
 	// is user IP blocked?
 	function checkIPs()
 	{
 		global $error;
-	
+
 		$blockedips = @file_get_contents($this->dir . "Admin_blockedips.txt");
 
 		if(!empty($blockedips)) {
 			$blockedips = str_replace("\r", "\n", $blockedips); // unifying newlines
-			
+
 			$arr = explode("\n", $blockedips);
 
 			foreach($arr as $line)
@@ -149,15 +149,15 @@ Password: <input type=\"password\" name=\"sc\" />
 					return false;
 			}
 		}
-		
+
 		return true;
 	}
-	
+
 	// are there any occurences of forbidden expressions in content?
 	function checkBlacklist()
 	{
 		global $content, $error;
-	
+
 		$blacklist = @file_get_contents($this->dir . "Admin_blacklist.txt");
 
 		if(!empty($blacklist)) {
@@ -175,7 +175,7 @@ Password: <input type=\"password\" name=\"sc\" />
 				}
 			}
 		}
-		
+
 		return true;
 	}
 
@@ -197,7 +197,7 @@ Password: <input type=\"password\" name=\"sc\" />
 			$PASSWORD_MD5 = "2";
 		}
 	}
-	
+
 	// check if page is not set as "read-only"
 	function checkPages($echo = true)
 	{
@@ -207,7 +207,7 @@ Password: <input type=\"password\" name=\"sc\" />
 
 		if(!empty($pages)) {
 			$pages = str_replace("\r", "\n", $pages); // unifying newlines
-			
+
 			$arr = explode("\n", $pages);
 
 			foreach($arr as $line)
@@ -222,10 +222,10 @@ Password: <input type=\"password\" name=\"sc\" />
 					}
 			}
 		}
-		
+
 		return true;
 	}
-	
+
 	// is it ok for all filters to save the page?
 	function writingPage()
 	{
@@ -237,41 +237,41 @@ Password: <input type=\"password\" name=\"sc\" />
 
 		return true;
 	}
-	
+
 	// find out if page is editable by user
 	function formatBegin()
 	{
 		global $editable, $error;
-		
+
 		$orig_error = $error;
-		
+
 		$editable = $this->checkPages() && $this->checkIPs();
-		
+
 		$error = $orig_error; // for this we don't need error messages
 
 		return true;
 	}
-	
+
 	// Deactivate plugins
 	function pluginsLoaded()
 	{
 		global $plugins;
-	
+
 		$fc = @file_get_contents($this->dir . "Admin_plugins.txt");
 
 		if(!empty($fc)) {
 			$fc = str_replace("\r", "\n", $fc); // unifying newlines
-		
+
 			$list = explode("\n", $fc);
-			
+
 			$count = count($plugins);
-			
+
 			$i = 0;
-			
+
 			while($i < $count)
 				if(in_array(get_class($plugins[$i]), $list)) {
 					$plugins[$i] = $plugins[$count - 1];
-					
+
 					array_pop($plugins);
 					$count--;
 				}
@@ -281,16 +281,16 @@ Password: <input type=\"password\" name=\"sc\" />
 	}
 
 	function template()
-	{		
+	{
 		global $html;
-	
+
 		$tpl_subs = array(
 			array("plugin:ADMIN_BLOCKED_IPS", "<a href=\"$self?action=admin-blockip\" rel=\"nofollow\">Blocked IPs</a>"),
 			array("plugin:ADMIN_BLACKLIST", "<a href=\"$self?action=admin-blacklist\" rel=\"nofollow\">Blacklist</a>"),
 			array("plugin:ADMIN_READONLY_PAGES", "<a href=\"$self?action=admin-pages\" rel=\"nofollow\">Read-only pages</a>"),
 			array("plugin:ADMIN_DISABLED_PLUGINS", "<a href=\"$self?action=admin-plugins\" rel=\"nofollow\">Disabled plugins</a>")
 		);
-		
+
 		foreach($tpl_subs as $subs) // substituting values
 			$html = preg_replace("/\{([^}]* )?$subs[0]( [^}]*)?\}/U", "$1$subs[1]$2", $html);
 	}
