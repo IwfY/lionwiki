@@ -1,54 +1,47 @@
 <?php 
-
-class WhatLinksHere
-{
-  var $desc = array(
+class WhatLinksHere {
+	var $desc = array(
 		array("WhatLinksHere plugin", "gives list of pages linking to selected article. Function is triggered by action=\"whatlinkshere\" with properly set parameter page.")
 	);
 
-	function action($a)
-	{
-	  global $TITLE, $page, $PAGES_DIR, $CON;
+	function action($a) {
+		global $TITLE, $page, $PAGES_DIR, $CON;
 
-	  if($a == "whatlinkshere")
-	  {
-	    $CON = "";
-	    
-	    $editable = false;
-    	$dir = opendir(getcwd() . "/$PAGES_DIR");
+		if($a == "whatlinkshere") {
+			$CON = "";
 
-    	while($file = readdir($dir)) {
-	      if(preg_match("/\.txt$/", $file)) {
-	        @$con = file_get_contents($PAGES_DIR . $file);
-	        $query = preg_quote($page);
+			$editable = false;
+			$dir = opendir(getcwd() . "/$PAGES_DIR");
 
-	        if(@preg_match("/\[([^|\]]+\|)? *$query(#[^\]]+)? *\]/i", $con))
-	          $files[] = substr($file, 0, strlen($file) - 4);
-	      }
-	    }
-	    
-	    if(is_array($files)) {
-	      sort($files);
+			while($file = readdir($dir)) {
+				if(preg_match("/\.txt$/", $file)) {
+					@$con = file_get_contents($PAGES_DIR . $file);
+					$query = preg_quote($page);
 
-	      foreach($files as $file)
-	        $CON .= "<a href=\"$self?page=" . $file . "\">" . $file . "</a><br />";
-	    }
+					if(@preg_match("/\[([^|\]]+\|)? *$query(#[^\]]+)? *\]/i", $con))
+					$files[] = substr($file, 0, strlen($file) - 4);
+				}
+			}
 
-	    $TITLE = "What links to $page? (" . count($files) . ")";
-	     
-	    return true;
-	  }
-	  else
-	  	return false;
+			if(is_array($files)) {
+				sort($files);
+
+				foreach($files as $file)
+				$CON .= "<a href=\"$self?page=" . $file . "\">" . $file . "</a><br />";
+			}
+
+			$TITLE = "What links to $page? (" . count($files) . ")";
+
+			return true;
+		}
+		else
+			return false;
 	}
 
-	function template()
-	{
-	  global $html, $page;
+	function template() {
+		global $html, $page;
 
 		if(!empty($page))		
 			$html = template_replace("plugin:WHAT_LINKS_HERE", "<a href=\"$self?action=whatlinkshere&amp;page=".urlencode($page)."\" rel=\"nofollow\">What links here?</a>", $html);
 	}
 }
-
-?>

@@ -12,7 +12,7 @@
 
 class PageVersions
 {
-  var $desc = array(
+	var $desc = array(
 		array("PageVersions", "provides list of language versions of current article.")
 	);
 	
@@ -27,6 +27,7 @@ class PageVersions
 		"de-ch" => "Schweizerdeutsch",
 		"da" => "Dansk",
 		"en" => "English",
+		"eo" => "Esperanto",
 		"es" => "Español",
 		"fi" => "Eesti",
 		"fr" => "Français",
@@ -43,25 +44,24 @@ class PageVersions
 		"sv" => "Svenska"
 	);
 
-	function template()
-	{
-	  global $CON, $html, $page, $PAGES_DIR, $action;
-	  
-	  if(!empty($action))
-	  	return;
-	  
-	  if(($pos = strpos($page, ".")) !== false)
-	  	$p = preg_quote(substr($page, 0, $pos));
-	  else
-	  	$p = preg_quote($page);
+	function template() {
+		global $CON, $html, $page, $PAGES_DIR, $action;
+
+		if(!empty($action))
+			return;
+
+		if(($pos = strpos($page, ".")) !== false)
+			$p = preg_quote(substr($page, 0, $pos));
+		else
+			$p = preg_quote($page);
 	  	
-	  $versions = array();
-	  
-	  if($dir = @opendir($PAGES_DIR))
+		$versions = array();
+
+		if($dir = @opendir($PAGES_DIR))
 			while($file = readdir($dir))
-				if(preg_match("/$p\.([a-z]+)\.txt|$p\.txt/", $file, $match))
+				if(preg_match("/$p\.([a-z\-]+)\.txt|$p\.txt/", $file, $match))
 					$versions[isset($match[1]) ? $match[1] : $this->default_lang] = $p;
-					
+
 		ksort($versions);
 		
 		if(count($versions) == 1)
@@ -74,15 +74,14 @@ class PageVersions
 		
 		if(!empty($arr_versions))
 			$ul_list = "<ul class=\"subpage\"><li>\n" . implode("</li><li>\n", $arr_versions) . "</li></ul>";
-					
+
 		$CON = template_replace("VERSIONS", $ul_list, $CON);
 		$html = template_replace("plugin:VERSIONS", $ul_list, $html);
 		
 		if(!empty($arr_versions))
 			$p_list = implode(", ", $arr_versions);
-			
+
 		$CON = template_replace("VERSIONS_LIST", $p_list, $CON);
 		$html = template_replace("plugin:VERSIONS_LIST", $p_list, $html);
 	}
 }
-?>

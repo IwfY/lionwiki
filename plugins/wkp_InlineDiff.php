@@ -1,13 +1,9 @@
 <?php
-/*
-	List plugins lists all active plugins and presents functions they offer. It creates
-	unordered (possibly nested) list of plugins and their functions.
-	
-	It is activated by ?action=listplugins
-*/
 
-
-@error_reporting(E_ERROR | E_WARNING | E_PARSE);
+/**
+ * This plugin works as a middle-man between LionWiki and stripped down Text_Diff
+ * package from PEAR. Thanks to its authors, it works great!
+ */
 
 class InlineDiff
 {

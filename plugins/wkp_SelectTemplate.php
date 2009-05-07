@@ -2,9 +2,9 @@
 
 class SelectTemplate
 {
-  var $desc = array(
+	var $desc = array(
 		array("SelectTemplate", "creates select box in which you can choose template.")
-		);
+	);
 
 	var $tpls = array(
 		"template_dandelion.html" => "Dandelion",
@@ -16,7 +16,7 @@ class SelectTemplate
 
 	function template()
 	{
-	  global $html, $page, $action, $TEMPLATE;
+		global $html, $page, $action, $TEMPLATE;
 		
 		$select = "
 <form action=\"$self\" method=\"get\">
@@ -51,4 +51,3 @@ class SelectTemplate
 			$TEMPLATE = $_COOKIE["LW_TEMPLATE"];
 	}
 }
-?>

@@ -7,7 +7,7 @@
 
 class AjaxEditing
 {
-  var $desc = array(
+	var $desc = array(
 		array("AjaxEditing", "Guess what. AJAX editing :)")
 	);
 	
@@ -100,4 +100,3 @@ class AjaxEditing
 		$HEAD .= '<script type="text/javascript" src="plugins/AjaxEditing/ajax.js"></script>';
 	}
 }
-?>

@@ -13,7 +13,7 @@ class Admin
 		if(empty($this->PASSWORD_MD5) && !empty($this->PASSWORD))
 			$this->PASSWORD_MD5 = md5($this->PASSWORD);
 
-		$this->dir = $PLUGINS_DATA_DIR;
+		$this->dir = dirname(__FILE__) . "/data/";
 		
 		$this->desc = array(
 			array("Admin plugin", "provides advanced administration functions protected by password"),
@@ -295,4 +295,3 @@ Password: <input type=\"password\" name=\"sc\" />
 			$html = preg_replace("/\{([^}]* )?$subs[0]( [^}]*)?\}/U", "$1$subs[1]$2", $html);
 	}
 }
-?>

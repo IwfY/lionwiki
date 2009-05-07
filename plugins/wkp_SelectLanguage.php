@@ -1,9 +1,9 @@
 <?php
 class SelectLanguage
 {
-  var $desc = array(
+	var $desc = array(
 		array("SelectLanguage", "creates select box in which you can choose language.")
-		);
+	);
 
 	var $lang_names = array(
 		"ar" => "العربية",
@@ -14,6 +14,7 @@ class SelectLanguage
 		"de-ch" => "Schweizerdeutsch",
 		"da" => "Dansk",
 		"en" => "English",
+		"eo" => "Esperanto",
 		"es" => "Español",
 		"fi" => "Eesti",
 		"fr" => "Français",
@@ -30,17 +31,16 @@ class SelectLanguage
 		"sv" => "Svenska"
 	);
 
-	function template()
-	{
-	  global $html, $LANG, $LANG_DIR, $CON, $page_nolang, $action;
-	  
-	  $langs = array();
-	  
-	  if(is_dir($LANG_DIR) && ($dir = opendir($LANG_DIR))) // common plugins
-	    while(($file = readdir($dir)) !== false)
-	      if(!is_dir($LANG_DIR . $file))
-	      	$langs[] = basename($file, ".php");
-	      
+	function template() {
+		global $html, $LANG, $LANG_DIR, $CON, $page_nolang, $action;
+
+		$langs = array();
+
+		if(is_dir($LANG_DIR) && ($dir = opendir($LANG_DIR))) // common plugins
+			while(($file = readdir($dir)) !== false)
+				if(!is_dir($LANG_DIR . $file))
+					$langs[] = basename($file, ".php");
+
 		sort($langs);
 		
 		$select = "
@@ -62,4 +62,3 @@ class SelectLanguage
 		$CON = str_replace("{SELECT_LANGUAGE}", $select, $CON);
 	}
 }
-?>

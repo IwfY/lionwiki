@@ -65,4 +65,3 @@ class Script
 			$CON = preg_replace_callback('/([^\^])\{script(?: +src=\"((?:.|\n)*?)\")?(?: +label=\"((?:.|\n)*?)\")?(?: +title=\"((?:.|\\n)*?)\")?(?: +key=\"((?:.|\n)*?)\")?( +show)? *\}((?:.|\n)*?)\{\/script\}/', "scriptHandler", $CON);
 	}
 }
-?>

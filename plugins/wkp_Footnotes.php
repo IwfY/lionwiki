@@ -7,7 +7,7 @@
  */ 
 
 class Footnotes {
-  var $desc = array(
+	var $desc = array(
 		array("Footnotes", "")
 	);
 	
@@ -15,9 +15,9 @@ class Footnotes {
 		
 	function footnote($occurence)
 	{
-		$this->ft[]	= $occurence[1];
+		$this->ft[] = $occurence[1];
 		
-		return "<sup><a href=\"#footnote_" . count($this->ft) . "\">[" . count($this->ft) . "]</a></sup>";
+		return "<sup><a name=\"ft_up_" . count($this->ft) . "\" href=\"#ft_down_" . count($this->ft) . "\">[" . count($this->ft) . "]</a></sup>";
 	}
 		
 	function formatEnd()
@@ -34,11 +34,10 @@ class Footnotes {
 		$footnotes = array("<ol id=\"footnotes\">");
 		
 		foreach($this->ft as $idx => $f)
-			$footnotes[] = "<li><a name=\"footnote_" . ($idx + 1) . "\">&nbsp;</a>$f</li>";
+			$footnotes[] = "<li><a name=\"ft_down_" . ($idx + 1) . "\" href=\"#ft_up_" . ($idx + 1) . "\">&uarr;</a>$f</li>";
 			
 		$footnotes[] = "</ol>";
 			
 		$CON = template_replace("plugin:FOOT_NOTES",  implode("\n", $footnotes), $CON);
 	}
 }
-?>

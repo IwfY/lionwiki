@@ -1,16 +1,11 @@
 <?php
-/** File upload plugin for Wikiss, adjusted and slightly improved for LionWiki
+/*
+ * File upload plugin for Wikiss, adjusted and slightly improved for LionWiki
  * access with : ?action=upload
  */
 
 class Upload
-{
-  /** Check/corect path validity
-   * remove .., ^/, //, /$ and decode path
-   * input: path
-   * return corrected path
-   */
-	
+{	
 	var $datadir;
 	
 	var $blacklist = array(".php", ".phtml", ".php3", ".php4", ".js", ".shtml", ".pl" ,".py", ".asp", ".jsp", ".sh", ".cgi"); // forbidden file extensions
@@ -19,53 +14,52 @@ class Upload
 	var $chmod_dir = 0755;
 	var $chmod_file = 0644;
 
-  function Upload()
-  {
-  	global $BASE_DIR, $self;
-  
-  	$this->datadir = $BASE_DIR . "data/";
-  
-    $this->localize();
-    
-    $this->desc = array(
+	function Upload()
+	{
+		global $BASE_DIR, $self;
+
+		$this->datadir = $BASE_DIR . "data/";
+
+		$this->localize();
+
+		$this->desc = array(
 			array("<a href=\"$self?action=upload\" rel=\"nofollow\">Upload plugin</a>", "provides uploading files to the server.")
 		);
-  }
+	}
 
-  function cleanInput($input)
-  {
-    return trim(preg_replace('/(\.\.|^\/|\/\/)/', '', urldecode($input)), '/');
-  }
+	function cleanInput($input)
+	{
+		return trim(preg_replace('/(\.\.|^\/|\/\/)/', '', urldecode($input)), '/');
+	}
 
-  function action($action)
-  {
-    global $CON, $TITLE, $editable, $T_PASSWORD, $TE_WRONG_PASSWORD, $error;
+	function action($action) {
+		global $CON, $TITLE, $editable, $T_PASSWORD, $TE_WRONG_PASSWORD, $error;
 
-    $curdir = "";
-    
-    if($action == "upload") {
-      $CON = "";
-      
-      $TITLE = $this->TP_FILE_UPLOAD;
+		$curdir = "";
 
-      if(is_dir($this->datadir)) {
-        $curdir = $this->cleanInput($_REQUEST['curdir']);
+		if($action == "upload") {
+			$CON = "";
 
-        if(!preg_match('/^' . preg_quote(trim($this->datadir, "/"), "/") . "/", $curdir)) // curdir must be data dir subdirectory
-          $curdir = trim($this->datadir, '/');
+			$TITLE = $this->TP_FILE_UPLOAD;
 
-        if(authentified()) {
-          if(!empty($_POST['dir2create']))
-            @mkdir($curdir . '/' . $this->cleanInput($_POST['dir2create']), $this->chmod_dir);
-          elseif(!empty($_FILES['file']['tmp_name'])) { // anything to upload?
-            if(is_uploaded_file($_FILES['file']['tmp_name'])) {
+			if(is_dir($this->datadir)) {
+				$curdir = $this->cleanInput($_REQUEST['curdir']);
+
+				if(!preg_match('/^' . preg_quote(trim($this->datadir, "/"), "/") . "/", $curdir)) // curdir must be data dir subdirectory
+					$curdir = trim($this->datadir, '/');
+
+				if(authentified()) {
+					if(!empty($_POST['dir2create']))
+						@mkdir($curdir . '/' . $this->cleanInput($_POST['dir2create']), $this->chmod_dir);
+					elseif(!empty($_FILES['file']['tmp_name'])) { // anything to upload?
+						if(is_uploaded_file($_FILES['file']['tmp_name'])) {
 							foreach($this->blacklist as $file) // executable files not allowed
-								if(preg_match("/" . preg_quote($file) . "$/i", $_FILES['file']['name'])) {  
+								if(preg_match("/" . preg_quote($file) . "$/i", $_FILES['file']['name'])) {
 									$error .= $this->TP_NO_EXECUTABLE;
 
 									break;
-							}
-							
+								}
+
 							if(!strcasecmp($_FILES['file']['name'], ".htaccess"))
 								$error .= $this->TP_NO_EXECUTABLE;
 
@@ -73,114 +67,114 @@ class Upload
 								@move_uploaded_file($_FILES['file']['tmp_name'], $curdir . '/' . $_FILES['file']['name']);
 								@chmod($curdir . '/' . $_FILES['file']['name'], $this->chmod_file);
 							}
-            }
-          } elseif($_FILES['file']['error'] != UPLOAD_ERR_OK)
-            $error = "$this->TP_ERROR_UPLOADING ($_FILES[file][error])";
+						}
+					} elseif($_FILES['file']['error'] != UPLOAD_ERR_OK)
+						$error = "$this->TP_ERROR_UPLOADING ($_FILES[file][error])";
 
-          if(isset($_GET['del'])) { // delete file/directory
-            $file = $this->cleanInput($_GET['del']);
+					if(isset($_GET['del'])) { // delete file/directory
+						$file = $this->cleanInput($_GET['del']);
 
 						$ret = is_dir($file) ? @rmdir($file) : @unlink($file);
-          }
-        } elseif($_SERVER['REQUEST_METHOD'] == 'POST')
-          $error = $TE_WRONG_PASSWORD;
+					}
+				} elseif($_SERVER['REQUEST_METHOD'] == 'POST')
+					$error = $TE_WRONG_PASSWORD;
 
-        // list of files
-        if($opening_dir = @opendir($curdir)) {
-          $CON .= '<h2>' . $this->TP_DIRECTORY . " " . $curdir . '</h2><table id="fileTable" style="min-width : 600px;"><col span="2" style="color : red;" /><col /><col style="text-align : right;" /><col style="text-align : center;" /><tr><th>' . $this->TP_FILE_NAME . '</th><th>' . $this->TP_FILE_TYPE . '</th><th>' . $this->TP_FILE_SIZE . '</th><th>' . $this->TP_DELETE . '</th></tr>';
+				// list of files
+				if($opening_dir = @opendir($curdir)) {
+					$CON .= '<h2>' . $this->TP_DIRECTORY . " " . $curdir . '</h2><table id="fileTable" style="min-width : 600px;"><col span="2" style="color : red;" /><col /><col style="text-align : right;" /><col style="text-align : center;" /><tr><th>' . $this->TP_FILE_NAME . '</th><th>' . $this->TP_FILE_TYPE . '</th><th>' . $this->TP_FILE_SIZE . '</th><th>' . $this->TP_DELETE . '</th></tr>';
 
-          $files = array();
+					$files = array();
 
-          while($filename = @readdir($opening_dir)) // do not add link to parent of data_dir
-            if(strcasecmp($filename, '.htaccess') && $filename != '.' && ($filename != '..' || $curdir != trim($this->datadir, '/')))
-              $files[] = array($filename, is_dir($curdir . "/" . $filename));
+					while($filename = @readdir($opening_dir)) // do not add link to parent of data_dir
+						if(strcasecmp($filename, '.htaccess') && $filename != '.' && ($filename != '..' || $curdir != trim($this->datadir, '/')))
+							$files[] = array($filename, is_dir($curdir . "/" . $filename));
 
-          
-          function cmp_files($a, $b) // sort directories first, then files.
-          {
-            if($a[1] == $b[1])
-              return strcmp($a[0], $b[0]) < 0 ? -1 : 1;
-            else
-              return $b[1];
-          }
+
+					function cmp_files($a, $b) // sort directories first, then files.
+					{
+						if($a[1] == $b[1])
+							return strcmp($a[0], $b[0]) < 0 ? -1 : 1;
+						else
+							return $b[1];
+					}
 
 					if($files)
-            usort($files, "cmp_files");
+						usort($files, "cmp_files");
 
-          foreach($files as $file) {
-            if($file[0] == '..')
-              $path = substr($curdir, 0, strrpos($curdir, '/'));
-            else
-              $path = $curdir . '/' . $file[0];
+					foreach($files as $file) {
+						if($file[0] == '..')
+							$path = substr($curdir, 0, strrpos($curdir, '/'));
+						else
+							$path = $curdir . '/' . $file[0];
 
-            $CON .= "<tr>";
+						$CON .= "<tr>";
 
-            if(is_dir($path))
-              $CON = $CON . '<td><a href="'.$self.'?action=' . $action . '&curdir=' . urlencode($path) . '">[' . $file[0] . ']</a></td><td>' . $this->TP_DIRECTORY . '</td><td>-</td>';
-            else
-              $CON = $CON . '<td><a href="' . $path . '">' . $file[0] . '</a></td><td>' . $this->TP_FILE . '</td><td>'.@number_format(@filesize($path), 0, ".", " ") . ' B</td>';
+						if(is_dir($path))
+							$CON = $CON . '<td><a href="'.$self.'?action=' . $action . '&curdir=' . urlencode($path) . '">[' . $file[0] . ']</a></td><td>' . $this->TP_DIRECTORY . '</td><td>-</td>';
+						else
+							$CON = $CON . '<td><a href="' . $path . '">' . $file[0] . '</a></td><td>' . $this->TP_FILE . '</td><td>'.@number_format(@filesize($path), 0, ".", " ") . ' B</td>';
 
-            if((authentified()) && ($file[0] != '..'))
-              $CON .= '<td><a title="delete" href="'.$self.'?action=upload&del=' . urlencode($path) . "&curdir=" . urlencode($curdir) . '">&times;</a></td>';
-            else
-            	$CON .= "<td>&nbsp;</td>";
+						if((authentified()) && ($file[0] != '..'))
+							$CON .= '<td><a title="delete" href="'.$self.'?action=upload&del=' . urlencode($path) . "&curdir=" . urlencode($curdir) . '">&times;</a></td>';
+						else
+							$CON .= "<td>&nbsp;</td>";
 
-            $CON .= "</tr>\n";
-          }
+						$CON .= "</tr>\n";
+					}
 
-          $CON .= "</table>";
-        }
+					$CON .= "</table>";
+				}
 
-        $CON .= '
-<h2>Upload</h2>
-        
-<div id="upload-form">
-  <form method="post" action="'.$self.'?action=' . $action . '" enctype= "multipart/form-data">
-  <input type="hidden" name="curdir" value="' . $curdir . '" />
-';
-        $CON .= "$this->TP_FILE: <input type=\"file\" name=\"file\" />\n";
-        
-        if(!authentified())
-          $CON .= "$T_PASSWORD: <input type=\"password\" name=\"sc\" />\n";
-        
-        $CON .= "<input type=\"submit\" value=\"$this->TP_UPLOAD\" />";
-        
-        $CON .= "</form>";
-        
-        $CON .= "<p><em>$this->TP_MAXIMUM_SIZE_IS " . ini_get('upload_max_filesize') . "</em></p>";
-        
-        $CON .= '
-	<form method="post" action="'.$self.'?action=' . $action . '" enctype= "multipart/form-data">
-  <input type="hidden" name="curdir" value="' . $curdir . '" />';
-        
-        $CON .= "$this->TP_CREATE_DIRECTORY: <input type=\"text\" name=\"dir2create\" />\n";
+				$CON .= '
+	<h2>Upload</h2>
+
+	<div id="upload-form">
+	  <form method="post" action="'.$self.'?action=' . $action . '" enctype= "multipart/form-data">
+	  <input type="hidden" name="curdir" value="' . $curdir . '" />
+	';
+				$CON .= "$this->TP_FILE: <input type=\"file\" name=\"file\" />\n";
 
 				if(!authentified())
-          $CON .= "$T_PASSWORD: <input type=\"password\" name=\"sc\" />\n";
+					$CON .= "$T_PASSWORD: <input type=\"password\" name=\"sc\" />\n";
+
+				$CON .= "<input type=\"submit\" value=\"$this->TP_UPLOAD\" />";
+
+				$CON .= "</form>";
+
+				$CON .= "<p><em>$this->TP_MAXIMUM_SIZE_IS " . ini_get('upload_max_filesize') . "</em></p>";
+
+				$CON .= '
+		<form method="post" action="'.$self.'?action=' . $action . '" enctype= "multipart/form-data">
+	  <input type="hidden" name="curdir" value="' . $curdir . '" />';
+
+				$CON .= "$this->TP_CREATE_DIRECTORY: <input type=\"text\" name=\"dir2create\" />\n";
+
+				if(!authentified())
+					$CON .= "$T_PASSWORD: <input type=\"password\" name=\"sc\" />\n";
 
 				$CON .= "<input type=\"submit\" value=\"$this->TP_CREATE\" />";
-        
-        $CON .= "</form></div>";
 
-      } else
-        $CON = "<div class=\"error\">$this->TP_NO_DATA_DIR ($this->datadir).</div>";
+				$CON .= "</form></div>";
 
-      return true;
-    }
-    
-    return false;
-  }
-  
-  function template()
-  {				
-  	global $html;
-	  
+			} else
+				$CON = "<div class=\"error\">$this->TP_NO_DATA_DIR ($this->datadir).</div>";
+
+			return true;
+		}
+
+		return false;
+	}
+
+	function template()
+	{
+		global $html;
+
 		$html = template_replace("plugin:UPLOAD", "<a href=\"$self?action=upload\" rel=\"nofollow\">Upload</a>", $html);
 	}
   
-  // Localization strings
+	// Localization strings
 
-  var $cs_strings = array(
+	var $cs_strings = array(
 		array("TP_FILE_UPLOAD", "Upload souborů"),
 		array("TP_FILE_NAME", "Jméno souboru"),
 		array("TP_FILE_TYPE", "Typ souboru"),
@@ -198,7 +192,7 @@ class Upload
 	);
 
 
-  var $en_strings = array(
+	var $en_strings = array(
 		array("TP_FILE_UPLOAD", "File upload"),
 		array("TP_FILE_NAME", "File name"),
 		array("TP_FILE_TYPE", "Type"),
@@ -213,6 +207,40 @@ class Upload
 		array("TP_MAXIMUM_SIZE_IS", "Maximum size of uploaded file is"),
 		array("TP_NO_DATA_DIR", "Data directory doesn't exist"),
 		array("TP_NO_EXECUTABLE", "Upload of executable files is not permitted.")
+	);
+
+	var $eo_strings = array(
+		array('TP_FILE_UPLOAD', 'Alŝuti dosierojn'),
+		array('TP_FILE_NAME', 'Dosier-nomo'),
+		array('TP_FILE_TYPE', 'Speco'),
+		array('TP_FILE_SIZE', 'Grando'),
+		array('TP_DELETE', 'Forviŝi'),
+		array('TP_ERROR_UPLOADING', 'Okazis eraro dum la dosier-alŝuto.'),
+		array('TP_FILE', 'Dosiero'),
+		array('TP_DIRECTORY', 'Dosierujo'),
+		array('TP_CREATE_DIRECTORY', 'Krei dosierujon'),
+		array('TP_CREATE', 'Krei'),
+		array('TP_UPLOAD', 'Alŝuti'),
+		array('TP_MAXIMUM_SIZE_IS', 'La maksimuma grando por alŝuteblaj dosieroj estas'),
+		array('TP_NO_DATA_DIR', 'La dosierujo ne ekzistas.'),
+		array('TP_NO_EXECUTABLE', 'Estas malpermesite alŝuti programajn dosierojn.')
+	);
+
+	var $es_strings = array(
+		array('TP_FILE_UPLOAD', 'Subir ficheros'),
+		array('TP_FILE_NAME', 'Nombre'),
+		array('TP_FILE_TYPE', 'Tipo'),
+		array('TP_FILE_SIZE', 'Tamaño'),
+		array('TP_DELETE', 'Borrar'),
+		array('TP_ERROR_UPLOADING', 'Ocurrió un error durante la subida del fichero.'),
+		array('TP_FILE', 'Fichero'),
+		array('TP_DIRECTORY', 'Directorio'),
+		array('TP_CREATE_DIRECTORY', 'Crear directorio'),
+		array('TP_CREATE', 'Crear'),
+		array('TP_UPLOAD', 'Subir'),
+		array('TP_MAXIMUM_SIZE_IS', 'El tamaño máximo permitido para cada fichero es'),
+		array('TP_NO_DATA_DIR', 'El directorio de ficheros no existe.'),
+		array('TP_NO_EXECUTABLE', 'No está permitido subir ficheros ejecutables.')
 	);
 	
 	var $fr_strings = array(
@@ -231,16 +259,15 @@ class Upload
 		array("TP_NO_EXECUTABLE", "Le téléversement de fichiers éxécutables n'est pas autorisé.")
 	);
 
-  function localize()
-  {
-    global $LANG;
+	function localize() {
+		global $LANG;
 
-    foreach($this->en_strings as $str)
-      $this->$str[0] = $str[1];
+		foreach($this->en_strings as $str)
+			$this->$str[0] = $str[1];
 
-    if($LANG != "en" && isset($this->{$LANG . "_strings"}))
-      foreach($this->{$LANG . "_strings"} as $str)
-        $this->$str[0] = $str[1];
-  }
+		if($LANG != "en" && isset($this->{$LANG . "_strings"}))
+			foreach($this->{$LANG . "_strings"} as $str)
+				$this->$str[0] = $str[1];
+	}
 }
 ?>

@@ -14,7 +14,7 @@ var trigger_heading_doubleclick = 0; // doubleclick on heading triggers AJAX edi
 function ajaxEdit(ret)
 {
 	if(!ret)
-		var ret = window.event;
+		ret = window.event;
 		
 	var elem = (window.event) ? ret.srcElement : ret.target; // f*cking browser incompatibilities!
 	
@@ -72,7 +72,7 @@ function ajaxAction(action, obj)
 	xmlHttpPost("index.php?page=Main+page&action=" + action + "&ajax=1&par=" + par_id, 
 		{
 			"content": content,
-			"econfprot": 0,
+			"last_changed": 2000000000,
 			"esum": esum,
 			"sc": password,
 			"moveto": moveto,
@@ -191,33 +191,33 @@ function getElementsByClassName(classname, node) {
  */ 
 
 function xmlHttpPost(strURL, params, func) {
-  var xmlHttpReq = false;
+	var xmlHttpReq = false;
 	  
-  if(window.XMLHttpRequest) // Mozilla/Safari
-    xmlHttpReq = new XMLHttpRequest();
-  else if (window.ActiveXObject) // IE
-    xmlHttpReq = new ActiveXObject("Microsoft.XMLHTTP");
+	if(window.XMLHttpRequest) // Mozilla/Safari
+		xmlHttpReq = new XMLHttpRequest();
+	else if (window.ActiveXObject) // IE
+		xmlHttpReq = new ActiveXObject("Microsoft.XMLHTTP");
   
-  var arr_params = [];
+	var arr_params = [];
   
-  if(params.length != 0) {
-	  for(key in params)
-	  	arr_params.push(key + "=" + encodeURIComponent(params[key]));
+	if(params.length != 0) {
+		for(key in params)
+			arr_params.push(key + "=" + encodeURIComponent(params[key]));
 	  
-	  var str_params = arr_params.join("&");
-  }
-  else
-  	str_params = "";
+		var str_params = arr_params.join("&");
+	}
+	else
+		str_params = "";
   
-  xmlHttpReq.open('POST', strURL, true);
-  xmlHttpReq.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+	xmlHttpReq.open('POST', strURL, true);
+	xmlHttpReq.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 	xmlHttpReq.setRequestHeader("Content-length", str_params.length);
 	xmlHttpReq.setRequestHeader("Connection", "close");
   
 	xmlHttpReq.onreadystatechange = function() {
-    if(xmlHttpReq.readyState == 4)
-    	func(xmlHttpReq.responseText);
-  }
+		if(xmlHttpReq.readyState == 4)
+			func(xmlHttpReq.responseText);
+	}
 
-  xmlHttpReq.send(str_params);
+	xmlHttpReq.send(str_params);
 }

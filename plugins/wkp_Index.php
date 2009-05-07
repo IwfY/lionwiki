@@ -2,35 +2,34 @@
 /*
 	Written by Swen Wetzel <xanatoswetzel@web.de> for LionWiki, minor changes made by Adam Zivner
 	
-	With {plugin:INDEX_COMMA} or {plugin:INDEX_LIST}, you can insert list of all pages into the page.
+	With {INDEX_COMMA} or {INDEX_LIST}, you can insert list of all pages into the page.
 	
-	{plugin:INDEX_COMMA} gives you comma separated list, {plugin:INDEX_LIST} <ul> HTML list
+	{INDEX_COMMA} gives you comma separated list, {INDEX_LIST} <ul> HTML list
 */
 
 class Index
 {
-  var $desc = array(
+	var $desc = array(
 		array("Index plugin", "gives list of pages in the wiki.")
 	);
 
-	function pages_list($type)
-	{
-	  global $TITLE, $page, $PAGES_DIR;
+	function pages_list($type) {
+		global $TITLE, $page, $PAGES_DIR;
 
-    $list = array();
-    
-  	$dir = opendir(getcwd() . "/$PAGES_DIR");
+		$list = array();
 
-  	while($file = readdir($dir))
-      if(preg_match("/\.txt$/", $file))
-          $files[] = substr($file, 0, strlen($file) - 4);
-    
-    if(is_array($files)) {
-      sort($files);
+		$dir = opendir(getcwd() . "/$PAGES_DIR");
 
-      foreach($files as $file)
-        $list[] = "<a href=\"$self?page=" . $file . "\">" . $file . "</a>";
-    }
+		while($file = readdir($dir))
+			if(preg_match("/\.txt$/", $file))
+				$files[] = substr($file, 0, strlen($file) - 4);
+
+		if(is_array($files)) {
+			sort($files);
+
+			foreach($files as $file)
+				$list[] = "<a href=\"$self?page=" . $file . "\">" . $file . "</a>";
+		}
 
 		if($type == "comma")
 			$ret = implode(", ", $list);
@@ -40,12 +39,10 @@ class Index
 		return $ret;
 	}
 	
-	function formatBegin()
-  {
-    global $CON;
-    
-    $CON = template_replace("plugin:INDEX_COMMA", $this->pages_list("comma"), $CON);
-    $CON = template_replace("plugin:INDEX_LIST", $this->pages_list("list"), $CON);
-  }
+	function formatBegin() {
+		global $CON;
+
+		$CON = template_replace("INDEX_COMMA", $this->pages_list("comma"), $CON);
+		$CON = template_replace("INDEX_LIST", $this->pages_list("list"), $CON);
+	}
 }
-?>
