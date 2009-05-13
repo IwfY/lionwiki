@@ -14,7 +14,7 @@
 	// if not empty, $PASSWORD is ignored and $PASSWORD_MD5 is used instead
 	$PASSWORD_MD5 = "";
 
-	$TEMPLATE = "templates/template_dandelion.html";  // presentation template
+	$TEMPLATE = "templates/dandelion.html";  // presentation template
 
 	$USE_AUTOLANG = true; // should we try to detect language from browser?
 	$LANG = "en"; // language code you want to use, used only when $USE_AUTOLANG = false
@@ -65,7 +65,7 @@
 	$PLUGINS_DATA_DIR = $VAR_DIR . "plugins/";
 	$LANG_DIR = "lang/";
 
-	$WIKI_VERSION = "LionWiki 3.0";
+	$WIKI_VERSION = "LionWiki 3.0.1";
 
 	umask(0); // sets default mask
 
@@ -127,9 +127,6 @@
 			mkdir(rtrim($DIR, "/"), 0777);
 			$f = fopen($REAL_PATH . $DIR . ".htaccess", "w"); fwrite($f, "deny from all"); fclose($f);
 		}
-			
-	if($USE_HISTORY && !file_exists($HISTORY_DIR) && !mkdir(rtrim($HISTORY_DIR, "/")))
-		die("Can't create directory $HISTORY_DIR. Please create $HISTORY_DIR with 0777 rights or turn off history feature in config file. Turning off history now.");
 
 	if($_GET["erasecookie"]) // remove cookie without reloading
 		foreach($_COOKIE as $key => $value)
@@ -854,7 +851,7 @@
 	}
 
 	function authentified() {
-		global $PASSWORD_MD5, $sc;
+		global $PASSWORD_MD5, $PROTECTED_READ, $sc;
 
 		if(empty($PASSWORD_MD5)
 			|| !strcasecmp($_COOKIE['LW_AUT'], $PASSWORD_MD5)

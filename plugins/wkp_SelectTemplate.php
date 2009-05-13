@@ -7,11 +7,11 @@ class SelectTemplate
 	);
 
 	var $tpls = array(
-		"templates/template_dandelion.html" => "Dandelion",
-		"templates/template_red.html" => "Red panel",
-		"templates/template_minimal.html" => "Minimal",
-		"templates/template_terminal.html" => "Green terminal",
-		"templates/template_wikiss.html" => "WiKiss"
+		"templates/dandelion.html" => "Dandelion",
+		"templates/red.html" => "Red panel",
+		"templates/minimal.html" => "Minimal",
+		"templates/terminal.html" => "Green terminal",
+		"templates/wikiss.html" => "WiKiss"
 	);
 
 	function template()
