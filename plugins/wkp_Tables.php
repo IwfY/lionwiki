@@ -7,7 +7,7 @@
 
 class Tables {
 	var $desc = array(
-		array("Tables", "provides flexible and powerful syntax. Help how to use it is located <a href=\"http://lionwiki.0o.cz/?page=Plugin:Tables\">here</a>.")
+		array("Tables", "provides flexible and powerful syntax. Help how to use it is located <a href=\"http://lionwiki.0o.cz/index.php?page=UserGuide%3A+Tables+plugin\">here</a>.")
 	);
 
 	function table_style($s) {

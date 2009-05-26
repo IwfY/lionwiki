@@ -85,7 +85,7 @@ class RSS {
 	function template() {
 		global $HEAD;
 
-		$HEAD .= "\n<link rel=\"alternate\" type=\"application/rss+xml\" title=\"RSS\" href=\"rss.xml\" />\n";
+		$HEAD .= "\n<link rel=\"alternate\" type=\"application/rss+xml\" title=\"RSS\" href=\"var/rss.xml\" />\n";
 
 		return false;
 	}

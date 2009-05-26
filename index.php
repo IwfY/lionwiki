@@ -65,7 +65,7 @@
 	$PLUGINS_DATA_DIR = $VAR_DIR . "plugins/";
 	$LANG_DIR = "lang/";
 
-	$WIKI_VERSION = "LionWiki 3.0.1";
+	$WIKI_VERSION = "LionWiki 3.0.2";
 
 	umask(0); // sets default mask
 
@@ -216,7 +216,7 @@
 			if(!$file = @fopen($PAGES_DIR . $page . ".txt", "w"))
 				die("Could not write page $PAGES_DIR$page.txt!");
 
-			fputs($file, $content);
+			fwrite($file, $content, strlen($content));
 			fclose($file);
 
 			if($USE_HISTORY) { // let's archive previous revision
@@ -232,7 +232,7 @@
 				if(!$bak = @fopen($filename, "w"))
 					die("Could not write backup $filename of page!");
 
-				fwrite($bak, $content);
+				fwrite($bak, $content, strlen($content));
 				fclose($bak);
 
 				if($USE_META)
@@ -581,7 +581,7 @@
 
 		// Fixing crappy job of parsing *** and ###. 3 times for 3 levels.
 		for($i = 0; $i < 3; $i++)
-			$CON = preg_replace('/(<\/ol>\n<ol>|<\/ul>\n<ul>)/', "", $CON);
+			$CON = preg_replace('/(<\/ol>\n?<ol>|<\/ul>\n?<ul>)/', "", $CON);
 
 		// still fixing. Following three lines fix only XHTML validity
 		$CON = preg_replace('/<\/li><([uo])l>/', "<$1l>", $CON);
