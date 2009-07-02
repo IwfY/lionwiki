@@ -27,7 +27,7 @@ $USE_META = true; // use and create meta data. Small overhead, but edit summary 
 $USE_HISTORY = true; // If you don't want to keep history of pages, change to false
 
 $START_PAGE = "Main page"; // Which page should be default (start page)?
-$SYNTAX_PAGE = "Syntax reference"; // Which page contains help informations?
+$SYNTAX_PAGE = "http://lionwiki.0o.cz/?page=Syntax+reference";
 
 // END OF SETTINGS
 
@@ -489,10 +489,7 @@ if($action == "") { // substituting $CON to be viewed as HTML
 
 	$CON = preg_replace("/[^\^]<!--.*-->/U", "", $CON); // internal comments
 
-	while(($pos = strpos($CON, "^")) !== false && isset($CON[$pos + 1])) // escaping ^codes which protects them from substitution
-		$CON = str_replace("^" . $CON[$pos + 1], '&#'.ord($CON[$pos + 1]).";", $CON);
-
-	//$CON = preg_replace("/\^(.)/Umsie", "'&#'.ord('$1').';'", $CON);
+	$CON = preg_replace("/\^(.)/Umsie", "'&#'.ord('$1').';'", $CON);
 
 	$CON = str_replace("<", "&lt;", $CON);
 
@@ -710,12 +707,12 @@ $tpl_subs = array(
 	array("HEAD", $HEAD),
 	array("SEARCH_FORM", "<form action=\"$self\" method=\"get\" id=\"searchForm\"><span><input type=\"hidden\" name=\"action\" value=\"search\" /><input type=\"submit\" style=\"display:none;\" />"),
 	array("\/SEARCH_FORM", "</span></form>"),
-	array("SEARCH_INPUT", "<input type=\"text\" id=\"searchInput\" name=\"query\" value=\"" . htmlspecialchars($query) . "\" tabindex=\"1\" />"),
+	array("SEARCH_INPUT", "<input type=\"text\" id=\"searchInput\" name=\"query\" value=\"".htmlspecialchars($query)."\" tabindex=\"1\" />"),
 	array("SEARCH_SUBMIT", "<input class=\"submit\" type=\"submit\" value=\"$T_SEARCH\" />"),
-	array("HOME", "<a href=\"$self?page=" . urlencode($START_PAGE) . "\">$T_HOME</a>"),
+	array("HOME", "<a href=\"$self?page=".urlencode($START_PAGE)."\">$T_HOME</a>"),
 	array("RECENT_CHANGES", "<a href=\"$self?action=recent\">$T_RECENT_CHANGES</a>"),
 	array("ERROR",	$error),
-	array("HISTORY", !empty($page) ? "<a href=\"$self?page=" . urlencode($page) . "&amp;action=history\" rel=\"nofollow\">" . $T_HISTORY . "</a>" : ""),
+	array("HISTORY", !empty($page) ? "<a href=\"$self?page=".urlencode($page)."&amp;action=history\" rel=\"nofollow\">$T_HISTORY</a>" : ""),
 	array("PAGE_TITLE", htmlspecialchars($page_nolang == $START_PAGE ? $WIKI_TITLE : $TITLE)),
 	array("PAGE_TITLE_HEAD", htmlspecialchars($page_nolang == $START_PAGE ? "" : $TITLE)),
 	array("PAGE_URL", urlencode($page)),
@@ -730,7 +727,7 @@ $tpl_subs = array(
 	array("WIKI_VERSION", $WIKI_VERSION),
 	array("DATE", date($DATE_FORMAT, time() + $LOCAL_HOUR * 3600)),
 	array("IP", $_SERVER['REMOTE_ADDR']),
-	array("SYNTAX", $action == "edit" || $preview ? "<a href=\"$self?page=" . urlencode($SYNTAX_PAGE) . "\" rel=\"nofollow\">$T_SYNTAX</a>" : ""),
+	array("SYNTAX", $action == "edit" || $preview ? "<a href=\"$SYNTAX_PAGE\">$T_SYNTAX</a>" : ""),
 	array("SHOW_PAGE", $action == "edit" || $preview ?  "<a href=\"$self?page=".urlencode($page)."\">$T_SHOW_PAGE</a>" : ""),
 	array("COOKIE", '<a href="'.$self.'?page=' . urlencode($page) . '&amp;action='. urlencode($action) .'&amp;erasecookie=1" rel="nofollow">' . $T_ERASE_COOKIE . '</a>'),
 	array("CONTENT_FORM", $CON_FORM_BEGIN),
