@@ -3,7 +3,7 @@
 class Admin
 {
 	var $PASSWORD = ""; // either $PASSWORD or $PASSWORD_MD5 must be set
-	var $PASSWORD_MD5 = "5a2531e3c240e8137dc47b1a2d8a0914"; // if set, $PASSWORD is ignored
+	var $PASSWORD_MD5 = "hkjhlkjhlkjhlk"; // if set, $PASSWORD is ignored
 	var $dir;
 
 	function Admin()
