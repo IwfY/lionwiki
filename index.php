@@ -65,7 +65,7 @@ $PLUGINS_DIR = "plugins/";
 $PLUGINS_DATA_DIR = $VAR_DIR . "plugins/";
 $LANG_DIR = "lang/";
 
-$WIKI_VERSION = "LionWiki 3.0.3";
+$WIKI_VERSION = "LionWiki 3.0.4";
 
 umask(0); // sets default mask
 
@@ -164,6 +164,12 @@ $req_conv = array("action", "query", "sc", "content", "page", "moveto", "restore
 foreach($req_conv as $req) // export variables to main namespace
 	$$req = $_REQUEST[$req];
 
+$page = sanitizeFilename($page);
+$moveto = sanitizeFilename($moveto);
+$f1 = sanitizeFilename($f1);
+$f2 = sanitizeFilename($f2);
+$gtime = sanitizeFilename($gtime);
+
 if(!empty($preview)) {
 	$action = "edit";
 	$CON = $content;
@@ -255,10 +261,10 @@ else if($action == "save" && authentified()) { // do we have page to save?
 
 		if($moveto != $page && !empty($moveto)) {
 			if(!rename($PAGES_DIR . $page . ".txt", $PAGES_DIR . $moveto . ".txt"))
-				die("Moving page was not succesful! Page was not moved.");
+				die("Moving page was not successful! Page was not moved.");
 			else if(!rename($HISTORY_DIR . $page, $HISTORY_DIR . $moveto)) {
 				rename($PAGES_DIR . $moveto . ".txt", $PAGES_DIR . $page . ".txt"); // revert previous change
-				die("Moving history of the page was not succesful! Page was not moved.");
+				die("Moving history of the page was not successful! Page was not moved.");
 			}
 			else {
 				@touch($PAGES_DIR . $moveto . ".txt"); // moved page should be at the top of recent ch.
@@ -754,6 +760,17 @@ echo $html; // voila
 
 function template_replace($what, $subs, $where) { return preg_replace("/\{(([^}]*) )?$what( ([^}]*))?\}/U", empty($subs) ? "" : "\${2}".str_replace("$", "&#36;", trim($subs))."\${4}", $where); }
 function template_match($what, $where, &$dest) { return preg_match("/\{(([^}]*) )?$what( ([^}]*))?\}/U", $where, $dest); }
+
+function sanitizeFilename($filename)
+{
+	$ret = "";
+
+	for($i = 0, $c = strlen($filename); $i < $c; $i++)
+		if(!ctype_cntrl($filename[$i]))
+			$ret .= $filename[$i];
+
+	return trim(str_replace("..", "", $ret), "/");
+}
 
 function revTime($time) {
 	global $DATE_FORMAT, $LOCAL_HOUR;

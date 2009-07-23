@@ -1,14 +1,14 @@
 <?php
 /*
  * File upload plugin for Wikiss, adjusted and slightly improved for LionWiki
- * access with : ?action=upload
+ * access with: ?action=upload
  */
 
 class Upload
 {
 	var $datadir;
 
-	var $blacklist = array(".php", ".phtml", ".php3", ".php4", ".js", ".shtml", ".pl" ,".py", ".asp", ".jsp", ".sh", ".cgi"); // forbidden file extensions
+	var $blacklist = array(".php", ".phtml", ".php3", ".php4", ".js", ".shtml", ".pl" ,".py", ".asp", ".jsp", ".sh", ".cgi", ".htaccess"); // forbidden file extensions
 
 	// permissions of uploaded files and directories. Leading zeroes are necessary!
 	var $chmod_dir = 0755;
@@ -30,15 +30,9 @@ class Upload
 		);
 	}
 
-	function cleanInput($input)
+	function action($action)
 	{
-		return trim(preg_replace('/(\.\.|^\/|\/\/)/', '', urldecode($input)), '/');
-	}
-
-	function action($action) {
 		global $CON, $TITLE, $editable, $T_PASSWORD, $TE_WRONG_PASSWORD, $error;
-
-		$curdir = "";
 
 		if($action == "upload") {
 			$CON = "";
@@ -46,51 +40,48 @@ class Upload
 			$TITLE = $this->TP_FILE_UPLOAD;
 
 			if(is_dir($this->datadir)) {
-				$curdir = $this->cleanInput($_REQUEST['curdir']);
-
-				if(!preg_match('/^' . preg_quote(trim($this->datadir, "/"), "/") . "/", $curdir)) // curdir must be data dir subdirectory
-					$curdir = trim($this->datadir, '/');
+				$rel_dir = ltrim(sanitizeFilename($_REQUEST['curdir']), "/");
+				$abs_dir = $this->datadir . $rel_dir;
 
 				if(authentified()) {
 					if(!empty($_POST['dir2create']))
-						@mkdir($curdir . '/' . $this->cleanInput($_POST['dir2create']), $this->chmod_dir);
+						@mkdir($abs_dir . '/' . sanitizeFilename($_POST['dir2create']), $this->chmod_dir);
 					elseif(!empty($_FILES['file']['tmp_name'])) { // anything to upload?
 						if(is_uploaded_file($_FILES['file']['tmp_name'])) {
+							$filename = sanitizeFilename($_FILES['file']['name']);
+
 							foreach($this->blacklist as $file) // executable files not allowed
-								if(preg_match("/" . preg_quote($file) . "$/i", $_FILES['file']['name'])) {
+								if(preg_match("/" . preg_quote($file) . "$/i", $filename)) {
 									$error .= $this->TP_NO_EXECUTABLE;
 
 									break;
 								}
 
-							if(!strcasecmp($_FILES['file']['name'], ".htaccess"))
-								$error .= $this->TP_NO_EXECUTABLE;
-
 							if(empty($error)) {
-								@move_uploaded_file($_FILES['file']['tmp_name'], $curdir . '/' . $_FILES['file']['name']);
-								@chmod($curdir . '/' . $_FILES['file']['name'], $this->chmod_file);
+								@move_uploaded_file($_FILES['file']['tmp_name'], $abs_dir . '/' . $filename);
+								@chmod($abs_dir . '/' . $filename, $this->chmod_file);
 							}
 						}
 					} elseif($_FILES['file']['error'] != UPLOAD_ERR_OK)
 						$error = "$this->TP_ERROR_UPLOADING ($_FILES[file][error])";
 
 					if(isset($_GET['del'])) { // delete file/directory
-						$file = $this->cleanInput($_GET['del']);
+						$file = sanitizeFilename($_GET['del']);
 
-						$ret = is_dir($file) ? @rmdir($file) : @unlink($file);
+						$ret = is_dir($this->datadir . $file) ? @rmdir($this->datadir . $file) : @unlink($this->datadir . $file);
 					}
 				} elseif($_SERVER['REQUEST_METHOD'] == 'POST')
 					$error = $TE_WRONG_PASSWORD;
 
 				// list of files
-				if($opening_dir = @opendir($curdir)) {
-					$CON .= '<h2>' . $this->TP_DIRECTORY . " " . $curdir . '</h2><table id="fileTable" style="min-width : 600px;"><col span="2" style="color : red;" /><col /><col style="text-align : right;" /><col style="text-align : center;" /><tr><th>' . $this->TP_FILE_NAME . '</th><th>' . $this->TP_FILE_TYPE . '</th><th>' . $this->TP_FILE_SIZE . '</th><th>' . $this->TP_DELETE . '</th></tr>';
+				if($opening_dir = @opendir($abs_dir)) {
+					$CON .= '<h2>' . $this->TP_DIRECTORY . " " . $rel_dir . '</h2><table id="fileTable" style="min-width : 600px;"><col span="2" style="color : red;" /><col /><col style="text-align : right;" /><col style="text-align : center;" /><tr><th>' . $this->TP_FILE_NAME . '</th><th>' . $this->TP_FILE_TYPE . '</th><th>' . $this->TP_FILE_SIZE . '</th><th>' . $this->TP_DELETE . '</th></tr>';
 
 					$files = array();
 
 					while($filename = @readdir($opening_dir)) // do not add link to parent of data_dir
-						if(strcasecmp($filename, '.htaccess') && $filename != '.' && ($filename != '..' || $curdir != trim($this->datadir, '/')))
-							$files[] = array($filename, is_dir($curdir . "/" . $filename));
+						if(strcasecmp($filename, '.htaccess') && $filename != '.' && ($filename != '..' || $rel_dir != ""))
+							$files[] = array($filename, is_dir($abs_dir . "/" . $filename));
 
 
 					function cmp_files($a, $b) // sort directories first, then files.
@@ -106,19 +97,19 @@ class Upload
 
 					foreach($files as $file) {
 						if($file[0] == '..')
-							$path = substr($curdir, 0, strrpos($curdir, '/'));
+							$path = substr($rel_dir, 0, strrpos($rel_dir, '/'));
 						else
-							$path = $curdir . '/' . $file[0];
+							$path = (empty($rel_dir) ? '' : $rel_dir . '/') . $file[0];
 
 						$CON .= "<tr>";
 
-						if(is_dir($path))
+						if(is_dir($this->datadir . $path))
 							$CON = $CON . '<td><a href="'.$self.'?action=' . $action . '&curdir=' . urlencode($path) . '">[' . $file[0] . ']</a></td><td>' . $this->TP_DIRECTORY . '</td><td>-</td>';
 						else
-							$CON = $CON . '<td><a href="' . $path . '">' . $file[0] . '</a></td><td>' . $this->TP_FILE . '</td><td>'.@number_format(@filesize($path), 0, ".", " ") . ' B</td>';
+							$CON = $CON . '<td><a href="' . $this->datadir . $path . '">' . $file[0] . '</a></td><td>' . $this->TP_FILE . '</td><td>' . @number_format(@filesize($this->datadir . $path), 0, ".", " ") . ' B</td>';
 
 						if((authentified()) && ($file[0] != '..'))
-							$CON .= '<td><a title="delete" href="'.$self.'?action=upload&del=' . urlencode($path) . "&curdir=" . urlencode($curdir) . '">&times;</a></td>';
+							$CON .= '<td><a title="delete" href="'.$self.'?action=upload&del=' . urlencode($path) . "&curdir=" . urlencode($rel_dir) . '">&times;</a></td>';
 						else
 							$CON .= "<td>&nbsp;</td>";
 
@@ -133,7 +124,7 @@ class Upload
 
 	<div id="upload-form">
 	  <form method="post" action="'.$self.'?action=' . $action . '" enctype= "multipart/form-data">
-	  <input type="hidden" name="curdir" value="' . $curdir . '" />
+	  <input type="hidden" name="curdir" value="' . $rel_dir . '" />
 	';
 				$CON .= "$this->TP_FILE: <input type=\"file\" name=\"file\" />\n";
 
@@ -148,7 +139,7 @@ class Upload
 
 				$CON .= '
 		<form method="post" action="'.$self.'?action=' . $action . '" enctype= "multipart/form-data">
-	  <input type="hidden" name="curdir" value="' . $curdir . '" />';
+	  <input type="hidden" name="curdir" value="' . $rel_dir . '" />';
 
 				$CON .= "$this->TP_CREATE_DIRECTORY: <input type=\"text\" name=\"dir2create\" />\n";
 
@@ -262,7 +253,8 @@ class Upload
 		array("TP_NO_EXECUTABLE", "Le téléversement de fichiers éxécutables n'est pas autorisé.")
 	);
 
-	function localize() {
+	function localize()
+	{
 		global $LANG;
 
 		foreach($this->en_strings as $str)
