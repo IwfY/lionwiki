@@ -1,14 +1,16 @@
 <?php
 /*
-	PageVersions tries to find other versions of current page - usually language variants.
-
-	Example: "Syntax.en" and Syntax or "Syntax.en" and "Syntax.de" are language variants of the
-	same page.
-
-	Plugin supports both bulleted list of versions and simple comma separated list.
-
-	It can be used in both template ({plugin:VERSIONS} and {plugin:VERSIONS_LIST}) and in page content ({VERSIONS} and {VERSIONS_LIST})
-*/
+ * PageVersions is a LionWiki plugin which tries to find other language versions of current page.
+ *
+ * Example: "Syntax.en" and Syntax or "Syntax.en" and "Syntax.de" are language variants of the
+ * same page.
+ *
+ * Plugin supports both bulleted list of versions and simple comma separated list.
+ *
+ * It can be used in both template ({plugin:VERSIONS} and {plugin:VERSIONS_LIST}) and in page content ({VERSIONS} and {VERSIONS_LIST})
+ *
+ * (c) Adam Zivner 2008, 2009, adam.zivner@gmail.com, GPL'd
+ */
 
 class PageVersions
 {

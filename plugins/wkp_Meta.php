@@ -1,13 +1,15 @@
 <?php
 /*
-	Adds meta tags keyword and description to the head section of page. Simple stupid.
-	It can be used only in page content and not in templates because it wouldn't make sense.
-
-	Use syntax:
-
-	{description:This page is about cats and dogs}
-	{keywords:Cats, Dogs}
-*/
+ * Adds meta tags keyword and description to the head section of page. Simple stupid.
+ * It can be used only in page content and not in templates because it wouldn't make sense.
+ *
+ * Use syntax:
+ *
+ * {description:This page is about cats and dogs}
+ * {keywords:Cats, Dogs}
+ *
+ * (c) Adam Zivner 2008, 2009, <adam.zivner@gmail.com>. GPL'd
+ */
 
 class Meta
 {

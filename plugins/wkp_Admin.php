@@ -1,4 +1,13 @@
 <?php
+/*
+ * Admin plugin for LionWiki provides some sensitive, administrative features:
+ * - IP blocking (index.php?action=admin-blockip)
+ * - black list of forbidden words (index.php?action=admin-blacklist)
+ * - setting pages read only (index.php?action=admin-pages)
+ * - turning off plugins (index.php?action=admin-plugins)
+ *
+ * (c) Adam Zivner 2008, 2009, adam.zivner@gmail.com, GPL'd
+ */
 
 class Admin
 {

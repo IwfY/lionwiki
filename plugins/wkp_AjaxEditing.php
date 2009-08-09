@@ -2,7 +2,7 @@
 /**
  * AjaxEditing plugin for LionWiki, licensed under GNU/GPL
  *
- * (c) Adam Zivner 2009 <adam.zivner@gmail.com>
+ * (c) Adam Zivner 2009 adam.zivner@gmail.com, GPL'd
  */
 
 class AjaxEditing
@@ -25,7 +25,7 @@ class AjaxEditing
 
 	function formatFinished()
 	{
-		global $CON, $content, $self, $showsource, $page, $esum, $error, $preview, $par, $action;
+		global $CON, $content, $self, $showsource, $page, $esum, $error, $preview, $par, $action, $html;
 		global $T_PASSWORD, $T_MOVE_TEXT, $T_EDIT_SUMMARY, $T_PREVIEW, $T_DONE, $T_DISCARD_CHANGES;
 
 		if(!$_REQUEST["ajax"])
@@ -58,7 +58,7 @@ class AjaxEditing
 
 		$CON_FORM_END = "</form>";
 
-		$CON_TEXTAREA = "<textarea name=\"content\" class=\"ajaxContentTextarea\" cols=\"83\" rows=\"$rows\">" . htmlspecialchars($content ? $content : $CON) . "</textarea><input type=\"hidden\" id=\"ajaxPage\" name=\"page\" value=\"$page\" />";
+		$CON_TEXTAREA = "<textarea name=\"content\" class=\"ajaxContentTextarea contentTextarea\" cols=\"83\" rows=\"$rows\">" . htmlspecialchars($content ? $content : $CON) . "</textarea><input type=\"hidden\" id=\"ajaxPage\" name=\"page\" value=\"$page\" />";
 
 		if(!$showsource) {
 			$CON_SUBMIT = "<input class=\"submit ajaxContentSubmit\" onclick=\"ajaxAction('save', this);return false;\" type=\"submit\" value=\"$T_DONE\" />";

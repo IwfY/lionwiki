@@ -1,4 +1,16 @@
 <?php
+/*
+ * SelectTemplate plugin, (c) Adam Zivner, adam.zivner@gmail.com, GPL'd
+ *
+ * This plugin creates a select box with available templates.
+ *
+ * It is actually just an interface to built-in LionWiki function:
+ *
+ * index.php?page=Whatever&template=my_template_of_choice.html
+ *
+ * Because this plugin is not really useful, it may be removed from official
+ * distribution in future.
+ */
 
 class SelectTemplate
 {

@@ -1,4 +1,13 @@
 <?php
+/*
+ * RSS plugin for LionWiki, (c) Adam Zivner, adam.zivner@gmail.com, GPL'd
+ * 
+ * Plugin produces RSS feed of all changes of all pages in a wiki.
+ * Feed is composed of a diffs. It's default location is in var/rss.xml
+ * 
+ * Although it is based on original WiKiss code, it is almost completely
+ * rewritten.
+ */
 
 class RSS {
 	var $desc = array(
@@ -20,13 +29,13 @@ class RSS {
 </channel>
 </rss>'; // don't change template. This exact form is needed for correct functioning.
 
-	function pageWritten($file) {
+	function pageWritten($file)
+	{
 		global $WIKI_TITLE, $PAGES_DIR, $page, $HISTORY_DIR, $LANG, $TIME_FORMAT, $VAR_DIR, $USE_HISTORY;
 
 		if(!$USE_HISTORY)
 			return true;
 
-		// Attention, bug si https ou port différent de 80 ?
 		$pagelink = "http://" . $_SERVER["SERVER_NAME"] . $_SERVER["SCRIPT_NAME"];
 
 		preg_match("/<\/language>(.*)<\/channel>/s", @file_get_contents($VAR_DIR . "rss.xml"), $matches);
@@ -82,7 +91,8 @@ class RSS {
 		return true;
 	}
 
-	function template() {
+	function template()
+	{
 		global $HEAD;
 
 		$HEAD .= "\n<link rel=\"alternate\" type=\"application/rss+xml\" title=\"RSS\" href=\"var/rss.xml\" />\n";

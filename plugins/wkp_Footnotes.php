@@ -8,7 +8,7 @@
 
 class Footnotes {
 	var $desc = array(
-		array("Footnotes", "")
+		array("Footnotes", "allows adding footnotes/references")
 	);
 
 	var $ft = array();

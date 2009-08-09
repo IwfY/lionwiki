@@ -1,16 +1,18 @@
 <?php
 /*
-	Tables - plugin providing flexible and powerful syntax for tables
-
-	Programmed by TigerWiki and WiKiss programmers, thanks to them.
-*/
+ * Tables - plugin providing flexible and powerful syntax for tables
+ *
+ * Programmed by TigerWiki and WiKiss programmers, thanks to them.
+ * (the only piece of LionWiki practically unmodified from WiKiss)
+ */
 
 class Tables {
 	var $desc = array(
 		array("Tables", "provides flexible and powerful syntax. Help how to use it is located <a href=\"http://lionwiki.0o.cz/index.php?page=UserGuide%3A+Tables+plugin\">here</a>.")
 	);
 
-	function table_style($s) {
+	function table_style($s)
+	{
 		$r = '';
 		$st = '';
 
@@ -30,7 +32,8 @@ class Tables {
 		return $r . ($st ? ' style="' . $st . '"' : '');
 	}
 
-	function make_table($s) {
+	function make_table($s)
+	{
 		global $matches_links;
 		// Suppression des espaces en debut et fin de ligne
 		//~ $s = trim($s);
@@ -54,7 +57,8 @@ class Tables {
 		return stripslashes($s);
 	}
 
-	function formatBegin() {
+	function formatBegin()
+	{
 		global $CON;
 
 		$CON = preg_replace("/((^ *\|[^\n]*\| *$\n)+)/me", '"<table class=\"wikitable\">".stripslashes($this->make_table("$1"))."</table>\n"', $CON);

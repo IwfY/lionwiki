@@ -1,0 +1,49 @@
+<div style="text-align: center">
+	<a href="javascript:" onclick="toggleComments();" style="font-variant: small-caps; font-size: larger;"><span id="plusminus"></span> {COMMENTS} ({NUMBER_OF_COMMENTS})</a>
+</div>
+
+<br />
+
+<div id="commentWrap">
+<table class="commentList">
+	{item}
+	<tr id="{ID}" class="commentItem">
+		<td class="commentContent">{CONTENT}</td>
+		<td class="commentMeta">
+			{NAME}<br />
+			{EMAIL}<br />
+			{DATE}<br />
+			{IP}
+		</td>
+	</tr>
+	<tr class="commentPadding">
+		<td colspan="2"></td>
+	</tr>
+	{/item}
+</table>
+
+<form action="{FORM_SELF}" method="post">
+<input type="hidden" name="action" value="save-comment" />
+<input type="hidden" name="page" value="{FORM_PAGE}" />
+<table class="commentAdd">
+	<tr>
+		<td>{FORM_NAME}</td>
+		<td><input type="text" size="30" name="name" value="" /></td>
+		<td>{FORM_EMAIL}</td>
+		<td><input size="30" type="text" name="email" value="" /></td>
+		<td>&nbsp;</td>
+	</tr>
+	{<tr><td colspan="5"> plugin:TOOLBAR_TEXTAREA </td></tr>}
+	<tr>
+		<td colspan="5"><textarea name="content" class="contentTextarea" style="width: 100%;" rows="4"></textarea></td>
+	</tr>
+	<tr>
+		<td colspan="4" style="text-align: left;">
+			{plugin:CAPTCHA_QUESTION} {plugin:CAPTCHA_INPUT}
+			<input type="submit" value="{FORM_SUBMIT}" />
+		</td>
+		<td style="text-align: right; vertical-align: top;" nowrap>{plugin:RESIZE_TEXTAREA}</td>
+	</tr>
+</table>
+</form>
+</div>

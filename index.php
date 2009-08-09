@@ -336,7 +336,7 @@ if($action == "edit") {
 
 	$CON_FORM_END = "</form>";
 
-	$CON_TEXTAREA = "<textarea id=\"contentTextarea\" name=\"content\" cols=\"83\" rows=\"30\">" . htmlspecialchars($CON) . "</textarea>";
+	$CON_TEXTAREA = "<textarea id=\"contentTextarea\" class=\"contentTextarea\" name=\"content\" cols=\"83\" rows=\"30\">" . htmlspecialchars($CON) . "</textarea>";
 
 	if(!$showsource) {
 		$CON_SUBMIT = "<input id=\"contentSubmit\" class=\"submit\" type=\"submit\" value=\"$T_DONE\" />";
@@ -526,7 +526,6 @@ if($action == "") { // substituting $CON to be viewed as HTML
 	// small
 	$CON = preg_replace("/\{small\}(.*)\{\/small\}/U", "<small>$1</small>", $CON);
 
-	// TODO: verif & / &amp;
 	$rg_url = "[0-9a-zA-Z\.\#/~\-_%=\?\&,\+\:@;!\(\)\*\$']*";
 	$rg_img_local = "(" . $rg_url . "\.(jpeg|jpg|gif|png))";
 	$rg_img_http = "h(ttps?://" . $rg_url . "\.(jpeg|jpg|gif|png))";

@@ -1,8 +1,10 @@
 <?php
-/** Plugin Slimbox
- * Usage:
- * [images/thumb/thumbnail.png|images/picture.jpg|Caption of the image]
- * */
+/*
+ * Slimbox plugin for LionWiki
+ * Usage: [images/thumb/thumbnail.png|images/picture.jpg|Caption of the image]
+ * 
+ * Not part of LionWiki official distribution, must be downloaded separately.
+ */
 class Slimbox
 {
 	var $desc = array(

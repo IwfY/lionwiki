@@ -1,8 +1,9 @@
 <?php
-
 /**
  * This plugin works as a middle-man between LionWiki and stripped down Text_Diff
  * package from PEAR. Thanks to its authors, it works great!
+ *
+ * (c) Adam Zivner 2009 adam.zivner@gmail.com, GPL'd
  */
 
 class InlineDiff

@@ -1,21 +1,21 @@
 <?php
 /*
-	Tags plugin for LionWiki, (c) Adam Zivner 2008, licensed under GNU GPL
-
-	Tags plugin provides nonhiearchical categorizing. It can display Tag list and/or Tag cloud
-
-	Syntax: insert {tags:Biography, LionWiki, Another tag}
-
-	Tags are case insensitive
-
-	Tags plugin supports both Tag List (shows tags for current page) and Tag Cloud.
-	You can use them in template (will be displayed on every page) by inserting
-	{plugin:TAG_LIST} or {plugin:TAG_CLOUD}, or in page by inserting {TAG_LIST} or {TAG_CLOUD}
-
-	Internals: tags for all pages are stored in one file - usually plugins/data/tags.txt
-	This file has simple format - it's filled with pairs of lines. First line is name of
-	the page and second is comma separated list of tags belonging to this page.
-*/
+ * Tags plugin for LionWiki, (c) Adam Zivner 2008, licensed under GNU GPL
+ *
+ * Tags plugin provides nonhiearchical categorizing. It can display Tag list and/or Tag cloud
+ *
+ * Syntax: insert {tags:Biography, LionWiki, Another tag}
+ *
+ * Tags are case insensitive
+ *
+ * Tags plugin supports both Tag List (shows tags for current page) and Tag Cloud.
+ * You can use them in template (will be displayed on every page) by inserting
+ * {plugin:TAG_LIST} or {plugin:TAG_CLOUD}, or in page by inserting {TAG_LIST} or {TAG_CLOUD}
+ *
+ * Internals: tags for all pages are stored in one file - usually plugins/data/tags.txt
+ * This file has simple format - it's filled with pairs of lines. First line is name of
+ * the page and second is comma separated list of tags belonging to this page.
+ */
 
 class Tags
 {

@@ -41,6 +41,8 @@ function ajaxEdit(ret)
 	xmlHttpPost("index.php?page=" + page + "&action=edit&ajax=1&par=" + elem.id.substr(4), "", function(content) {
 		var div = replaceContent(elem.id, "div", elem.id, content);
 		div.className = "par-div";
+
+		registerEditor();
 	});
 
 	return false;
@@ -139,8 +141,24 @@ function registerAjax(node)
 	}
 }
 
+function registerEditor(node)
+{
+	if(typeof insertResizeDiv == 'function') { // is plugin BetterEditor installed?
+		var txts = getElementsByClassName("contentTextarea", node);
+
+		for(key in txts)
+			insertResizeDiv(txts[key]);
+	}
+}
+
+if(typeof wons == "undefined")
+	wons = new Array();
+
+wons.push("registerAjax()");
+
 window.onload = function() {
-	registerAjax();
+	for(var i = 0; i < wons.length; i++)
+		eval(wons[i]);
 }
 
 /**
@@ -154,7 +172,8 @@ function getOrNothing(what, where)
 	return a.length == 0 ? "" : a[0].value;
 }
 
-function replaceContent(oldElementId, newElementName, newId, newContent) {
+function replaceContent(oldElementId, newElementName, newId, newContent)
+{
 	var oldElement = document.getElementById(oldElementId);
 	var newElement = document.createElement(newElementName);
 
@@ -167,7 +186,8 @@ function replaceContent(oldElementId, newElementName, newId, newContent) {
 	return newElement;
 }
 
-function getElementsByClassName(classname, node) {
+function getElementsByClassName(classname, node)
+{
 	if(!node)
 		node = document.getElementsByTagName("body")[0];
 
@@ -190,7 +210,8 @@ function getElementsByClassName(classname, node) {
  * Copied as PD from some website. Consider this to be credit to Unknown Programmer
  */
 
-function xmlHttpPost(strURL, params, func) {
+function xmlHttpPost(strURL, params, func)
+{
 	var xmlHttpReq = false;
 
 	if(window.XMLHttpRequest) // Mozilla/Safari

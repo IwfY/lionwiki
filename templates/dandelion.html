@@ -23,7 +23,7 @@ a.pending{color:#c174a0;}
 a:hover{text-decoration:underline;}
 a img{border:none;}
 input,textarea{font-size:94%;border:1px solid #999;background:#fff;color:#666;outline:0.2em solid #eee;padding:0px;line-height:1.2;margin:0.5em;vertical-align:middle;}
-textarea{display:block;margin:0.5em auto;width:97%;}
+textarea{display:block;margin:0.5em auto;width:100%;}
 pre{outline:0.4em solid #eee;padding:0.5em;margin:0.5em;border:1px solid #e0d78a;background:#fef4a4;color:#644e22;width:640px;}
 img{border:1px solid #ccc;outline:0.25em solid #eee;padding:0.25em;margin:0.25em 0 0.25em 0.5em;background:#fff;}
 hr{height:0;border:none;color:#fff;background:transparent;border-bottom:1px solid #ccc; margin:0.5em 0;}
@@ -51,6 +51,22 @@ form{display:inline;}
 #fileTable td{border:1px solid #FEF4A4;padding:2px 6px 2px 6px;}
 h2 span.par-edit, h3 span.par-edit, h4 span.par-edit, h5 span.par-edit, h6 span.par-edit {display:none;}
 h2:hover span.par-edit, h3:hover span.par-edit, h4:hover span.par-edit, h5:hover span.par-edit, h6:hover span.par-edit {display:inline;font-size:x-small;}
+.comment-item { border:1px solid #999;color:#666;outline:0.2em solid #eee; }
+.resizeTextareaDiv { margin-top: 5px;}
+a.toolbarTextareaItem { padding-right: 10px; }
+/*.toolbarTextareaDiv {
+	float: left;
+	top: 5px;
+	position: relative;
+}
+
+a.toolbarTextareaItem {
+	display: block;
+	float: left;
+	margin-right: 8px;
+	padding: 1px 5px 1px 5px;
+	border: 1px solid black;
+}*/
 	</style>
   {HEAD}
 </head>
@@ -63,13 +79,25 @@ h2:hover span.par-edit, h3:hover span.par-edit, h4:hover span.par-edit, h5:hover
 	<div id="content">
 		<h1 id="page-title">{PAGE_TITLE} {<span class="pageVersionsList">( plugin:VERSIONS_LIST )</span>}</h1>
 		{<div class="error"> ERROR </div>}
-{CONTENT}
-{plugin:TAG_LIST}
-{CONTENT_FORM} <div style="float:left">{RENAME_TEXT} {RENAME_INPUT}</div> <div style="float:right">{SHOW_PAGE} &nbsp; {SYNTAX}</div>
-<div class="clear"></div>
- {CONTENT_TEXTAREA} {<p style="float:right;"> FORM_PASSWORD} {FORM_PASSWORD_INPUT} {plugin:CAPTCHA_QUESTION} {plugin:CAPTCHA_INPUT} {EDIT_SUMMARY_TEXT} {EDIT_SUMMARY_INPUT} {CONTENT_SUBMIT} {CONTENT_PREVIEW </p>} {/CONTENT_FORM}
-	
-	<div class="clear"></div>
+		{CONTENT}
+		{plugin:TAG_LIST}
+		{CONTENT_FORM}
+		<table>
+			<tr>
+				<td>{RENAME_TEXT} {RENAME_INPUT} {plugin:TOOLBAR_TEXTAREA}</td>
+				<td colspan="2" style="text-align: right;" nowrap>{SHOW_PAGE} &nbsp; {SYNTAX}</td>
+			</tr>
+			<tr>
+				<td colspan="3">{CONTENT_TEXTAREA}</td>
+			</tr>
+			<tr>
+				<td colspan="2">{FORM_PASSWORD} {FORM_PASSWORD_INPUT} {plugin:CAPTCHA_QUESTION} {plugin:CAPTCHA_INPUT} {EDIT_SUMMARY_TEXT} {EDIT_SUMMARY_INPUT} {CONTENT_SUBMIT} {CONTENT_PREVIEW}</td>
+				<td style="text-align: right; vertical-align: top;">{plugin:RESIZE_TEXTAREA}</td>
+			</tr>
+		</table>
+		{/CONTENT_FORM}
+
+		{plugin:COMMENTS}
 	</div>
 	
 	<div id="footer">

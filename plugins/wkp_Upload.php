@@ -1,7 +1,10 @@
 <?php
 /*
- * File upload plugin for Wikiss, adjusted and slightly improved for LionWiki
- * access with: ?action=upload
+ * Upload plugin for LionWiki, (c) Adam Zivner and WiKiss programmers
+ *
+ * Accessible through index.php?action=upload
+ *
+ * Based on WiKiss 0.4svn
  */
 
 class Upload

@@ -1,13 +1,11 @@
 <?php
 /*
-	Captcha plugin is simple spam filtering plugin. It asks user simple questions
-	(If today is saturday, what day is tomorrow?). It is active only when no
-	password protection is used.
-
-	(c) Adam Zivner 2008
-
-	GPL'd, of course
-*/
+ * Captcha plugin is simple spam filtering plugin. It asks user simple questions
+ * (If today is saturday, what day is tomorrow?). It is active only when no
+ * password protection is used.
+ *
+ * (c) Adam Zivner 2008. GPL'd, of course.
+ */
 
 class Captcha
 {
@@ -155,5 +153,17 @@ class Captcha
 
 		$html = template_replace("plugin:CAPTCHA_QUESTION", $question_text, $html);
 		$html = template_replace("plugin:CAPTCHA_INPUT", "<input type=\"hidden\" id=\"captcha-id\" name=\"qid\" value=\"$question_id\" /><input type=\"text\" id=\"captcha-input\" name=\"ans\" class=\"input\" value=\"\" />", $html);
+	}
+
+	function commentsTemplate()
+	{
+		global $comments_html;
+
+		$question_count = $this->questionCount();
+		$question_id = rand(1, $question_count);
+		$question_text = trim($this->getQuestion($question_id, 1));
+
+		$comments_html = template_replace("plugin:CAPTCHA_QUESTION", $question_text, $comments_html);
+		$comments_html = template_replace("plugin:CAPTCHA_INPUT", "<input type=\"hidden\" id=\"captcha-id\" name=\"qid\" value=\"$question_id\" /><input type=\"text\" id=\"captcha-input\" name=\"ans\" class=\"input\" value=\"\" />", $comments_html);
 	}
 }

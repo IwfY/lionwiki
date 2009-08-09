@@ -1,4 +1,20 @@
 <?php
+/*
+ * SelectLanguage plugin for LionWiki, (c) Adam Zivner, adam.zivner@gmail.com, GPL'd
+ *
+ * This plugin produces select box with (more or less arbitrary) list of languages.
+ * Although LionWiki has a built-in detection of user's language, there are cases
+ * in which LionWiki's choice is wrong. This plugin allows user to change
+ *
+ * LionWiki's language. This affects two things:
+ * - interface language (if available)
+ * - page version (in case that there are more language variants of the same page)
+ *
+ * This is actually just an interface to built-in LionWiki function:
+ *
+ * index.php?page=Whatever&lang=cs
+ */
+
 class SelectLanguage
 {
 	var $desc = array(

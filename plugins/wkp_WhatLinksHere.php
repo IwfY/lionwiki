@@ -1,4 +1,10 @@
 <?php
+/*
+ * WhatLinksHere plugin for LionWiki searches for backreferences to current page
+ *
+ * (c) Adam Zivner 2008, adam.zivner@gmail.com, GPL'd
+ */
+
 class WhatLinksHere {
 	var $desc = array(
 		array("WhatLinksHere plugin", "gives list of pages linking to selected article. Function is triggered by action=\"whatlinkshere\" with properly set parameter page.")

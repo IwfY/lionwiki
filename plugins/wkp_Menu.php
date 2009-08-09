@@ -20,7 +20,7 @@
 class Menu
 {
 	var $desc = array(
-		array("Meta", "adds meta tags keywords and description to the page. Syntax {description:This page is about cats and dogs} and {keywords:Cats, Dogs}.")
+		array("Menu", "provides syntax for simple one level menus.")
 	);
 
 	var $template_dir;

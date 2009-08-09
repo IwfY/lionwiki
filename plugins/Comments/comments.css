@@ -1,0 +1,30 @@
+.commentAdd {
+	text-align: center;
+	margin: auto;
+	width: 700px;
+}
+
+.commentList {
+	border-collapse: collapse;
+	width: 700px;
+	margin: auto;
+}
+
+.commentItem td {
+	border: 1px solid #AAAAAA;
+}
+
+.commentPadding td {
+	height: 15px;
+	overflow: hidden;
+}
+
+.commentMeta, .commentContent {
+	vertical-align: top;
+	padding: 4px;
+}
+
+.commentMeta {
+	font-size: smaller;
+	width: 150px;
+}
