@@ -1,20 +1,16 @@
-<div style="text-align: center">
+<div style="text-align: center; margin-bottom: 8px;">
 	<a href="javascript:" onclick="toggleComments();" style="font-variant: small-caps; font-size: larger;"><span id="plusminus"></span> {COMMENTS} ({NUMBER_OF_COMMENTS})</a>
 </div>
-
-<br />
 
 <div id="commentWrap">
 <table class="commentList">
 	{item}
-	<tr id="{ID}" class="commentItem">
-		<td class="commentContent">{CONTENT}</td>
-		<td class="commentMeta">
-			{NAME}<br />
-			{EMAIL}<br />
-			{DATE}<br />
-			{IP}
-		</td>
+  <tr id="{ID}" class="commentHeader">
+    <td>{NAME_TO_EMAIL} {IP}</td>
+    <td style="text-align: right;">{DATE}</td>
+  </tr>
+	<tr class="commentItem">
+    <td colspan="2" class="commentContent">{CONTENT}</td>
 	</tr>
 	<tr class="commentPadding">
 		<td colspan="2"></td>
@@ -22,20 +18,20 @@
 	{/item}
 </table>
 
-<form action="{FORM_SELF}" method="post">
+<form id="commentForm" action="{FORM_SELF}#commentForm" method="post">
 <input type="hidden" name="action" value="save-comment" />
 <input type="hidden" name="page" value="{FORM_PAGE}" />
 <table class="commentAdd">
 	<tr>
 		<td>{FORM_NAME}</td>
-		<td><input type="text" size="30" name="name" value="" /></td>
+		<td><input type="text" size="30" name="name" value="{FORM_NAME_VALUE}" /></td>
 		<td>{FORM_EMAIL}</td>
-		<td><input size="30" type="text" name="email" value="" /></td>
+		<td><input size="30" type="text" name="email" value="{FORM_EMAIL_VALUE}" /></td>
 		<td>&nbsp;</td>
 	</tr>
 	{<tr><td colspan="5"> plugin:TOOLBAR_TEXTAREA </td></tr>}
 	<tr>
-		<td colspan="5"><textarea name="content" class="contentTextarea" style="width: 100%;" rows="4"></textarea></td>
+		<td colspan="5"><textarea name="content" class="contentTextarea" style="width: 100%;" rows="4">{FORM_CONTENT_VALUE}</textarea></td>
 	</tr>
 	<tr>
 		<td colspan="4" style="text-align: left;">

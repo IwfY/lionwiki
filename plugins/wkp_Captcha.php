@@ -159,6 +159,9 @@ class Captcha
 	{
 		global $comments_html;
 
+    if(!empty($PASSWORD_MD5) || ($this->permanent && $_COOKIE["LW_CAPTCHA"] == $this->cookie_password))
+			return;
+
 		$question_count = $this->questionCount();
 		$question_id = rand(1, $question_count);
 		$question_text = trim($this->getQuestion($question_id, 1));

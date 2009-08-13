@@ -43,14 +43,16 @@ class Comments
 
 	function processComment($txt)
 	{
+    global $PAGES_DIR;
+
 		$rg_url = "[0-9a-zA-Z\.\#/~\-_%=\?\&,\+\:@;!\(\)\*\$']*";
 		$rg_link_local = "(" . $rg_url . ")";
 		$rg_link_http = "h(ttps?://" . $rg_url . ")";
 
-		$txt = preg_replace('#\[([^\]]+)\|' . $rg_link_http . '\]#U', '<a href="xx$2" class="url">$1</a>', $txt);
+		$txt = preg_replace('#\[([^\]]+)\|' . $rg_link_http . '\]#U', '<a href="xx$2" class="url external">$1</a>', $txt);
 		// local links has to start either with / or ./
 		$txt = preg_replace('#\[([^\]]+)\|\.\/' . $rg_link_local . '\]#U', '<a href="$2" class="url">$1</a>', $txt);
-		$txt = preg_replace('#' . $rg_link_http . '#i', '<a href="$0" class="url">xx$1</a>', $txt);
+		$txt = preg_replace('#' . $rg_link_http . '#i', '<a href="$0" class="url external">xx$1</a>', $txt);
 		$txt = preg_replace('#xxttp#', 'http', $txt);
 
 		preg_match_all("/\[([^|\]]+\|)?([^\]#]+)(#[^\]]+)?\]/", $txt, $matches, PREG_SET_ORDER); // matching Wiki links
@@ -70,6 +72,8 @@ class Comments
 				$txt = str_replace($match[0], '<a href="'.$self.'?page=' . urlencode($match[2]) . '&amp;action=edit" class="pending" rel="nofollow">' . $match[1] . '</a>', $txt);
 		}
 
+    $txt = preg_replace('#([0-9a-zA-Z\./~\-_]+@[0-9a-z/~\-_]+\.[0-9a-z\./~\-_]+)#i', '<a href="mailto:$0">$0</a>', $txt);
+
 		$txt = preg_replace("/'--(.*)--'/Um", '<del>$1</del>', $txt); // strikethrough
 
 		$txt = str_replace("--", "&mdash;", $txt); // --
@@ -87,7 +91,7 @@ class Comments
 
 	function template()
 	{
-		global $CON, $html, $action, $preview, $page, $PAGES_DIR, $HEAD, $self, $comments_html;
+		global $CON, $html, $action, $preview, $page, $PAGES_DIR, $HEAD, $self, $comments_html, $comment_captcha_failed;
 
 		/*
 		 * Include comments if:
@@ -106,9 +110,13 @@ class Comments
 			$tmpl = strtr($tmpl, array(
 				"{FORM_NAME}" => $this->TP_FORM_NAME,
 				"{FORM_EMAIL}" => $this->TP_FORM_EMAIL,
+        "{FORM_CONTENT}" => $this->TP_FORM_CONTENT,
+        "{FORM_NAME_VALUE}" => $comment_captcha_failed ? htmlspecialchars($_POST["name"]) : "",
+				"{FORM_EMAIL_VALUE}" => $comment_captcha_failed ? htmlspecialchars($_POST["email"]) : "",
+        "{FORM_CONTENT_VALUE}" => $comment_captcha_failed ? htmlspecialchars($_POST["content"]) : "",
 				"{FORM_SUBMIT}" => $this->TP_FORM_SUBMIT,
-				"{FORM_SELF}" => $self,
-				"{FORM_PAGE}" => urlencode($page),
+				"{FORM_SELF}" => htmlspecialchars($self),
+				"{FORM_PAGE}" => htmlspecialchars($page),
 				"{COMMENTS}" => $this->TP_COMMENTS
 			));
 
@@ -131,12 +139,16 @@ class Comments
 				else if($this->sorting_order == "desc")
 					rsort($filenames);
 
+        $comment_num = 0;
+
 				foreach($filenames as $filename) {
+          $comment_num++;
+
 					$file = file_get_contents($this->comments_dir . $page . "/" . $filename);
 
 					$delimiter = strpos($file, "\n");
 
-					$meta = substr($file, 0, $delimiter - 1);
+					$meta = substr($file, 0, $delimiter);
 					$content = substr($file, $delimiter + 1);
 
 					list($ip, $name, $email) = explode("\t", $meta);
@@ -145,11 +157,13 @@ class Comments
 
 					$items_str .= strtr($item_tmpl, array(
 						"{CONTENT}" => $processed_content,
-						"{NAME}" => $name,
-						"{EMAIL}" => $email,
+						"{NAME}" => htmlspecialchars($name),
+						"{EMAIL}" => htmlspecialchars($email),
+            "{NAME_TO_EMAIL}" => $email == "" ? $name : ("<a href=\"mailto:".htmlspecialchars($email)."\">" . htmlspecialchars($name) . "</a>"),
 						"{IP}" => $ip,
 						"{DATE}" => revTime(basename($filename, ".txt")),
-						"{ID}" => basename($filename, ".txt")
+						"{ID}" => basename($filename, ".txt"),
+            "{NUMBER}" => $comment_num
 					));
 				}
 
@@ -164,11 +178,25 @@ class Comments
 		}
 	}
 
-	function action($action)
+	function actionBegin()
 	{
-		global $page, $LOCAL_HOUR;
+		global $page, $LOCAL_HOUR, $plugins, $action, $plugin_saveok, $error, $comment_captcha_failed;
 
 		if($action == "save-comment") {
+      if(isset($plugins["Captcha"])) {
+        $plugins["Captcha"]->checkCaptcha();
+
+        if($plugin_saveok == false) {
+          $comment_captcha_failed = true;
+          $action = "";
+          $error = ""; // suppress error messages
+
+          unset($_REQUEST["qid"]); // don't check captcha again
+
+          return true;
+        }
+      }
+
 			if(!is_dir($this->comments_dir))
 				mkdir($this->comments_dir);
 
@@ -199,6 +227,7 @@ class Comments
 			fclose($h);
 
 			header("Location: $self?page=$page#$rightnow");
+      die();
 		}
 	}
 
@@ -207,16 +236,18 @@ class Comments
 	var $cs_strings = array(
 		array("TP_FORM_NAME", "Jméno"),
 		array("TP_FORM_EMAIL", "E-mail"),
+    array("TP_FORM_CONTENT", "Obsah"),
+    array("TP_FORM_SUBMIT", "Přidat"),
 		array("TP_REPLY_TO", "Odpovědět na tento komentář"),
-		array("TP_FORM_SUBMIT", "Přidat"),
 		array("TP_COMMENTS", "Komentáře")
 	);
 
 	var $en_strings = array(
 		array("TP_FORM_NAME", "Name"),
 		array("TP_FORM_EMAIL", "E-mail"),
+    array("TP_FORM_CONTENT", "Content"),
+    array("TP_FORM_SUBMIT", "Save"),
 		array("TP_REPLY_TO", "Reply to this comment"),
-		array("TP_FORM_SUBMIT", "Save"),
 		array("TP_COMMENTS", "Comments")
 	);
 

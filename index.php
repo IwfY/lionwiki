@@ -65,7 +65,7 @@ $PLUGINS_DIR = "plugins/";
 $PLUGINS_DATA_DIR = $VAR_DIR . "plugins/";
 $LANG_DIR = "lang/";
 
-$WIKI_VERSION = "LionWiki 3.0.4";
+$WIKI_VERSION = "LionWiki 3.0.5";
 
 umask(0); // sets default mask
 
@@ -153,7 +153,7 @@ if($dir = @opendir($PLUGINS_DIR)) // common plugins
 foreach($plugin_files as $pfile)
 	if(preg_match("/^.*wkp_(.+)\.php$/", $pfile, $matches) > 0) {
 		require $pfile;
-		$plugins[] = new $matches[1]();
+		$plugins[$matches[1]] = new $matches[1]();
 	}
 
 plugin_call_method("pluginsLoaded"); // for admin plugin
@@ -551,12 +551,12 @@ if($action == "") { // substituting $CON to be viewed as HTML
 	$CON = preg_replace('#([0-9a-zA-Z\./~\-_]+@[0-9a-z/~\-_]+\.[0-9a-z\./~\-_]+)#i', '<a href="mailto:$0">$0</a>', $CON); // mail recognition
 
 	// LINKS
-	$CON = preg_replace('#\[([^\]]+)\|' . $rg_link_http . '\]#U', '<a href="xx$2" class="url">$1</a>', $CON);
+	$CON = preg_replace('#\[([^\]]+)\|' . $rg_link_http . '\]#U', '<a href="xx$2" class="url external">$1</a>', $CON);
 	// local links has to start either with / or ./
 	$CON = preg_replace('#\[([^\]]+)\|\.\/' . $rg_link_local . '\]#U', '<a href="$2" class="url">$1</a>', $CON);
-	$CON = preg_replace('#' . $rg_link_http . '#i', '<a href="$0" class="url">xx$1</a>', $CON);
+	$CON = preg_replace('#' . $rg_link_http . '#i', '<a href="$0" class="url external"">xx$1</a>', $CON);
 	$CON = preg_replace('#xxttp#', 'http', $CON);
-	$CON = preg_replace('#\[\?(.*)\]#Ui', '<a href="http://' . substr($LANG, 0, 2) . '.wikipedia.org/wiki/$1" class="url" title="Wikipedia">$1</a>', $CON); // Wikipedia
+	$CON = preg_replace('#\[\?(.*)\]#Ui', '<a href="http://' . substr($LANG, 0, 2) . '.wikipedia.org/wiki/$1" class="url external"" title="Wikipedia">$1</a>', $CON); // Wikipedia
 
 	preg_match_all("/\[([^|\]]+\|)?([^\]#]+)(#[^\]]+)?\]/", $CON, $matches, PREG_SET_ORDER); // matching Wiki links
 
