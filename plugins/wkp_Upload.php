@@ -54,7 +54,7 @@ class Upload
 							$filename = sanitizeFilename($_FILES['file']['name']);
 
 							foreach($this->blacklist as $file) // executable files not allowed
-								if(preg_match("/" . preg_quote($file) . "$/i", $filename)) {
+								if(preg_match("/" . preg_quote($file) . "/i", $filename)) {
 									$error .= $this->TP_NO_EXECUTABLE;
 
 									break;
