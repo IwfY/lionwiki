@@ -163,9 +163,9 @@ class Comments
             "{NUMBER}" => $comment_num
 					));
 				}
-
-				$tmpl = str_replace("{NUMBER_OF_COMMENTS}", count($filenames), $tmpl);
 			}
+
+      $tmpl = str_replace("{NUMBER_OF_COMMENTS}", count($filenames), $tmpl);
 
 			$comments_html = preg_replace("/\{item\}.*\{\/item\}/Us", $items_str, $tmpl);
 
