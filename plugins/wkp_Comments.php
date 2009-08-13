@@ -165,6 +165,8 @@ class Comments
 				}
 			}
 
+      $CON = str_replace("{NO_COMMENTS}", "", $CON);
+
       $tmpl = str_replace("{NUMBER_OF_COMMENTS}", count($filenames), $tmpl);
 
 			$comments_html = preg_replace("/\{item\}.*\{\/item\}/Us", $items_str, $tmpl);
