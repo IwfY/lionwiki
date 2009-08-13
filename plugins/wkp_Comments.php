@@ -27,8 +27,8 @@ class Comments
 
 	function Comments()
 	{
-		$this->data_dir = $GLOBALS["PLUGINS_DIR"] . "Comments/";
-		$this->comments_dir = $GLOBALS["VAR_DIR"] . "comments/";
+		$this->data_dir = $GLOBALS["PLUGINS_DIR"] . "Comments/"; // CSS and JS for comments
+		$this->comments_dir = $GLOBALS["VAR_DIR"] . "comments/"; // actual comments
 
 		$this->localize();
 	}
@@ -73,13 +73,9 @@ class Comments
 		}
 
     $txt = preg_replace('#([0-9a-zA-Z\./~\-_]+@[0-9a-z/~\-_]+\.[0-9a-z\./~\-_]+)#i', '<a href="mailto:$0">$0</a>', $txt);
-
 		$txt = preg_replace("/'--(.*)--'/Um", '<del>$1</del>', $txt); // strikethrough
-
 		$txt = str_replace("--", "&mdash;", $txt); // --
-
 		$txt = preg_replace("/'__(.*)__'/Um", '<u>$1</u>', $txt); // underlining
-
 		$txt = preg_replace("/'''(.*)'''/Um", '<strong>$1</strong>', $txt); // bold
 		$txt = preg_replace("/''(.*)''/Um", '<em>$1</em>', $txt); // italic
 
@@ -111,6 +107,7 @@ class Comments
 				"{FORM_NAME}" => $this->TP_FORM_NAME,
 				"{FORM_EMAIL}" => $this->TP_FORM_EMAIL,
         "{FORM_CONTENT}" => $this->TP_FORM_CONTENT,
+        // Following 3 are for failed captcha test
         "{FORM_NAME_VALUE}" => $comment_captcha_failed ? htmlspecialchars($_POST["name"]) : "",
 				"{FORM_EMAIL_VALUE}" => $comment_captcha_failed ? htmlspecialchars($_POST["email"]) : "",
         "{FORM_CONTENT_VALUE}" => $comment_captcha_failed ? htmlspecialchars($_POST["content"]) : "",
