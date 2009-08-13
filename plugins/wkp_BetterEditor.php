@@ -51,7 +51,7 @@ class BetterEditor
 
 	public function template()
 	{
-		global $action, $HEAD, $preview;
+		global $action, $HEAD, $preview, $html;
 
 		$HEAD .= '<script type="text/javascript" src="plugins/BetterEditor/bettereditor.js"></script>';
 
