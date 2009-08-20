@@ -65,7 +65,7 @@ $PLUGINS_DIR = "plugins/";
 $PLUGINS_DATA_DIR = $VAR_DIR . "plugins/";
 $LANG_DIR = "lang/";
 
-$WIKI_VERSION = "LionWiki 3.0.5";
+$WIKI_VERSION = "LionWiki 3.0.6";
 
 umask(0); // sets default mask
 
@@ -833,7 +833,7 @@ function diff($f1, $f2) {
 
 	$complete_dir = $GLOBALS["HISTORY_DIR"] . $GLOBALS["page"] . "/";
 
-	if(plugin_call_method("diff", $complete_dir . $f1, $complete_dir . $f2, $diff))
+	if(plugin_call_method("diff", $complete_dir . $f1, $complete_dir . $f2))
 		$diff = $GLOBALS["plugin_ret_diff"];
 	else
 		$diff = diff_builtin($complete_dir . $f1, $complete_dir . $f2);

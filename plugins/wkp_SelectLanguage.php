@@ -34,6 +34,7 @@ class SelectLanguage
 		"es" => "Español",
 		"fi" => "Eesti",
 		"fr" => "Français",
+		"he" => "עברית",
 		"hr" => "Hrvatski",
 		"hu" => "Magyar",
 		"it" => "Italiano",

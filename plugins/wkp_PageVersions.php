@@ -33,6 +33,7 @@ class PageVersions
 		"es" => "Español",
 		"fi" => "Eesti",
 		"fr" => "Français",
+		"he" => "עברית",
 		"hr" => "Hrvatski",
 		"hu" => "Magyar",
 		"it" => "Italiano",
@@ -46,7 +47,8 @@ class PageVersions
 		"sv" => "Svenska"
 	);
 
-	function template() {
+	function template()
+  {
 		global $CON, $html, $page, $PAGES_DIR, $action;
 
 		if(!empty($action))

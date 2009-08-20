@@ -12,7 +12,8 @@ class InlineDiff
 		array("InlineDiff", "provides inline diff which is much better than default built-in")
 	);
 
-	function mapNewline($arr) {
+	function mapNewline($arr)
+	{
 		$ret = array();
 
 		foreach($arr as $row)
@@ -21,7 +22,7 @@ class InlineDiff
 		return $ret;
 	}
 
-	function diff($f1, $f2, &$ret)
+	function diff($f1, $f2)
 	{
 		require_once 'InlineDiff/diff.php';
 		require_once 'InlineDiff/renderer.php';

@@ -147,6 +147,12 @@ class Tags
 		}
 	}
 
+	/*
+	 * Comma separated list of tags in current page. Wrapping div has "tagList" class.
+	 *
+	 * Use {plugin:TAG_LIST} in templates or {TAG_LIST} in pages
+	 */
+
 	function tagList()
 	{
 		global $page, $self;
@@ -160,6 +166,12 @@ class Tags
 
 		return empty($tag_array) ? "" : "<div class=\"tagList\">Tags: \n" . implode(", ", $tag_array) . "</div>\n";
 	}
+
+	/*
+	 * Tag "cloud" with all tags on all pages. Size of font is roughly proportional to the number of occurences.
+	 *
+	 * Use {plugin:TAG_CLOUD} in templates or {TAG_CLOUD} in pages
+	 */
 
 	function tagCloud()
 	{
@@ -238,7 +250,8 @@ class Tags
 			$CON = template_replace("TAG_CLOUD", $this->tagCloud(), $CON);
 	}
 
-	function template() {
+	function template()
+  {
 		global $html, $action;
 
 		if(!empty($action))

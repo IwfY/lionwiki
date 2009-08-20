@@ -22,7 +22,7 @@ class BetterEditor
 	var $basic_toolbar_html; // used for comments
 	var $advanced_toolbar_html; // used for page editing
 
-	public function BetterEditor()
+	function BetterEditor()
 	{
 		$this->localize();
 
@@ -39,8 +39,10 @@ class BetterEditor
 	<a class="toolbarTextareaItem" href="javascript:" onclick="insertSyntax(this, \'\\\'--\', \'--\\\'\', \''.$this->TP_STRIKETHROUGH[2].'\');" title="'.$this->TP_STRIKETHROUGH[1].'" style="text-decoration: line-through;">'.$this->TP_STRIKETHROUGH[0].'</a>
 	<a class="toolbarTextareaItem" href="javascript:" onclick="insertSyntax(this, \'[title|\', \']\', \''.$this->TP_LINK[2].'\');" title="'.$this->TP_LINK[1].'" style="text-decoration: underline;">'.$this->TP_LINK[0].'</a>';
 
+    // basic toolbar is used in comments plugin
 		$this->basic_toolbar_html = $common_toolbar . '</span>';
 
+    // advanced toolbar is used in both regular editing textarea and AjaxEditing plugin
 		$this->advanced_toolbar_html = $common_toolbar . '
 	<a class="toolbarTextareaItem" href="javascript:" onclick="insertSyntax(this, \'[\', \'|left]\', \''.$this->TP_IMAGE[2].'\');" title="'.$this->TP_IMAGE[1].'">'.$this->TP_IMAGE[0].'</a>
 	<a class="toolbarTextareaItem" href="javascript:" onclick="insertSyntax(this, \'{{\', \'}}\', \''.$this->TP_CODE[2].'\');" title="'.$this->TP_CODE[1].'">'.$this->TP_CODE[0].'</a>
@@ -49,7 +51,7 @@ class BetterEditor
 </span>';
 	}
 
-	public function template()
+	function template()
 	{
 		global $action, $HEAD, $preview, $html;
 
@@ -61,7 +63,7 @@ class BetterEditor
 		}
 	}
 
-	public function commentsTemplate()
+	function commentsTemplate()
 	{
 		global $comments_html;
 		
