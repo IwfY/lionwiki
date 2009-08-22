@@ -17,8 +17,6 @@ class RSS {
 	var $max_changes = 50; // RSS contains $max_changes last changes
 	var $short_diff = false; // RSS omits unchanged lines
 
-	var $funcs = array();
-
 	var $template = '<rss version="2.0">
 <channel>
 <title>{WIKI_TITLE}</title>
@@ -31,9 +29,9 @@ class RSS {
 
 	function pageWritten($file)
 	{
-		global $WIKI_TITLE, $PAGES_DIR, $page, $HISTORY_DIR, $LANG, $TIME_FORMAT, $VAR_DIR, $USE_HISTORY;
+		global $WIKI_TITLE, $PAGES_DIR, $page, $HISTORY_DIR, $LANG, $TIME_FORMAT, $VAR_DIR, $USE_HISTORY, $PROTECTED_READ;
 
-		if(!$USE_HISTORY)
+		if(!$USE_HISTORY || $PROTECTED_READ)
 			return true;
 
 		$pagelink = "http://" . $_SERVER["SERVER_NAME"] . $_SERVER["SCRIPT_NAME"];
@@ -74,7 +72,7 @@ class RSS {
 			echo "RSS plugin: can't open history directory!";
 
 		$rss = str_replace('{WIKI_TITLE}', $WIKI_TITLE, $this->template);
-		$rss = str_replace('{PAGE_LINK}', $page_link, $rss);
+		$rss = str_replace('{PAGE_LINK}', $pagelink, $rss);
 		$rss = str_replace('{LANG}', $LANG, $rss);
 		$rss = str_replace('{WIKI_DESCRIPTION}', "RSS feed from " . $WIKI_TITLE, $rss);
 		$rss = str_replace('{CONTENT_RSS}', $n_item . $items, $rss);

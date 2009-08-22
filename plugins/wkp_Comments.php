@@ -25,10 +25,24 @@ class Comments
 	var $comments_dir;
 	var $template = "template.html";
 
+	var $rss_use = true; // turn on/off creating comments RSS
+	var $rss_file;
+	var $rss_max_comments = 50;
+	var $rss_template = '<rss version="2.0">
+<channel>
+<title>{WIKI_TITLE}</title>
+<link>{PAGE_LINK}</link>
+<description>{WIKI_DESCRIPTION}</description>
+<language>{LANG}</language>
+{CONTENT_RSS}
+</channel>
+</rss>'; // don't change template. This exact form is needed for correct functioning.
+
 	function Comments()
 	{
 		$this->data_dir = $GLOBALS["PLUGINS_DIR"] . "Comments/"; // CSS and JS for comments
 		$this->comments_dir = $GLOBALS["VAR_DIR"] . "comments/"; // actual comments
+		$this->rss_file = $GLOBALS["VAR_DIR"] . "comments-rss.xml";
 
 		$this->localize();
 	}
@@ -160,7 +174,10 @@ class Comments
 						"{IP}" => $ip,
 						"{DATE}" => revTime(basename($filename, ".txt")),
 						"{ID}" => basename($filename, ".txt"),
-						"{NUMBER}" => $comment_num
+						"{NUMBER}" => $comment_num,
+						"{DELETE}" => htmlspecialchars($this->TP_DELETE),
+						"{DELETE_LINK}" => "$self?action=admin-deletecomment&amp;page=" . urlencode($page) . "&amp;filename=" . urlencode($filename),
+						"{DELETE_CONFIRM}" => htmlspecialchars($this->TP_DELETE_CONFIRM)
 					));
 				}
 			}
@@ -175,6 +192,8 @@ class Comments
 		}
 
 		$CON = str_replace("{NO_COMMENTS}", "", $CON);
+
+		$HEAD .= "\n<link rel=\"alternate\" type=\"application/rss+xml\" title=\"RSS ".htmlspecialchars($this->TP_COMMENTS)."\" href=\"$this->rss_file\" />\n";
 	}
 
 	function actionBegin()
@@ -196,8 +215,13 @@ class Comments
 				}
 			}
 
-			if(!is_dir($this->comments_dir))
+			if(!is_dir($this->comments_dir)) {
 				mkdir($this->comments_dir);
+				
+				$f = fopen($this->comments_dir . ".htaccess", "w"); 
+				fwrite($f, "deny from all"); 
+				fclose($f);
+			}
 
 			$c_dir = $this->comments_dir . urldecode($page);
 
@@ -220,15 +244,62 @@ class Comments
 			if(!$h)
 				return;
 
-			fwrite($h, $meta);
-			fwrite($h, $_POST["content"]);
-
+			fwrite($h, $meta . $_POST["content"]);
 			fclose($h);
+
+			$this->writeRSS($page, $rightnow, $meta . $_POST["content"]);
 
 			header("Location: $self?page=$page#$rightnow");
 
 			die();
 		}
+	}
+
+	function writeRSS($page, $id, $content)
+	{
+		global $PROTECTED_READ, $WIKI_TITLE, $LANG;
+
+		if(!$this->rss_use || $PROTECTED_READ)
+			return;
+
+		$pagelink = "http://" . $_SERVER["SERVER_NAME"] . $_SERVER["SCRIPT_NAME"];
+
+		preg_match("/<\/language>(.*)<\/channel>/s", @file_get_contents($this->rss_file), $matches);
+
+		$items = $matches[1];
+
+		$pos = -1;
+
+		// count items
+		for($i = 0; $i < $this->rss_max_comments - 1; $i++)
+			if(!($pos = strpos($items, "</item>", $pos + 1)))
+				break;
+
+		if($pos) // if count is higher than $max_changes - 1, cut out the rest
+			$items = substr($items, 0, $pos + 7);
+
+		$n_item = "
+	<item>
+	  <title>".htmlspecialchars($page)."</title>
+	  <pubDate>". date("r")."</pubDate>
+	  <link>$pagelink?page=".urlencode($page)."#$id</link>
+	  <description>".htmlspecialchars($content)."</description>
+	</item>";
+
+		$rss = str_replace('{WIKI_TITLE}', $WIKI_TITLE . ": " . $this->TP_COMMENTS, $this->rss_template);
+		$rss = str_replace('{PAGE_LINK}', $pagelink, $rss);
+		$rss = str_replace('{LANG}', $LANG, $rss);
+		$rss = str_replace('{WIKI_DESCRIPTION}', "RSS comments feed from " . $WIKI_TITLE, $rss);
+		$rss = str_replace('{CONTENT_RSS}', $n_item . $items, $rss);
+
+		if(!$file = @fopen($this->rss_file, "w")) {
+			echo "Opening file for writing RSS comments file is not possible! Please create file rss.xml in your var directory and make it writable (chmod 666).";
+
+			return true;
+		}
+
+		fwrite($file, $rss);
+		fclose($file);
 	}
 
 	// Localization strings
@@ -239,7 +310,9 @@ class Comments
 		array("TP_FORM_CONTENT", "Obsah"),
 		array("TP_FORM_SUBMIT", "Přidat"),
 		array("TP_REPLY_TO", "Odpovědět na tento komentář"),
-		array("TP_COMMENTS", "Komentáře")
+		array("TP_COMMENTS", "Komentáře"),
+		array("TP_DELETE", "Smazat"),
+		array("TP_DELETE_CONFIRM", "Chcete opravdu smazat tento komentář?"),
 	);
 
 	var $en_strings = array(
@@ -248,7 +321,9 @@ class Comments
 		array("TP_FORM_CONTENT", "Content"),
 		array("TP_FORM_SUBMIT", "Save"),
 		array("TP_REPLY_TO", "Reply to this comment"),
-		array("TP_COMMENTS", "Comments")
+		array("TP_COMMENTS", "Comments"),
+		array("TP_DELETE", "Delete"),
+		array("TP_DELETE_CONFIRM", "Do you really want to delete this comment?")
 	);
 
 

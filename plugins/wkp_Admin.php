@@ -5,14 +5,16 @@
  * - black list of forbidden words (index.php?action=admin-blacklist)
  * - setting pages read only (index.php?action=admin-pages)
  * - turning off plugins (index.php?action=admin-plugins)
+ * - deleting comments from Comments plugin (needs installed Comments plugin)
  *
  * (c) Adam Zivner 2008, 2009, adam.zivner@gmail.com, GPL'd
  */
 
 class Admin
 {
-	var $PASSWORD = ""; // either $PASSWORD or $PASSWORD_MD5 must be set
-	var $PASSWORD_MD5 = "hkjhlkjhlkjhlk"; // if set, $PASSWORD is ignored
+	var $PASSWORD = "aaa"; // either $PASSWORD or $PASSWORD_MD5 must be set
+	var $PASSWORD_MD5 = ""; // if set, $PASSWORD is ignored
+	var $expire_login = 7200;
 	var $dir;
 
 	function Admin()
@@ -64,8 +66,8 @@ class Admin
 		}
 
 		// check required password
-		if(!empty($_POST["action"]) && (empty($_POST["sc"]) || strcasecmp(md5($_POST["sc"]), $this->PASSWORD_MD5)))
-			$ret .= "<div class=\"error\">Wrong password. List was not updated. You can try again.</div>";
+		if(!empty($_POST["action"]) && $this->authentified() == false)
+			$ret .= '<div class="error">Wrong password. List was not updated. You can try again.</div>';
 		else if(!empty($_POST["action"]))
 			if($f = fopen($filename, "wb")) {
 				fwrite($f, $_POST["$dataname"]);
@@ -75,17 +77,21 @@ class Admin
 
 		$ret .= "<p>$comment</p>\n";
 
-		$ret .= "
-<form action=\"$self\" method=\"post\">
-<input type=\"hidden\" name=\"action\" value=\"$action\" />
-<table width=\"600px\">
-<tr><td><textarea name=\"$dataname\" rows=\"15\" style=\"width : 100%;\">" . (!empty($_POST["$dataname"]) ? $_POST["$dataname"] : @file_get_contents($filename)) . "</textarea></td></tr>
-<tr><td style=\"text-align:right;\">
-Password: <input type=\"password\" name=\"sc\" />
-<input type=\"submit\" class=\"submit\" value=\"Update\" />
+		$ret .= '
+<form action="'.$self.'" method="post">
+<input type="hidden" name="action" value="'.$action.'" />
+<table width="600px">
+<tr><td><textarea name="'.$dataname.'" rows="15" style="width: 100%;">' . (!empty($_POST["$dataname"]) ? $_POST["$dataname"] : @file_get_contents($filename)) . '</textarea></td></tr>
+<tr><td style="text-align:right;">';
+
+		if(!$this->authentified())
+			$ret .= 'Password: <input type="password" name="sc" />';
+			
+		$ret .= '
+<input type="submit" class="submit" value="Update" />
 </td></tr>
 </table>
-</form>";
+</form>';
 
 		return $ret;
 	}
@@ -133,6 +139,11 @@ Password: <input type=\"password\" name=\"sc\" />
 
 			$CON .= $this->fileForm($action, "Admin_plugins", $comment);
 
+			return true;
+		}
+		else if($action == "admin-deletecomment") {
+			$CON = $this->deleteComment();
+			
 			return true;
 		}
 
@@ -289,6 +300,42 @@ Password: <input type=\"password\" name=\"sc\" />
 		}
 	}
 
+	/*
+	 * Deleting comments from Comments plugin.
+	 *
+	 * If user is logged to Admin, it directly deletes the comment and redirects to the page. If not logged,
+	 * outputs password form.
+	 */
+
+	function deleteComment()
+	{
+		global $self, $T_PASSWORD, $plugins, $action;
+
+		$ret = "";
+
+		if($this->authentified() == false) {
+			$ret .= '
+<form action="'.$self.'" method="post">
+<input type="hidden" name="action" value="admin-deletecomment" />
+<input type="hidden" name="page" value="'.htmlspecialchars($_REQUEST["page"]).'" />
+<input type="hidden" name="filename" value="'.htmlspecialchars($_REQUEST["filename"]).'" />
+'.$T_PASSWORD.': <input type="text" name="sc" value="" />
+<input type="submit" value="Delete" />
+</form>';
+			$action = "view-html";
+		}
+		else {
+			$filename = sanitizeFilename($_REQUEST["filename"]);
+			$page = sanitizeFilename($_REQUEST["page"]);
+
+			if(preg_match("/([0-9]{8}-[0-9]{4}-[0-9]{2})\.txt/", $filename, $m)) // is it really a comment file?
+				unlink($plugins["Comments"]->comments_dir . $page . "/" . $filename);
+
+			Header("Location:$self?page=" . urlencode($page) . "#commentWrap");
+			die();
+		}
+	}
+
 	function template()
 	{
 		global $html;
@@ -302,5 +349,16 @@ Password: <input type=\"password\" name=\"sc\" />
 
 		foreach($tpl_subs as $subs) // substituting values
 			$html = preg_replace("/\{([^}]* )?$subs[0]( [^}]*)?\}/U", "$1$subs[1]$2", $html);
+	}
+
+	function authentified()
+	{
+		if(strlen($this->PASSWORD_MD5) > 0 && $_COOKIE["LW_ADMIN"] == $this->PASSWORD_MD5 || (isset($_POST["sc"]) && md5($_POST["sc"]) == $this->PASSWORD_MD5)) {
+			setcookie("LW_ADMIN", $this->PASSWORD_MD5, time() + $this->expire_login);
+
+			return true;
+		}
+		else
+			return false;
 	}
 }

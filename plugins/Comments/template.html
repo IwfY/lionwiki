@@ -7,7 +7,10 @@
 	{item}
   <tr id="{ID}" class="commentHeader">
     <td>{NAME_TO_EMAIL} {IP}</td>
-    <td style="text-align: right;">{DATE}</td>
+    <td style="text-align: right;">
+	    {DATE}
+	    <a href="{DELETE_LINK}" title="{DELETE}" onclick="return confirm('{DELETE_CONFIRM}');">&#10005;</a>
+    </td>
   </tr>
 	<tr class="commentItem">
     <td colspan="2" class="commentContent">{CONTENT}</td>
