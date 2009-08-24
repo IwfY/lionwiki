@@ -279,12 +279,12 @@ class Comments
 			$items = substr($items, 0, $pos + 7);
 
 		$n_item = "
-	<item>
-	  <title>".htmlspecialchars($page)."</title>
-	  <pubDate>". date("r")."</pubDate>
-	  <link>$pagelink?page=".urlencode($page)."#$id</link>
-	  <description>".htmlspecialchars($content)."</description>
-	</item>";
+<item>
+	<title>".htmlspecialchars($page)."</title>
+	<pubDate>". date("r")."</pubDate>
+	<link>$pagelink?page=".urlencode($page)."#$id</link>
+	<description><pre>".htmlspecialchars($content)."</pre></description>
+</item>";
 
 		$rss = str_replace('{WIKI_TITLE}', $WIKI_TITLE . ": " . $this->TP_COMMENTS, $this->rss_template);
 		$rss = str_replace('{PAGE_LINK}', $pagelink, $rss);

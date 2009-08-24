@@ -323,6 +323,8 @@ class Admin
 <input type="submit" value="Delete" />
 </form>';
 			$action = "view-html";
+
+			return $ret;
 		}
 		else {
 			$filename = sanitizeFilename($_REQUEST["filename"]);
