@@ -32,7 +32,7 @@ class SelectLanguage
 		"en" => "English",
 		"eo" => "Esperanto",
 		"es" => "Español",
-		"fi" => "Eesti",
+		"fi" => "Suomi",
 		"fr" => "Français",
 		"he" => "עברית",
 		"hr" => "Hrvatski",
@@ -48,7 +48,8 @@ class SelectLanguage
 		"sv" => "Svenska"
 	);
 
-	function template() {
+	function template()
+	{
 		global $html, $LANG, $LANG_DIR, $CON, $page_nolang, $action;
 
 		$langs = array();

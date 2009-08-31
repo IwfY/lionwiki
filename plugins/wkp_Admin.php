@@ -12,8 +12,8 @@
 
 class Admin
 {
-	var $PASSWORD = "aaa"; // either $PASSWORD or $PASSWORD_MD5 must be set
-	var $PASSWORD_MD5 = ""; // if set, $PASSWORD is ignored
+	var $PASSWORD = ""; // either $PASSWORD or $PASSWORD_MD5 must be set
+	var $PASSWORD_MD5 = "dfglkdjfhglkjsfghlk"; // if set, $PASSWORD is ignored
 	var $expire_login = 7200;
 	var $dir;
 
@@ -69,7 +69,7 @@ class Admin
 		if(!empty($_POST["action"]) && $this->authentified() == false)
 			$ret .= '<div class="error">Wrong password. List was not updated. You can try again.</div>';
 		else if(!empty($_POST["action"]))
-			if($f = fopen($filename, "wb")) {
+			if($f = fopen(sanitizeFilename($filename), "wb")) {
 				fwrite($f, $_POST["$dataname"]);
 
 				fclose($f);

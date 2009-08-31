@@ -47,25 +47,18 @@ if(get_magic_quotes_gpc()) // magic_quotes_gpc can't be turned off
 	for($i = 0, $_SG = array(&$_GET, &$_POST, &$_COOKIE, &$_REQUEST), $c = count($_SG); $i < $c; ++$i)
 		$_SG[$i] = array_map("stripslashes", $_SG[$i]);
 
-$BASE_DIR = $_GET["basedir"] ? $_GET["basedir"] . "/" : "";
-
-@include("config.php"); // config file is not required, see settings above
-
-if(!empty($BASE_DIR))
-	@include($BASE_DIR . "config.php"); // subdomain specific settings
-
 if(empty($PASSWORD_MD5) && !empty($PASSWORD))
 	$PASSWORD_MD5 = md5($PASSWORD);
 
 $REAL_PATH = realpath(dirname(__FILE__)) . "/";
-$VAR_DIR = $BASE_DIR . "var/";
+$VAR_DIR = "var/";
 $PAGES_DIR = $VAR_DIR . "pages/";
 $HISTORY_DIR = $VAR_DIR . "history/";
 $PLUGINS_DIR = "plugins/";
 $PLUGINS_DATA_DIR = $VAR_DIR . "plugins/";
 $LANG_DIR = "lang/";
 
-$WIKI_VERSION = "LionWiki 3.0.6";
+$WIKI_VERSION = "LionWiki 3.0.7";
 
 umask(0); // sets default mask
 
@@ -112,6 +105,8 @@ if(!empty($_GET["lang"])) {
 	setcookie('LW_LANG', $LANG, time() + 365 * 86400);
 }
 
+$LANG = sanitizeFilename($LANG);
+
 if(@file_exists($LANG_DIR . $LANG . ".php"))
 	@include $LANG_DIR . $LANG . ".php";
 else if(@file_exists($LANG_DIR . substr($LANG, 0, 2) . ".php"))
@@ -136,25 +131,14 @@ if($_GET["erasecookie"]) // remove cookie without reloading
 		}
 
 $plugins = array();
-$plugin_files = array();
-
 $plugin_saveok = true; // is OK to save page changes (from plugins)
-
-// We load common plugins for all subsites and then just for this subsite.
-if(!empty($BASE_DIR) && ($dir = @opendir($BASE_DIR . $PLUGINS_DIR)))
-	while($file = readdir($dir))
-		$plugin_files[] = $BASE_DIR . $PLUGINS_DIR . $file;
 
 if($dir = @opendir($PLUGINS_DIR)) // common plugins
 	while($file = readdir($dir))
-		if(!in_array($PLUGINS_DIR . $BASE_DIR . $file, $plugin_files)) // we don't want to load plugin twice
-			$plugin_files[] = $PLUGINS_DIR . $file;
-
-foreach($plugin_files as $pfile)
-	if(preg_match("/^.*wkp_(.+)\.php$/", $pfile, $matches) > 0) {
-		require $pfile;
-		$plugins[$matches[1]] = new $matches[1]();
-	}
+		if(preg_match("/^.*wkp_(.+)\.php$/", $file, $matches) > 0) {
+			require $PLUGINS_DIR . $file;
+			$plugins[$matches[1]] = new $matches[1]();
+		}
 
 plugin_call_method("pluginsLoaded"); // for admin plugin
 plugin_call_method("pluginsLoaded2"); // second pass ("for ordinary plugins")
@@ -678,11 +662,8 @@ if($action == "") { // substituting $CON to be viewed as HTML
 
 plugin_call_method("formatFinished");
 
-// lets check first subsite specific template, then common, then fallback
-if(file_exists($BASE_DIR . $TEMPLATE))
-	$html = file_get_contents($BASE_DIR . $TEMPLATE);
-elseif(file_exists($TEMPLATE))
-	$html = file_get_contents($TEMPLATE);
+if(file_exists($TEMPLATE))
+	$html = file_get_contents(sanitizeFilename($TEMPLATE));
 else // there's no template file, we'll use default minimal template
 	$html = fallback_template();
 

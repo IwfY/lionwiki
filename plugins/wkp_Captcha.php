@@ -159,8 +159,12 @@ class Captcha
 	{
 		global $comments_html;
 
-    if(!empty($PASSWORD_MD5) || ($this->permanent && $_COOKIE["LW_CAPTCHA"] == $this->cookie_password))
+		if(!empty($PASSWORD_MD5) || ($this->permanent && $_COOKIE["LW_CAPTCHA"] == $this->cookie_password)) {
+			$comments_html = template_replace("plugin:CAPTCHA_QUESTION", "", $comments_html);
+			$comments_html = template_replace("plugin:CAPTCHA_INPUT", "", $comments_html);
+
 			return;
+		}
 
 		$question_count = $this->questionCount();
 		$question_id = rand(1, $question_count);

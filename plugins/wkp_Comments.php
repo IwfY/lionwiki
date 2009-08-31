@@ -189,6 +189,7 @@ class Comments
 			plugin_call_method("commentsTemplate");
 
 			$html = template_replace("plugin:COMMENTS", $comments_html, $html);
+			$CON = str_replace("{COMMENTS}", $comments_html, $CON);
 		}
 
 		$CON = str_replace("{NO_COMMENTS}", "", $CON);

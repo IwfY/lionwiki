@@ -31,7 +31,7 @@ class PageVersions
 		"en" => "English",
 		"eo" => "Esperanto",
 		"es" => "Español",
-		"fi" => "Eesti",
+		"fi" => "Suomi",
 		"fr" => "Français",
 		"he" => "עברית",
 		"hr" => "Hrvatski",
