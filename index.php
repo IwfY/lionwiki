@@ -47,6 +47,8 @@ if(get_magic_quotes_gpc()) // magic_quotes_gpc can't be turned off
 	for($i = 0, $_SG = array(&$_GET, &$_POST, &$_COOKIE, &$_REQUEST), $c = count($_SG); $i < $c; ++$i)
 		$_SG[$i] = array_map("stripslashes", $_SG[$i]);
 
+@include("config.php"); // config file is not required, see settings above
+
 if(empty($PASSWORD_MD5) && !empty($PASSWORD))
 	$PASSWORD_MD5 = md5($PASSWORD);
 
