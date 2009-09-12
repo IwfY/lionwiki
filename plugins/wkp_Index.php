@@ -11,7 +11,8 @@ class Index
 		array("Index plugin", "gives list of pages in the wiki.")
 	);
 
-	function pages_list($type) {
+	function pages_list($type)
+	{
 		global $TITLE, $page, $PAGES_DIR;
 
 		$list = array();
@@ -37,7 +38,8 @@ class Index
 		return $ret;
 	}
 
-	function formatBegin() {
+	function formatBegin()
+	{
 		global $CON;
 
 		$CON = template_replace("INDEX_COMMA", $this->pages_list("comma"), $CON);
