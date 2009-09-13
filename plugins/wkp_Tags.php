@@ -55,44 +55,70 @@ class Tags
 		return array();
 	}
 
-	// displays tag search results page
-
-	function action($action)
+	function action()
 	{
-		if($action != "tagsearch")
-			return;
+		global $action;
 
-		global $TITLE, $CON;
+		/*
+		 * ?action=regenerate-tags regenerates tags for all pages on a wiki. Good in situations when tag file
+		 * is lost or corrupted, or when changes to pages are made not using web interface.
+		 *
+		 * As of now it's quite hackish, it's gonna be quite slow on large wikis.
+		 */
 
-		$tag = trim($_GET["tag"]);
+		if($action == "regenerate-tags") {
+			global $PAGES_DIR, $page, $content, $CON;
 
-		$TITLE = 'List of pages tagged with "' . htmlspecialchars($tag) . '"';
+			@unlink($this->tagfile);
 
-		$f = fopen($this->tagfile, "rb");
+			$dir = opendir($PAGES_DIR);
 
-		if(!$f)
-			return;
+			while($file = readdir($dir))
+				if(preg_match("/\.txt$/", $file)) {
+					$content = file_get_contents($PAGES_DIR . $file);
+					$page = basename($file, ".txt");
 
-		$results = array();
+					$this->pageWritten();
+				}
 
-		while($page = fgets($f)) {
-			$tags = array_map("trim", explode(",", fgets($f)));
+			$CON = "Tags were successfully (re)generated.";
+			$action = "view-html";
 
-			if($this->inCaseArray($tag, $tags))
-				$results[] = trim($page);
+			return false;
 		}
+		else if($action == "tagsearch") { // displays tag search results page
+			global $TITLE, $CON;
 
-		if(empty($results))
-			$CON = "'''No pages are tagged with this tag.'''"; // shouldn't happen at all
-		else {
-			$CON = "<ul>\n";
+			$tag = trim($_GET["tag"]);
 
-			foreach($results as $r)
-				$CON .= "	<li><a href=\"$self?page=".urlencode($r)."\">".htmlspecialchars($r)."</a></li>\n";
+			$TITLE = 'List of pages tagged with "' . htmlspecialchars($tag) . '"';
 
-			$CON .= "</ul>\n";
+			$f = fopen($this->tagfile, "rb");
 
-			return true;
+			if(!$f)
+				return;
+
+			$results = array();
+
+			while($page = fgets($f)) {
+				$tags = array_map("trim", explode(",", fgets($f)));
+
+				if($this->inCaseArray($tag, $tags))
+					$results[] = trim($page);
+			}
+
+			if(empty($results))
+				$CON = "'''No pages are tagged with this tag.'''"; // shouldn't happen at all
+			else {
+				$CON = "<ul>\n";
+
+				foreach($results as $r)
+					$CON .= "	<li><a href=\"$self?page=".urlencode($r)."\">".htmlspecialchars($r)."</a></li>\n";
+
+				$CON .= "</ul>\n";
+
+				return true;
+			}
 		}
 	}
 
@@ -228,7 +254,7 @@ class Tags
 			else
 				$tagsize = floor(($tag["count"] - $count_min) / ($count_max - $count_min) * ($this->font_max - $this->font_min) + $this->font_min);
 
-			$t .= "<a class=\"tagCloudLink\" style=\"font-size:${tagsize}px\" href=\"$self?action=tagsearch&amp;tag=".urlencode($tag["name"])."\">".htmlspecialchars($tag["name"])."</a>\n";
+			$t .= "<a class=\"tagCloudLink\" style=\"font-size:{$tagsize}px\" href=\"$self?action=tagsearch&amp;tag=".urlencode($tag["name"])."\">".htmlspecialchars($tag["name"])."</a>\n";
 		}
 
 		return $t . "</div>\n";
@@ -251,7 +277,7 @@ class Tags
 	}
 
 	function template()
-  {
+	{
 		global $html, $action;
 
 		if(!empty($action))

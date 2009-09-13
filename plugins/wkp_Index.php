@@ -17,7 +17,7 @@ class Index
 
 		$list = array();
 
-		$dir = opendir(getcwd() . "/$PAGES_DIR");
+		$dir = opendir($PAGES_DIR);
 
 		while($file = readdir($dir))
 			if(preg_match("/\.txt$/", $file))

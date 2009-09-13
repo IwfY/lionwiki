@@ -18,7 +18,7 @@ class WhatLinksHere {
 			$CON = "";
 
 			$editable = false;
-			$dir = opendir(getcwd() . "/$PAGES_DIR");
+			$dir = opendir($PAGES_DIR);
 
 			while($file = readdir($dir)) {
 				if(preg_match("/\.txt$/", $file)) {
@@ -34,10 +34,10 @@ class WhatLinksHere {
 				sort($files);
 
 				foreach($files as $file)
-					$CON .= "<a href=\"$self?page=" . urlencode($file) . "\">" . htmlspecialchars($file) . "</a><br />";
+					$CON .= "<a href=\"$self?page=".urlencode($file)."\">".htmlspecialchars($file)."</a><br />";
 			}
 
-			$TITLE = "What links to " . htmlspecialchars($page) . "? (" . count($files) . ")";
+			$TITLE = "What links to ".htmlspecialchars($page)."? (".count($files).")";
 
 			return true;
 		}

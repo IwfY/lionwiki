@@ -13,13 +13,13 @@
 
 class Meta
 {
-  var $desc = array(
+	var $desc = array(
 		array("Meta", "adds meta tags keywords and description to the page. Syntax {description:This page is about cats and dogs} and {keywords:Cats, Dogs}.")
 	);
 
 	function formatBegin()
 	{
-	  global $HEAD, $CON;
+		global $HEAD, $CON;
 
 		if(preg_match("/\{description:(.*)\}/U", $CON, $match)) {
 			$HEAD .= "<meta name=\"description\" content=\"".strip_tags($match[1])."\" />\n";

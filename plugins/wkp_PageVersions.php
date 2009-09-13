@@ -48,7 +48,7 @@ class PageVersions
 	);
 
 	function template()
-  {
+	{
 		global $CON, $html, $page, $PAGES_DIR, $action;
 
 		if(!empty($action))

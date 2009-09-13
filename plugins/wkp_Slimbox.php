@@ -18,8 +18,7 @@ class Slimbox
 		$HEAD .= "
 <script type=\"text/javascript\" src=\"plugins/Slimbox/js/jquery.js\"></script>
 <script type=\"text/javascript\" src=\"plugins/Slimbox/js/slimbox2.js\"></script>
-<link rel=\"stylesheet\" href=\"plugins/Slimbox/css/slimbox2.css\" />
-";
+<link rel=\"stylesheet\" href=\"plugins/Slimbox/css/slimbox2.css\" />";
 
 		return false;
 	}
@@ -29,9 +28,9 @@ class Slimbox
 		global $CON;
 
 		$rg_url = "[0-9a-zA-Z\.\#/~\-_%=\?\&,\+\:@;!\(\)\*\$']*";
-		$rg_img_local = "(".$rg_url."\.(jpeg|jpg|gif|png))";
+		$rg_img_local = "($rg_url\.(jpeg|jpg|gif|png))";
 
-		$regex = "#\[".$rg_img_local."\|".$rg_img_local."\|(.+)\]#U";
+		$regex = "#\[$rg_img_local\|$rg_img_local\|(.+)\]#U";
 
 		$CON = preg_replace($regex, '<a href="$3" class="lightbox" rel="lightbox[]" title="$5"><img src="$1" alt="$5"/></a>', $CON);
 	 }

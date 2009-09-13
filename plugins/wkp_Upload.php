@@ -268,4 +268,3 @@ class Upload
 				$this->$str[0] = $str[1];
 	}
 }
-?>
