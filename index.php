@@ -580,7 +580,7 @@ if($action == "") { // substituting $CON to be viewed as HTML
 
 		$head_stack[] = (int) $h[0];
 
-		$ret .= "<div class=\"par-div\" id=\"par-$heading_id\"><h$h[0]><a class=\"section-edit\" name=\"$h[1]\">".htmlspecialchars($h[2])."</a>";
+		$ret .= "<div class=\"par-div\" id=\"par-$heading_id\"><h$h[0]><a class=\"section-edit\" name=\"$h[1]\">$h[2]</a>";
 
 		if(is_writable($PAGES_DIR . $page . ".txt"))
 			$ret .=  "<span class=\"par-edit\">(<a href=\"$self?action=edit&amp;page=".urlencode($page)."&amp;par=$heading_id\">$T_EDIT</a>)</span>";
