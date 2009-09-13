@@ -11,6 +11,8 @@ class Slimbox
 		array("Slimbox plugin", "plugin provides Slimbox galleries using syntax: [images/thumb/thumbnail.png|images/picture.jpg|Caption of the image].")
 	);
 
+	var $version = "1.0";
+
 	function template()
 	{
 		global $HEAD;

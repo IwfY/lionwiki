@@ -29,6 +29,8 @@ class Script
 		array("Script", "provides flexible and powerful syntax to write inline JavaScript. Help how to use it is located <a href=\"http://www.TiddlyTools.com/#InlineJavascriptPlugin\">here</a>.")
 	);
 
+	var $version = "1.0";
+
 	function subPagesLoaded()
 	{
 		global $CON, $NO_HTML;

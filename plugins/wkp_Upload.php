@@ -9,6 +9,12 @@
 
 class Upload
 {
+	var $desc = array(
+		array("Upload plugin", ".")
+	);
+
+	var $version = "1.0";
+
 	var $datadir;
 
 	var $blacklist = array(".php", ".phtml", ".php3", ".php4", ".js", ".shtml", ".pl" ,".py", ".asp", ".jsp", ".sh", ".cgi", ".htaccess"); // forbidden file extensions
