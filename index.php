@@ -802,9 +802,9 @@ function getParagraph($text, $par_id)
 			$par[] = $line;
 
 		if(strpos($line, "{html}") !== false && strpos($line, "^{html}") === false) $inside_html = true;
-		if(strpos($line, "{/html}") !== false && strpos($line, "^{/html}")) $inside_html = false;
-		if(strpos($line, "{{") !== false && strpos($line, "^{{")) $inside_code = true;
-		if(strpos($line, "}}") !== false && strpos($line, "^}}")) $inside_code = false;
+		if(strpos($line, "{/html}") !== false && strpos($line, "^{/html}") === false) $inside_html = false;
+		if(strpos($line, "{{") !== false && strpos($line, "^{{") === false) $inside_code = true;
+		if(strpos($line, "}}") !== false && strpos($line, "^}}") === false) $inside_code = false;
 	}
 
 	return implode("\n", $par);
