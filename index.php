@@ -56,7 +56,7 @@ $PLUGINS_DIR = "plugins/";
 $PLUGINS_DATA_DIR = $VAR_DIR."plugins/";
 $LANG_DIR = "lang/";
 
-$WIKI_VERSION = "LionWiki 3.0.8";
+$WIKI_VERSION = "LionWiki 3.0.9";
 
 umask(0); // sets default mask
 
@@ -240,11 +240,13 @@ else if($action == "save" && authentified()) { // do we have page to save?
 		plugin_call_method("pageWritten", $file);
 
 		if($moveto != $page && !empty($moveto)) {
+			if(file_exists($PAGES_DIR . $moveto . ".txt"))
+				die("Error: target filename already exists. Page was not moved.");
 			if(!rename($PAGES_DIR . $page . ".txt", $PAGES_DIR . $moveto . ".txt"))
-				die("Moving page was not successful! Page was not moved.");
+				die("Unknown error! Page was not moved.");
 			else if(!rename($HISTORY_DIR . $page, $HISTORY_DIR . $moveto)) {
 				rename($PAGES_DIR . $moveto . ".txt", $PAGES_DIR . $page . ".txt"); // revert previous change
-				die("Moving history of the page was not successful! Page was not moved.");
+				die("Unknown error2! Page was not moved.");
 			}
 			else {
 				@touch($PAGES_DIR . $moveto . ".txt"); // moved page should be at the top of recent ch.
