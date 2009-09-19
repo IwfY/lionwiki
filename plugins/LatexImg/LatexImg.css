@@ -1,0 +1,21 @@
+/* LatexImg plugin for LionWiki, (c) Matthew Leifer <matt@mattleifer.info>, 2009
+ * Licensed under GNU GPLv2.0
+ *
+ * LatexImg plugin provides ability to insert snippets of LaTeX into a page that are 
+ * rendered as either .gif or .png images.  This is useful for adding mathematical 
+ * equations to a wiki page.
+ *
+ * LatexImg plugin is built upon LaTeX Rendering Class 0.8, (c) 2003/2004 Benjamin Zeiss
+ * See the file "LatexImg/class.latexrender.php" for licensing and further details.
+ *
+ * This css file makes sure minimal styling is in force for LaTeX images
+ */
+
+img.latex {
+    background: transparent;
+    border: none;
+    outline: none;
+    padding: 0;
+    margin: 0;
+    vertical-align: middle;
+}

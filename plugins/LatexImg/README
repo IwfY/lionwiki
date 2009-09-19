@@ -1,0 +1,56 @@
+LatexImg plugin for LionWiki 
+============================
+
+(c) Matthew Leifer <matt@mattleifer.info>, 2009
+
+Licensed under GNU GPLv2.0
+
+LatexImg plugin provides ability to insert snippets of LaTeX into a page that are rendered as either .gif or .png images.  This is useful for adding mathematical equations to a wiki page.
+
+LatexImg plugin is built upon LaTeX Rendering Class 0.8, (c) 2003/2004 Benjamin Zeiss
+See the file "LatexImg/class.latexrender.php" for licensing and further details.
+
+PREREQUISITES
+-------------
+
+This plugin requires that either laTeX and ImageMagick or MimeTex are installed on your server.  LaTeX and ImageMagick give better results than MimeTex.  Obviously, this plugin also requires a working installation of LionWiki.
+
+INSTALLATION
+------------
+
+1. Copy the file "wkp_LatexImg.php" and the directory "LatexImg" to the "plugins" directory of your LionWiki installation.
+2. Edit the file "config.php" in the "LatexImg" directoy to reflect your server configuration.
+
+USAGE
+-----
+
+LatexImg adds the syntax {tex}...{/tex} for inserting a snippet of LaTeX markup.  For example, to insert Einstein's famous equation in your document you would write: 
+
+{tex}E = mc^2{/tex}
+
+When you save or preview a wiki page that contains new LaTeX markup, LaTeX is run and the result is converted into an image.  This may take some time if you have a lot of LaTeX markup, but images are cached so the page will load much more quickly when you navigate to the page again.
+
+LaTeX markup is processed before most of the other LionWiki syntax, so there is no need to escape characters within a {tex}...{/tex} block that are common in LaTeX but used differently by LionWiki, e.g. "{","^" and "}".
+
+If the default LaTeX rendering settings are causing problems in your site, e.g. the font is too small with your template or the images do not have high enough resolution, then you can find some advanced configuration options in the file "LatexImg/class.letexrender.php".  Editing these is not recommended for LaTeX/PHP novices.
+
+ERROR CODES
+-----------
+
+If the LaTeX rendering fails for any reason, you will see a LatexImg error code on your wiki page.  Here are the explanations of the error codes:
+
+1 Formula longer than 500 characters
+2 Includes a blacklisted tag
+3 (Not used) LaTeX rendering failed
+4 Cannot create DVI file
+5 Picture larger than 500 x 500 followed by x x y dimensions
+6 Cannot copy image to pictures directory
+
+In particular, code 4 usually indicates a problem with your paths in config.php or the lack of some of the prerequisites.  Error code 6 usually indicates that the webserver does not have write permission to the "var/plugins" directory.
+
+Error codes 1 and 5 indicate that you have tried to include a LaTeX snippet that is too long.  LatexImg is designed for short snipptes, i.e. mainly equations, but if you really need longer LaTeX snippets then you can change these settings by editing "LatexImg/class.latexrender.php".
+
+CHANGELOG
+---------
+
+v0.1: Initial release.
