@@ -101,7 +101,7 @@ class Admin
 		global $CON, $editable, $TITLE;
 
 		if(substr($action, 0, 6) == "admin-") {
-			if(!is_dir($this->dir) && !mkdir($this->dir)) {
+			if(!is_dir(rtrim($this->dir, "/")) && !mkdir(rtrim($this->dir, "/"))) {
 				$CON = "<div class=\"error\">Plugin data directory doesn't exist. Create please $this->dir and set access permissions to 777.</div>";
 				return true;
 			}

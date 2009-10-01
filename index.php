@@ -49,6 +49,7 @@ if(get_magic_quotes_gpc()) // magic_quotes_gpc can't be turned off
 if(empty($PASSWORD_MD5) && !empty($PASSWORD))
 	$PASSWORD_MD5 = md5($PASSWORD);
 
+$REAL_PATH = realpath(dirname(__FILE__)) . "/";
 $VAR_DIR = "var/";
 $PAGES_DIR = $VAR_DIR."pages/";
 $HISTORY_DIR = $VAR_DIR."history/";
@@ -56,7 +57,7 @@ $PLUGINS_DIR = "plugins/";
 $PLUGINS_DATA_DIR = $VAR_DIR."plugins/";
 $LANG_DIR = "lang/";
 
-$WIKI_VERSION = "LionWiki 3.0.9";
+$WIKI_VERSION = "LionWiki 3.0.10";
 
 umask(0); // sets default mask
 

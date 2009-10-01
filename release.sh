@@ -23,6 +23,8 @@ rm $work/install.sh*
 rm -rf $work/nbproject
 rm $work/plugins/wkp_Upload.php
 rm $work/plugins/wkp_Script.php
+rm $work/plugins/wkp_LatexImg.php
+rm -rf $work/plugins/LatexImg
 
 release=$path/$version
 

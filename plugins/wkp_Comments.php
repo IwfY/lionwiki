@@ -216,8 +216,8 @@ class Comments
 				}
 			}
 
-			if(!is_dir($this->comments_dir)) {
-				mkdir($this->comments_dir);
+			if(!is_dir(rtrim($this->comments_dir, "/"))) {
+				mkdir(rtrim($this->comments_dir, "/"));
 				
 				$f = fopen($this->comments_dir . ".htaccess", "w"); 
 				fwrite($f, "deny from all"); 
@@ -226,8 +226,8 @@ class Comments
 
 			$c_dir = $this->comments_dir . urldecode($page);
 
-			if(!is_dir($c_dir))
-				mkdir($c_dir);
+			if(!is_dir(rtrim($c_dir, "/")))
+				mkdir(rtrim($c_dir, "/"));
 
 			function prepare($txt) {
 				return strtr($txt, array(
