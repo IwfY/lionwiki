@@ -57,7 +57,7 @@ $PLUGINS_DIR = "plugins/";
 $PLUGINS_DATA_DIR = $VAR_DIR."plugins/";
 $LANG_DIR = "lang/";
 
-$WIKI_VERSION = "LionWiki 3.0.10";
+$WIKI_VERSION = "LionWiki 3.0.11";
 
 umask(0); // sets default mask
 
@@ -762,10 +762,10 @@ function getParagraph($text, $par_id) {
 		else if($par_excl)
 			$par[] = $line;
 
-		if(strpos($line, "{html}") !== false && strpos($line, "^{html}") === false) $inside_html = true;
-		if(strpos($line, "{/html}") !== false && strpos($line, "^{/html}") === false) $inside_html = false;
-		if(strpos($line, "{{") !== false && strpos($line, "^{{") === false) $inside_code = true;
-		if(strpos($line, "}}") !== false && strpos($line, "^}}") === false) $inside_code = false;
+		if(preg_match("/(?<!\^)\{html\}/", $line)) $inside_html = true;
+		if(preg_match("/(?<!\^)\{\/html\}/", $line)) $inside_html = false;
+		if(preg_match("/(?<!\^)\{\{/", $line)) $inside_code = true;
+		if(preg_match("/(?<!\^)\}\}/", $line)) $inside_code = false;
 	}
 
 	return implode("\n", $par);
@@ -797,7 +797,7 @@ function diff_builtin($f1, $f2) {
 	for($i = 0; $i <= max(sizeof($a2), sizeof($a1)); $i++) {
 		if($r1 = array_key_exists($i, $d1)) $ret .= "<del>".htmlspecialchars(trim($d1[$i]))."</del>\n";
 		if($r2 = array_key_exists($i, $d2)) $ret .= "<ins>".htmlspecialchars(trim($d2[$i]))."</ins>\n";
-		if(!$r1 && !$r2) $ret .= htmlspecialchars(trim($a2[$i])) . "\n";
+		if(!$r1 && !$r2) $ret .= htmlspecialchars(trim($a2[$i]))."\n";
 	}
 
 	return $ret . "</pre>";
@@ -805,8 +805,8 @@ function diff_builtin($f1, $f2) {
 
 function lwread($name) {
 	if(file_exists($name)) return @file_get_contents($name);
-	elseif(file_exists($name . ".gz")) return implode(@gzfile($name . ".gz"));
-	elseif(file_exists($name . ".bz2")) return bzdecompress(@file_get_contents($name . ".bz2"));
+	elseif(file_exists($name.".gz")) return implode(@gzfile($name.".gz"));
+	elseif(file_exists($name.".bz2")) return bzdecompress(@file_get_contents($name.".bz2"));
 }
 
 function authentified() {
