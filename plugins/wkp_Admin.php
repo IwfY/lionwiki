@@ -13,7 +13,7 @@
 class Admin
 {
 	var $PASSWORD = ""; // either $PASSWORD or $PASSWORD_MD5 must be set
-	var $PASSWORD_MD5 = "dfglkdjfhglkjsfghlk"; // if set, $PASSWORD is ignored
+	var $PASSWORD_MD5 = "X"; // if set, $PASSWORD is ignored
 	var $expire_login = 7200;
 	var $dir;
 

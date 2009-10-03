@@ -493,7 +493,7 @@ if($action == "") { // substituting $CON to be viewed as HTML
 	$nbcode = preg_match_all("/{{(.+)}}/Ums", $CON, $matches_code, PREG_PATTERN_ORDER);
 	$CON = preg_replace("/{{(.+)}}/Ums", "<pre><code>{{CODE}}</code></pre>", $CON);
 
-	preg_match_all("/\{([\.#][^ \"\}]*)( ([^\}\"]*))?\}/m", $CON, $spans, PREG_SET_ORDER);
+	preg_match_all("/\{([\.#][^\s\"\}]*)(\s([^\}\"]*))?\}/m", $CON, $spans, PREG_SET_ORDER);
 
 	foreach($spans as $m) {
 		$class = $id = "";

@@ -39,10 +39,27 @@ class Menu
 
 		// First we need to save it, otherwise main parsing algorithm would mess with it
 
-		preg_match_all("/\{menu(\(([^)]*)\))? (.*)\}/Us", $CON, $this->menus, PREG_SET_ORDER);
+		preg_match_all("/\{menu(\(([^)]*)\))?(\s+parent=\[([^\]]+)\])?\s+([^\}]*)\}/s", $CON, $this->menus, PREG_SET_ORDER);
 
 		foreach($this->menus as $menu)
 			$CON = str_replace($menu[0], "{MENU}", $CON);
+	}
+
+	// $str is something like [Link] or [Title|Link] or [Title|http://hskdjfhjks]
+
+	function getLink($str)
+	{
+		$parts = explode("|", $str);
+
+		if(empty($parts[1]))
+			$parts[1] = $parts[0];
+
+		list($name, $link) = $parts;
+
+		if(substr($link, 0, 4) != "http" && substr($link, 0, 4) != "http" && substr($link, 0, 2) != "./" && $link[0] != "/")
+			$link = $GLOBALS["self"] . "?page=" . urlencode($link);
+
+		return array($link, $parts[0]);
 	}
 
 	function formatEnd()
@@ -51,7 +68,8 @@ class Menu
 
 		foreach($this->menus as $m) {
 			$template_file = $m[2];
-			$item_string = $m[3];
+			list($parent_link, $parent_name) = $this->getLink($m[4]);
+			$item_string = $m[5];
 
 			$template_file = sanitizeFilename($template_file);
 
@@ -73,33 +91,29 @@ class Menu
 			$items_str = "";
 
 			for($i = 0, $c = count($items); $i < $c; $i++) {
-				$parts = explode("|", $items[$i]);
-
-				if(empty($parts[1]))
-					$parts[1] = $parts[0];
-
-				list($name, $link) = $parts;
-
-				if(substr($link, 0, 7) != "http://" && substr($link, 0, 7) != "http://"
-					&& substr($link, 0, 2) != "./" && $link[0] != "/")
-					$link = $GLOBALS["self"] . "?page=" . urlencode($link) . $suffix;
-
 				$class = "";
 
 				if($i == 0)
 					$class = "first";
 
 				if($i == $c - 1)
-					$class .= "last";
+					$class .= " last";
+
+				list($link, $name) = $this->getLink($items[$i]);
 
 				$items_str .= strtr($item_tmpl, array(
 					"{class}" => $class,
-					"{name}" => htmlspecialchars($parts[0]),
+					"{name}" => htmlspecialchars($name),
 					"{link}" => $link
 				));
 			}
 
-			$menu_str = preg_replace("/\{item\}.*\{\/item\}/Us", $items_str, $tmpl);
+			$menu_str = strtr($tmpl, array(
+				"{parent_name}" => $parent_name,
+				"{parent_link}" => $parent_link
+			));
+
+			$menu_str = preg_replace("/\{item\}.*\{\/item\}/Us", $items_str, $menu_str);
 
 			$CON = preg_replace("/\{MENU\}/", $menu_str, $CON, 1);
 		}
