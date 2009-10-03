@@ -710,8 +710,6 @@ $tpl_subs = array(
 	array("LANG", $LANG),
 	array("LIST_OF_ALL_PAGES", "<a href=\"$self?action=search\">$T_LIST_OF_ALL_PAGES</a>"),
 	array("WIKI_VERSION", $WIKI_VERSION),
-	array("DATE", date($DATE_FORMAT, time() + $LOCAL_HOUR * 3600)),
-	array("IP", $_SERVER['REMOTE_ADDR']),
 	array("SYNTAX", $action == "edit" || $preview ? "<a href=\"$SYNTAX_PAGE\">$T_SYNTAX</a>" : ""),
 	array("SHOW_PAGE", $action == "edit" || $preview ?  "<a href=\"$self?page=".urlencode($page)."\">$T_SHOW_PAGE</a>" : ""),
 	array("COOKIE", '<a href="'.$self.'?page='.urlencode($page).'&amp;action='.urlencode($action).'&amp;erasecookie=1" rel="nofollow">'.$T_ERASE_COOKIE.'</a>'),
