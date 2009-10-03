@@ -1,19 +1,20 @@
-<div style="text-align: center; margin-bottom: 8px;">
-	<a href="javascript:" onclick="toggleComments();" style="font-variant: small-caps; font-size: larger;"><span id="plusminus"></span> {COMMENTS} ({NUMBER_OF_COMMENTS})</a>
+<div style="text-align: center; margin: 0px;">
+	<a href="javascript:" onclick="toggleComments();" style="font-variant: small-caps;"><span id="plusminus"></span> {COMMENTS} ({NUMBER_OF_COMMENTS})</a>
 </div>
 
 <div id="commentWrap">
+	<br />
 <table class="commentList">
 	{item}
-  <tr id="{ID}" class="commentHeader">
-    <td>{NAME_TO_EMAIL} {IP}</td>
-    <td style="text-align: right;">
-	    {DATE}
-	    <a href="{DELETE_LINK}" title="{DELETE}" onclick="return confirm('{DELETE_CONFIRM}');">&#10005;</a>
-    </td>
-  </tr>
+	<tr id="{ID}" class="commentHeader">
+		<td>{NAME_TO_EMAIL} {IP}</td>
+		<td style="text-align: right;">
+			{DATE}
+			<a href="{DELETE_LINK}" title="{DELETE}" onclick="return confirm('{DELETE_CONFIRM}');">&#10005;</a>
+		</td>
+	</tr>
 	<tr class="commentItem">
-    <td colspan="2" class="commentContent">{CONTENT}</td>
+		<td colspan="2" class="commentContent">{CONTENT}</td>
 	</tr>
 	<tr class="commentPadding">
 		<td colspan="2"></td>

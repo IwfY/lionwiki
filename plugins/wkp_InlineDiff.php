@@ -30,8 +30,8 @@ class InlineDiff
 
 		// Load the lines of each file.
 
-		$c1 = lwread($f1);
-		$c2 = lwread($f2);
+		$c1 = file_get_contents($f1);
+		$c2 = file_get_contents($f2);
 
 		$lines1 = empty($c1) ? array() : explode("\n", $c1);
 		$lines2 = empty($c2) ? array() : explode("\n", $c2);

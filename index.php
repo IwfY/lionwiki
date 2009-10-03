@@ -44,11 +44,6 @@ if(get_magic_quotes_gpc()) // magic_quotes_gpc can't be turned off
 	for($i = 0, $_SG = array(&$_GET, &$_POST, &$_COOKIE, &$_REQUEST), $c = count($_SG); $i < $c; ++$i)
 		$_SG[$i] = array_map("stripslashes", $_SG[$i]);
 
-@include("config.php"); // config file is not required, see settings above
-
-if(empty($PASSWORD_MD5) && !empty($PASSWORD))
-	$PASSWORD_MD5 = md5($PASSWORD);
-
 $REAL_PATH = realpath(dirname(__FILE__)) . "/";
 $VAR_DIR = "var/";
 $PAGES_DIR = $VAR_DIR."pages/";
@@ -57,7 +52,12 @@ $PLUGINS_DIR = "plugins/";
 $PLUGINS_DATA_DIR = $VAR_DIR."plugins/";
 $LANG_DIR = "lang/";
 
-$WIKI_VERSION = "LionWiki 3.0.11";
+@include("config.php"); // config file is not required, see settings above
+
+if(empty($PASSWORD_MD5) && !empty($PASSWORD))
+	$PASSWORD_MD5 = md5($PASSWORD);
+
+$WIKI_VERSION = "LionWiki 3.1.0";
 
 umask(0); // sets default mask
 
@@ -137,6 +137,10 @@ if($dir = @opendir($PLUGINS_DIR)) // common plugins
 		if(preg_match("/^.*wkp_(.+)\.php$/", $file, $matches) > 0) {
 			require $PLUGINS_DIR . $file;
 			$plugins[$matches[1]] = new $matches[1]();
+
+			if(isset($$matches[1]))
+				foreach($$matches[1] as $name => $value)
+					$plugins[$matches[1]]->$name = $value;
 		}
 
 plugin_call_method("pluginsLoaded"); // for admin plugin
@@ -299,7 +303,7 @@ if($gtime && ($restore || $action == "rev")) {
 		$CON = str_replace(array("{TIME}", "{RESTORE}"), array(revTime($gtime), $rev_restore), $T_REVISION);
 	}
 
-	$CON .= lwread($HISTORY_DIR.$page."/".$gtime);
+	$CON .= file_get_contents($HISTORY_DIR.$page."/".$gtime);
 }
 
 plugin_call_method("pageLoaded");
@@ -430,6 +434,8 @@ elseif($action == "diff") {
 
 	$filetime = array_slice($filetime, 0, 100); // just first 100 changed files
 
+	$CON .= "<table>";
+
 	foreach($filetime as $filename => $timestamp) {
 		$filename = substr($filename, 0, strlen($filename) - 4);
 
@@ -438,13 +444,16 @@ elseif($action == "diff") {
 			fclose($meta);
 
 			$ip = $m[1];
-			$size = " - ($m[2] B)";
-			$esum = htmlspecialchars($m[3]);
+			$size = "$m[2] B";
+			$esum = strlen($m[3]) ? " - " . htmlspecialchars($m[3]) : "";
 		} else
 			$ip = $size = $esum = "";
 
-		$CON .= "<a href=\"$self?page=".urlencode($filename)."\">".htmlspecialchars($filename)."</a> (".date($DATE_FORMAT, $timestamp + $LOCAL_HOUR * 3600)." - <a href=\"$self?page=".urlencode($filename)."&amp;action=diff\">$T_DIFF</a>) $size $ip <i>$esum</i><br />";
+		$CON .= "<tr><td class=\"rc-diff\"><a href=\"$self?page=".urlencode($filename)."&amp;action=diff\">$T_DIFF</a></td><td class=\"rc-date\" nowrap>".date($DATE_FORMAT, $timestamp + $LOCAL_HOUR * 3600)."</td><td class=\"rc-ip\">$ip</td><td class=\"rc-page\"><a href=\"$self?page=".urlencode($filename)."\">".htmlspecialchars($filename)."</a> <span class=\"rc-size\">($size)</span><i class=\"rc-esum\">$esum</i></td></tr>";
+		//$CON .= "<a href=\"$self?page=".urlencode($filename)."\">".htmlspecialchars($filename)."</a> (".date($DATE_FORMAT, $timestamp + $LOCAL_HOUR * 3600)." - <a href=\"$self?page=".urlencode($filename)."&amp;action=diff\">$T_DIFF</a>) $size $ip <i>$esum</i><br />";
 	}
+
+	$CON .= "</table>";
 } else if(!plugin_call_method("action", $action) && $action != "view-html")
 	$action = "";
 
@@ -483,6 +492,26 @@ if($action == "") { // substituting $CON to be viewed as HTML
 	// {{CODE}}
 	$nbcode = preg_match_all("/{{(.+)}}/Ums", $CON, $matches_code, PREG_PATTERN_ORDER);
 	$CON = preg_replace("/{{(.+)}}/Ums", "<pre><code>{{CODE}}</code></pre>", $CON);
+
+	preg_match_all("/\{([\.#][^ \"\}]*)( ([^\}\"]*))?\}/m", $CON, $spans, PREG_SET_ORDER);
+
+	foreach($spans as $m) {
+		$class = $id = "";
+
+		$parts = preg_split("/([\.#])/", $m[1], -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+
+		if($c = count($parts) > 1)
+			for($i = 0; $i < $c; $i += 2)
+				if($parts[$i] == ".")
+					$class .= $parts[$i + 1] . " ";
+				else
+					$id = $parts[$i + 1];
+
+		$CON = str_replace($m[0], "<span".($id ? " id=\"$id\"" : "").($class ? " class=\"$class\"" : "").($m[3] ? " style=\"$m[3]\"" : "").">", $CON);
+	}
+	
+
+	$CON = str_replace("{/}", "</span>", $CON);
 
 	plugin_call_method("formatBegin");
 
@@ -786,8 +815,8 @@ function diff($f1, $f2) {
 }
 
 function diff_builtin($f1, $f2) {
-	$a1 = explode("\n", lwread($f1));
-	$a2 = explode("\n", lwread($f2));
+	$a1 = explode("\n", file_get_contents($f1));
+	$a2 = explode("\n", file_get_contents($f2));
 
 	$d1 = array_diff($a1, $a2);
 	$d2 = array_diff($a2, $a1);
@@ -801,12 +830,6 @@ function diff_builtin($f1, $f2) {
 	}
 
 	return $ret . "</pre>";
-}
-
-function lwread($name) {
-	if(file_exists($name)) return @file_get_contents($name);
-	elseif(file_exists($name.".gz")) return implode(@gzfile($name.".gz"));
-	elseif(file_exists($name.".bz2")) return bzdecompress(@file_get_contents($name.".bz2"));
 }
 
 function authentified() {
