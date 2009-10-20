@@ -51,11 +51,13 @@ class WhatLinksHere {
 
 	function template()
 	{
-		global $html, $page, $page_nolang, $START_PAGE, $WIKI_TITLE, $TITLE;
+		global $html, $page, $START_PAGE, $WIKI_TITLE, $TITLE;
 
 		if(!empty($page)) {
-			$html = template_replace("plugin:WHAT_LINKS_HERE", "<a href=\"$self?action=whatlinkshere&amp;page=".urlencode($page)."\" rel=\"nofollow\">What links here?</a>", $html);
-			$html = template_replace("PAGE_TITLE", "<a href=\"$self?action=whatlinkshere&amp;page=".urlencode($page)."\" rel=\"nofollow\" title=\"What links to this page?\">".htmlspecialchars($page_nolang == $START_PAGE ? $WIKI_TITLE : $TITLE)."</a>", $html);
+			$page_nolang = preg_replace("/\.[A-Za-z]{2}(-[A-Za-z]{2})?$/", "", $page);
+
+			$html = template_replace("plugin:WHAT_LINKS_HERE", "<a href=\"$self?action=whatlinkshere&amp;page=".urlencode($page_nolang)."\" rel=\"nofollow\">What links here?</a>", $html);
+			$html = template_replace("PAGE_TITLE", "<a href=\"$self?action=whatlinkshere&amp;page=".urlencode($page_nolang)."\" rel=\"nofollow\" title=\"What links to this page?\">".htmlspecialchars($page == $START_PAGE ? $WIKI_TITLE : $TITLE)."</a>", $html);
 		}
 	}
 }

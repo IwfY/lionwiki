@@ -23,7 +23,7 @@ $PROTECTED_READ = false; // if true, you need to fill password for reading pages
 
 $NO_HTML = false; // XSS protection, meaningful only when password protection is enabled
 
-$USE_META = true; // use and create meta data. Small overhead, but edit summary and IP info
+$USE_META = true; // use and create meta data. Small overhead, but summary of changes and IP info
 $USE_HISTORY = true; // If you don't want to keep history of pages, change to false
 
 $START_PAGE = "Main page"; // Which page should be default (start page)?
@@ -57,7 +57,7 @@ $LANG_DIR = "lang/";
 if(empty($PASSWORD_MD5) && !empty($PASSWORD))
 	$PASSWORD_MD5 = md5($PASSWORD);
 
-$WIKI_VERSION = "LionWiki 3.1.0";
+$WIKI_VERSION = "LionWiki 3.1.1";
 
 umask(0); // sets default mask
 
@@ -78,7 +78,7 @@ $T_REV_DIFF = "<b>Difference between revisions from {REVISION1} and {REVISION2}.
 $T_REVISION = "'''This revision is from {TIME}. You can {RESTORE} it.'''\n\n";
 $T_PASSWORD = "Password";
 $T_EDIT = "Edit";
-$T_EDIT_SUMMARY = "Edit summary";
+$T_EDIT_SUMMARY = "Summary of changes";
 $T_EDIT_CONFLICT = "Edit conflict: somebody saved this page after you started editing. It is strongly encouraged to see last {DIFF} before saving it. After reviewing and possibly merging changes, you can save page by clicking on save button.";
 $T_SHOW_SOURCE = "Show source";
 $T_SHOW_PAGE = "Show page";
@@ -89,7 +89,6 @@ $T_CREATE_PAGE = "Create page";
 $T_PROTECTED_READ = "You need to enter password to view content of site: ";
 $TE_WRONG_PASSWORD = "Password is incorrect.";
 
-// Default character set for auto content header
 @ini_set("default_charset", "UTF-8");
 header("Content-type: text/html; charset=UTF-8");
 
@@ -132,16 +131,15 @@ if($_GET["erasecookie"]) // remove cookie without reloading
 $plugins = array();
 $plugin_saveok = true; // is OK to save page changes (from plugins)
 
-if($dir = @opendir($PLUGINS_DIR)) // common plugins
-	while($file = readdir($dir))
-		if(preg_match("/^.*wkp_(.+)\.php$/", $file, $matches) > 0) {
-			require $PLUGINS_DIR . $file;
-			$plugins[$matches[1]] = new $matches[1]();
+for($dir = @opendir($PLUGINS_DIR); $dir && $file = readdir($dir);)
+	if(preg_match("/^.*wkp_(.+)\.php$/", $file, $matches) > 0) {
+		require $PLUGINS_DIR . $file;
+		$plugins[$matches[1]] = new $matches[1]();
 
-			if(isset($$matches[1]))
-				foreach($$matches[1] as $name => $value)
-					$plugins[$matches[1]]->$name = $value;
-		}
+		if(isset($$matches[1]))
+			foreach($$matches[1] as $name => $value)
+				$plugins[$matches[1]]->$name = $value;
+	}
 
 plugin_call_method("pluginsLoaded"); // for admin plugin
 plugin_call_method("pluginsLoaded2"); // second pass ("for ordinary plugins")
@@ -151,9 +149,8 @@ $req_conv = array("action", "query", "sc", "content", "page", "moveto", "restore
 foreach($req_conv as $req) // export variables to main namespace
 	$$req = $_REQUEST[$req];
 
-$page = sanitizeFilename($page); $moveto = sanitizeFilename($moveto); $gtime = sanitizeFilename($gtime);
+$TITLE = $page = sanitizeFilename($page); $moveto = sanitizeFilename($moveto); $gtime = sanitizeFilename($gtime);
 $f1 = sanitizeFilename($f1); $f2 = sanitizeFilename($f2);
-
 
 if(!empty($preview)) {
 	$action = "edit";
@@ -164,15 +161,15 @@ plugin_call_method("actionBegin");
 
 // setting $PAGE_TITLE
 if($page || empty($action)) {
-	$page = $page_nolang = $TITLE = $page ? $page : $START_PAGE;
-
-	if($action == "" && file_exists($PAGES_DIR . $page . ".$LANG.txt")) // language variant
-		$page = $TITLE = $page_nolang . "." . $LANG;
-	else if(!file_exists($PAGES_DIR . $page . ".txt") && $action == "")
+	if(!$page)
+		die(header("Location:$self?page=" . urlencode($START_PAGE)));
+	else if($action == "" && file_exists("$PAGES_DIR$page.$LANG.txt")) // language variant
+		die(header("Location:$self?page=" . urlencode("$page.$LANG")));
+	else if(!file_exists("$PAGES_DIR$page.txt") && $action == "")
 		$action = "edit"; // create page if it doesn't exist
 
 	if(!empty($preview))
-		$TITLE = $T_PREVIEW . ": " . $page;
+		$TITLE = "$T_PREVIEW: $page";
 }
 else if($action == "search")
 	$TITLE = empty($query) ? $T_LIST_OF_ALL_PAGES : "$T_SEARCH_RESULTS $query";
@@ -259,10 +256,8 @@ else if($action == "save" && authentified()) { // do we have page to save?
 			}
 		}
 
-		if(!($_REQUEST["ajax"] && $par)) {
-			header("Location:?page=" . urlencode($page) . ($error ? ("&error=" . urlencode($error)) : ""));
-			die();
-		}
+		if(!($_REQUEST["ajax"] && $par))
+			die(header("Location:$self?page=" . urlencode($page) . ($error ? ("&error=" . urlencode($error)) : "")));
 		else
 			$CON = $par_content;
 	} else { // there's some problem with page, give user a chance to fix it (do not throw away submitted content)
@@ -286,10 +281,8 @@ if(@file_exists($PAGES_DIR . $page . ".txt")) {
 		if($par && is_numeric($par))
 			$CON = getParagraph($CON, $par);
 
-		if(substr($CON, 0, 10) == "{redirect:" && $action == "") {
-			header("Location:?page=".urlencode(substr($CON, 10, strpos($CON, "}") - 10)));
-			die();
-		}
+		if(substr($CON, 0, 10) == "{redirect:" && $action == "")
+			die(header("Location:$self?page=".urlencode(substr($CON, 10, strpos($CON, "}") - 10))));
 	}
 }
 
@@ -384,8 +377,7 @@ elseif($action == "diff") {
 
 		rsort($files);
 
-		header("Location: ?action=diff&page=" . urlencode($page) . "&f1=$files[0]&f2=$files[1]");
-		die();
+		die(header("Location:$self?action=diff&page=".urlencode($page)."&f1=$files[0]&f2=$files[1]"));
 	}
 
 	$r1 = "<a href=\"$self?page=".urlencode($page)."&action=rev&gtime=$f1\" rel=\"nofollow\">".revTime($f1)."</a>";
@@ -426,7 +418,7 @@ elseif($action == "diff") {
 } elseif($action == "recent") { // recent changes
 	$dir = opendir($PAGES_DIR);
 
-	while($file = readdir($dir))
+	for($filetime = array(); $file = readdir($dir);)
 		if(preg_match("/\.txt$/", $file))
 			$filetime[$file] = filemtime($PAGES_DIR . $file);
 
@@ -528,6 +520,11 @@ if($action == "") { // substituting $CON to be viewed as HTML
 	$CON = preg_replace("/\{sup\}(.*)\{\/sup\}/U", "<sup>$1</sup>", $CON);
 	$CON = preg_replace("/\{sub\}(.*)\{\/sub\}/U", "<sub>$1</sub>", $CON);
 
+	if(preg_match('/\{title:([^}\n]*)\}/U', $CON, $m)) {
+		$TITLE = html_entity_decode($m[1]);
+		$CON = str_replace($m[0], "", $CON);
+	}
+
 	// small
 	$CON = preg_replace("/\{small\}(.*)\{\/small\}/U", "<small>$1</small>", $CON);
 
@@ -566,25 +563,18 @@ if($action == "") { // substituting $CON to be viewed as HTML
 		if($match[3]) // link to the heading
 			$match[3] = "#" . preg_replace("/[^\da-z]/i", "_", urlencode(substr($match[3], 1, strlen($match[3]) - 1)));
 
-		if(file_exists("$PAGES_DIR$match[2].txt"))
-			$CON = str_replace($match[0], '<a href="'.$self.'?page='.urlencode($match[2]).$match[3].'">'.$match[1].'</a>', $CON);
-		else
-			$CON = str_replace($match[0], '<a href="'.$self.'?page='. urlencode($match[2]).'&amp;action=edit" class="pending" rel="nofollow">'.$match[1].'</a>', $CON);
+		$attr = file_exists("$PAGES_DIR$match[2].txt") ? $match[3] : '&amp;action=edit" class="pending" rel="nofollow';
+
+		$CON = str_replace($match[0], '<a href="'.$self.'?page='.urlencode($match[2]).$attr.'">'.$match[1].'</a>', $CON);
 	}
 
-	// LIST, ordered, unordered
-	$CON = preg_replace('/^\*\*\*(.*)(\n)/Um', "<ul><ul><ul><li>$1</li></ul></ul></ul>$2", $CON);
-	$CON = preg_replace('/^\*\*(.*)(\n)/Um', "<ul><ul><li>$1</li></ul></ul>$2", $CON);
-	$CON = preg_replace('/^\*(.*)(\n)/Um', "<ul><li>$1</li></ul>$2", $CON);
-	$CON = preg_replace('/^\#\#\#(.*)(\n)/Um', "<ol><ol><ol><li>$1</li></ol></ol></ol>$2", $CON);
-	$CON = preg_replace('/^\#\#(.*)(\n)/Um', "<ol><ol><li>$1</li></ol></ol>$2", $CON);
-	$CON = preg_replace('/^\#(.*)(\n)/Um', "<ol><li>$1</li></ol>$2", $CON);
-
-	// Fixing crappy job of parsing *** and ###. 3 times for 3 levels.
-	for($i = 0; $i < 3; $i++)
+	for($i = 10; $i >= 1; $i--) { // LIST, ordered, unordered
+		$CON = preg_replace('/^'.str_repeat('\*', $i).'(.*)(\n)/Um', str_repeat("<ul>", $i)."<li>$1</li>".str_repeat("</ul>", $i)."$2", $CON);
+		$CON = preg_replace('/^'.str_repeat('\#', $i).'(.*)(\n)/Um', str_repeat("<ol>", $i)."<li>$1</li>".str_repeat("</ol>", $i)."$2", $CON);
 		$CON = preg_replace('/(<\/ol>\n?<ol>|<\/ul>\n?<ul>)/', "", $CON);
+	}
 
-	// still fixing. Following three lines fix only XHTML validity
+	// Following three lines fix only XHTML validity of lists
 	$CON = preg_replace('/<\/li><([uo])l>/', "<$1l>", $CON);
 	$CON = preg_replace('/<\/([uo])l><li>/', "</$1l></li><li>", $CON);
 	$CON = preg_replace('/<(\/?)([uo])l><\/?[uo]l>/', "<$1$2l><$1li><$1$2l>", $CON);
@@ -683,10 +673,7 @@ plugin_call_method("template"); // plugin specific template substitutions
 $html = preg_replace("/\{([^}]* )?plugin:.+( [^}]*)?\}/U", "", $html); // getting rid of absent plugin tags
 
 if($page || empty($action))
-	if(is_writable($PAGES_DIR . $page . ".txt"))
-		$EDIT = "<a href=\"$self?page=".urlencode($page)."&amp;action=edit\" rel=\"nofollow\">$T_EDIT</a>";
-	else
-		$EDIT = "<a href=\"$self?page=".urlencode($page)."&amp;action=edit&showsource=1\" rel=\"nofollow\">$T_SHOW_SOURCE</a>";
+	$EDIT = "<a rel=\"nofollow\" href=\"$self?page=".urlencode($page)."&amp;action=edit".(is_writable("$PAGES_DIR$page.txt") ? "\">$T_EDIT</a>" : "&showsource=1\">$T_SHOW_SOURCE</a>");
 
 $tpl_subs = array(
 	array("HEAD", $HEAD),
@@ -698,11 +685,11 @@ $tpl_subs = array(
 	array("RECENT_CHANGES", "<a href=\"$self?action=recent\">$T_RECENT_CHANGES</a>"),
 	array("ERROR",	$error),
 	array("HISTORY", !empty($page) ? "<a href=\"$self?page=".urlencode($page)."&amp;action=history\" rel=\"nofollow\">$T_HISTORY</a>" : ""),
-	array("PAGE_TITLE", htmlspecialchars($page_nolang == $START_PAGE ? $WIKI_TITLE : $TITLE)),
-	array("PAGE_TITLE_HEAD", htmlspecialchars($page_nolang == $START_PAGE ? "" : $TITLE)),
+	array("PAGE_TITLE", htmlspecialchars($page == $START_PAGE ? $WIKI_TITLE : $TITLE)),
+	array("PAGE_TITLE_HEAD", htmlspecialchars($page == $START_PAGE ? "" : $TITLE)),
 	array("PAGE_URL", urlencode($page)),
 	array("EDIT", $EDIT),
-	array("WIKI_TITLE", $WIKI_TITLE),
+	array("WIKI_TITLE", htmlspecialchars($WIKI_TITLE)),
 	array("LAST_CHANGED_TEXT", $LAST_CHANGED ? $T_LAST_CHANGED : ""),
 	array("LAST_CHANGED", $LAST_CHANGED),
 	array("TOC", $TOC),

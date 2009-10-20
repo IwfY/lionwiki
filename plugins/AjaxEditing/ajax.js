@@ -8,7 +8,7 @@ var trigger_edit_click = 1; // click on the (edit) link in the heading triggers 
 var trigger_heading_doubleclick = 0; // doubleclick on heading triggers AJAX editing
 
 /**
- * ret should be event or something like this, it's given by browser
+ * ret should be event or something like "this", it's given by browser
  */
 
 function ajaxEdit(ret)

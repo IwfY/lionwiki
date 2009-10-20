@@ -44,7 +44,8 @@ class PageVersions
 		"ro" => "Română",
 		"ru" => "Русский",
 		"sk" => "Slovenština",
-		"sv" => "Svenska"
+		"sv" => "Svenska",
+		"zh-tw" => "臺灣國語"
 	);
 
 	function template()

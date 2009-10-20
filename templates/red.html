@@ -7,20 +7,24 @@
 	<style type="text/css">
 *{margin:0;padding:0;}
 body{font-size:12px;line-height:16px;font-family:sans-serif;padding:10px 20px 20px 20px;}
-a:link,a:visited{color:#CC3333;text-decoration : none;border-bottom : 1px dotted #CC3333;}
-p { margin : 5px 0 5px 0; }
+a{color:#CC3333;text-decoration:none;border-bottom:1px dotted #CC3333;}
+p{margin : 5px 0 5px 0;}
 a.pending{color:black;}
+a.external:after{content: "\2197";}
 pre{border:1px dotted #ccc;padding:4px;width:640px;overflow:auto;margin:3px;}
 img,a img{border:0px}
 h1,h2,h3,h4,h5,h6{letter-spacing:2px;font-weight:normal;margin:15px 0 15px 0px;color:#CC3333;font-variant:small-caps;}
-h1{margin:18px 0 15px 15px;font-size : 22px;}
+h1 a,h2 a,h3 a,h4 a,h5 a,h6 a{border-bottom:none;}
+h2 span.par-edit, h3 span.par-edit, h4 span.par-edit, h5 span.par-edit, h6 span.par-edit {visibility:hidden;font-size:x-small;}
+h2:hover span.par-edit, h3:hover span.par-edit, h4:hover span.par-edit, h5:hover span.par-edit, h6:hover span.par-edit {visibility:visible;}
+h1{margin:18px 0 15px 15px;font-size:22px;}
 hr{margin:10px 0 10px 0;height:0px;overflow:hidden;border:0px;border-top:1px solid #CC3333;}
 ul,ol{padding:5px 0px 5px 20px;}
 table{text-align:left;}
 .error{color:#F25A5A;font-weight:bold;}
 form{display:inline}
 #renameForm{display:block;margin-bottom:6px;}
-#contentTextarea{width:100%;}
+.contentTextarea{width:100%;}
 input,select,textarea{border:1px solid #CC3333;padding:2px;font-size:12px;}
 .submit{padding:1px;}
 textarea{padding:3px;}
@@ -36,31 +40,30 @@ textarea{padding:3px;}
 #rightPanel ul{padding-top:0px;}
 #mainContent{padding:10px;}
 #searchInput,#selectTemplate,#selectLanguage{width:140px;}
-table.wikitable{border-collapse:collapse;border:1px solid #ccc;}
-table.wikitable td{border:1px solid #ccc;text-align:center;vertical-align:middle;padding:2px;}
-table.wikitable td.em{background:#ccc;font-weight:bold;}
-.subpage{border:1px dashed #CC3333;margin:5px 0 5px 10px;padding:6px 5px 7px 20px;float:right;clear:right;}
-.pageVersionsList {letter-spacing:0px;font-variant:normal;font-size:12px;}
+#diff{padding:1em;white-space:pre-wrap;word-wrap:break-word;white-space:-moz-pre-wrap;white-space:-pre-wrap;white-space:-o-pre-wrap;width:97%;}
 #diff ins{color:green;text-decoration:none;font-weight:bold;}
 #diff del{color:red;text-decoration:line-through;}
 #diff .orig{color:#666;font-size:90%;}
+/* Plugins */
+table.wikitable{border-collapse:collapse;border:1px solid #ccc;}
+table.wikitable td{border:1px solid #ccc;text-align:center;vertical-align:middle;padding:2px;}
+table.wikitable td.em{background:#ccc;font-weight:bold;}
+.tagList{padding:0.2em 0.4em 0.2em 0.4em;margin-top:0.5em;border:1px dashed #CC3333;clear:right;}
+.tagCloud{float:right;width:200px;padding:0.5em;margin:1em;border:1px dashed #CC3333;clear:right;}
+.pageVersionsList{letter-spacing:0px;font-variant:normal;font-size:12px;}
+.resizeTextarea a{border-bottom:none;}
 	</style>
   {HEAD}
 </head>
-
 <body>
-{include:subpage menu}
-
 <h1 id="page-title">{PAGE_TITLE} {<span class="pageVersionsList">( plugin:VERSIONS_LIST )</span>}</h1>
-
 <div id="mainContent">
 {<div class="error"> ERROR </div>}
 {CONTENT}
 {plugin:TAG_LIST}
-{CONTENT_FORM} {RENAME_TEXT} {RENAME_INPUT} <br /> <br />
+{CONTENT_FORM} {RENAME_TEXT} {RENAME_INPUT <br /><br />}
 {CONTENT_TEXTAREA} <p style="float:right;margin:6px;">{FORM_PASSWORD} {FORM_PASSWORD_INPUT} {plugin:CAPTCHA_QUESTION} {plugin:CAPTCHA_INPUT} {EDIT_SUMMARY_TEXT} {EDIT_SUMMARY_INPUT} {CONTENT_SUBMIT} {CONTENT_PREVIEW}</p> {/CONTENT_FORM}
 </div>
-
 <div id="rightPanel">
 	<h2 style="color:#CC3333;font-size:18px;font-style:smallcaps;">Menu</h2>
 	<ul>
@@ -110,6 +113,5 @@ table.wikitable td.em{background:#ccc;font-weight:bold;}
 
 	<p style="position:absolute;bottom:20px;font-size:smaller;">Powered by <a href="http://lionwiki.0o.cz/">LionWiki</a></p>
 </div>
-
 </body>
 </html>

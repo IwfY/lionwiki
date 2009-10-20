@@ -45,12 +45,13 @@ class SelectLanguage
 		"ro" => "Română",
 		"ru" => "Русский",
 		"sk" => "Slovenština",
-		"sv" => "Svenska"
+		"sv" => "Svenska",
+		"zh-tw" => "臺灣國語"
 	);
 
 	function template()
 	{
-		global $html, $LANG, $LANG_DIR, $CON, $page_nolang, $action;
+		global $html, $LANG, $LANG_DIR, $CON, $action, $page;
 
 		$langs = array();
 
@@ -63,7 +64,7 @@ class SelectLanguage
 
 		$select = "
 <form action=\"$self\" id=\"formSelectLanguage\" method=\"get\">
-<input type=\"hidden\" name=\"page\" value=\"" . htmlspecialchars($page_nolang) . "\" />
+<input type=\"hidden\" name=\"page\" value=\"" . basename($page, ".$LANG") . "\" />
 <input type=\"hidden\" name=\"action\" value=\"" . htmlspecialchars($action) . "\" />
 <select name=\"lang\" id=\"selectLanguage\" onchange=\"this.form.submit();\">
 ";
