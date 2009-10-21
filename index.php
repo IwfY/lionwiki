@@ -442,7 +442,6 @@ elseif($action == "diff") {
 			$ip = $size = $esum = "";
 
 		$CON .= "<tr><td class=\"rc-diff\"><a href=\"$self?page=".urlencode($filename)."&amp;action=diff\">$T_DIFF</a></td><td class=\"rc-date\" nowrap>".date($DATE_FORMAT, $timestamp + $LOCAL_HOUR * 3600)."</td><td class=\"rc-ip\">$ip</td><td class=\"rc-page\"><a href=\"$self?page=".urlencode($filename)."\">".htmlspecialchars($filename)."</a> <span class=\"rc-size\">($size)</span><i class=\"rc-esum\">$esum</i></td></tr>";
-		//$CON .= "<a href=\"$self?page=".urlencode($filename)."\">".htmlspecialchars($filename)."</a> (".date($DATE_FORMAT, $timestamp + $LOCAL_HOUR * 3600)." - <a href=\"$self?page=".urlencode($filename)."&amp;action=diff\">$T_DIFF</a>) $size $ip <i>$esum</i><br />";
 	}
 
 	$CON .= "</table>";
@@ -873,12 +872,17 @@ function fallback_template() { return '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 
 	<style type="text/css">
 *{margin:0;padding:0;}
 body{font-size:12px;line-height:16px;padding:10px 20px 20px 20px;}
-a:link,a:visited{color:#006600;text-decoration : none;border-bottom : 1px dotted #006600;}
+a{color:#006600;text-decoration:none;border-bottom:1px dotted #006600;}
 p{margin: 5px 0 5px 0;}
 a.pending{color:#990000;}
-pre{border:1px dotted #ccc;padding:4px;width:640px;overflow:auto;margin:3px;}
+a.external:after{content: "\2197";}
+pre{border:1px dotted #ccc;padding:4px;overflow:auto;margin:3px;}
 img,a img{border:0px}
 h1,h2,h3,h4,h5,h6{letter-spacing:2px;font-weight:normal;margin:15px 0 15px 0px;color:#006600;}
+h1 a:hover,h2 a:hover,h3 a:hover,h4 a:hover,h5 a:hover,h6 a:hover{color:#006600;}
+h1 a,h2 a,h3 a,h4 a,h5 a,h6 a{border-bottom:none;}
+h2 span.par-edit, h3 span.par-edit, h4 span.par-edit, h5 span.par-edit, h6 span.par-edit {visibility:hidden;font-size:x-small;}
+h2:hover span.par-edit, h3:hover span.par-edit, h4:hover span.par-edit, h5:hover span.par-edit, h6:hover span.par-edit {visibility:visible;}
 h1{margin:18px 0 15px 15px;font-size : 22px;}
 hr{margin:10px 0 10px 0;height:0px;overflow:hidden;border:0px;border-top:1px solid #006600;}
 ul,ol{padding:5px 0px 5px 20px;}
@@ -886,44 +890,51 @@ table{text-align:left;}
 .error{color:#F25A5A;font-weight:bold;}
 form{display:inline}
 #renameForm{display:block;margin-bottom:6px;}
-#contentSubmit{margin-top:6px;}
-#contentTextarea{width:100%;}
+.submit{margin-top:6px;}
+.contentTextarea{width:100%;}
 input,select,textarea{border:1px solid #AAAAAA;padding:2px;font-size:12px;}
 .submit{padding:1px;}
 textarea{padding:3px;}
-#toc{border:1px dashed #11141A;margin:5px 0 5px 10px;padding:6px 5px 7px 0px;float:right;     padding-right:2em;list-style:none;}
+#toc{border:1px dashed #006600;margin:5px 0 5px 10px;padding:6px 5px 7px 0px;float:right;padding-right:2em;list-style:none;}
 #toc ul{list-style:none;padding:3px 0 3px 10px;}
 #toc li{font-size:11px;padding-left:10px;}
 #toc ul li{font-size:10px;}
 #toc ul ul li{font-size:9px;}
 #toc ul ul ul li{font-size:8px;}
 #toc ul ul ul ul li{font-size:7px;}
+#diff{padding:1em;white-space:pre-wrap;word-wrap:break-word;white-space:-moz-pre-wrap;white-space:-pre-wrap;white-space:-o-pre-wrap;width:97%;}
 #diff ins{color:green;text-decoration:none;font-weight:bold;}
 #diff del{color:red;text-decoration:line-through;}
 #diff .orig{color:#666;font-size:90%;}
+/* Plugins */
+.tagList{padding:0.2em 0.4em 0.2em 0.4em;margin-top:0.5em;border:1px dashed #006600;clear:right;}
+.tagCloud{float:right;width:200px;padding:0.5em;margin:1em;border:1px dashed #006600;clear:right;}
+.pageVersionsList{letter-spacing:0px;font-variant:normal;font-size:12px;}
+.resizeTextarea a{border-bottom:none;}
 	</style>
-  {HEAD}
+	{HEAD}
 </head>
-
 <body>
-<table border="0" width="100%" cellpadding="4" id="mainTable" cellspacing="0" summary="{PAGE_TITLE_BRUT}">
+<table border="0" width="100%" cellpadding="4" cellspacing="0">
 	<tr id="headerLinks">
 		<td colspan="2">{HOME} {RECENT_CHANGES}</td>
-		<td style="text-align : right;">{EDIT} {SYNTAX} {HISTORY}</td>
+		<td style="text-align:right">{EDIT} {SYNTAX} {HISTORY}</td>
 	</tr>
-	<tr><th colspan="3"><hr /><h1 id="page-title">{PAGE_TITLE}</h1></th></tr>
+	<tr><th colspan="3"><hr /><h1 id="page-title">{PAGE_TITLE} {<span class="pageVersionsList">( plugin:VERSIONS_LIST )</span>}</h1></th></tr>
 	<tr>
 		<td id="mainContent" colspan="3">
 			{<div class="error"> ERROR </div>}
-{CONTENT}
-{CONTENT_FORM} {RENAME_TEXT} {RENAME_INPUT} <br /><br /> {CONTENT_TEXTAREA}<p style="float:right;margin:6px">{FORM_PASSWORD} {FORM_PASSWORD_INPUT} {plugin:CAPTCHA_QUESTION} {plugin:CAPTCHA_INPUT} {EDIT_SUMMARY_TEXT} {EDIT_SUMMARY_INPUT} {CONTENT_SUBMIT} {CONTENT_PREVIEW}</p> {/CONTENT_FORM}
+			{CONTENT} {plugin:TAG_LIST}
+			{CONTENT_FORM} {RENAME_TEXT} {RENAME_INPUT <br /><br />} {CONTENT_TEXTAREA}
+			<p style="float:right;margin:6px">{FORM_PASSWORD} {FORM_PASSWORD_INPUT} {plugin:CAPTCHA_QUESTION} {plugin:CAPTCHA_INPUT}
+			{EDIT_SUMMARY_TEXT} {EDIT_SUMMARY_INPUT} {CONTENT_SUBMIT} {CONTENT_PREVIEW}</p>{/CONTENT_FORM}
 		</td>
 	</tr>
 	<tr><td colspan="3"><hr /></td></tr>
 	<tr>
 		<td><div>{SEARCH_FORM}{SEARCH_INPUT}{SEARCH_SUBMIT}{/SEARCH_FORM}</div></td>
 		<td>Powered by <a href="http://lionwiki.0o.cz/">LionWiki</a>. {LAST_CHANGED_TEXT}: {LAST_CHANGED} {COOKIE}</td>
-		<td style="text-align : right;">{EDIT} {SYNTAX} {HISTORY}</td>
+		<td style="text-align:right">{EDIT} {SYNTAX} {HISTORY}</td>
 	</tr>
 </table>
 </body>

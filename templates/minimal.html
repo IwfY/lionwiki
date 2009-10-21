@@ -49,7 +49,6 @@ textarea{padding:3px;}
 	</style>
 	{HEAD}
 </head>
-
 <body>
 <table border="0" width="100%" cellpadding="4" cellspacing="0">
 	<tr id="headerLinks">
@@ -60,10 +59,8 @@ textarea{padding:3px;}
 	<tr>
 		<td id="mainContent" colspan="3">
 			{<div class="error"> ERROR </div>}
-			{CONTENT}
-			{plugin:TAG_LIST}
-			{CONTENT_FORM} {RENAME_TEXT} {RENAME_INPUT <br /><br />}
-			{CONTENT_TEXTAREA}
+			{CONTENT} {plugin:TAG_LIST}
+			{CONTENT_FORM} {RENAME_TEXT} {RENAME_INPUT <br /><br />} {CONTENT_TEXTAREA}
 			<p style="float:right;margin:6px">{FORM_PASSWORD} {FORM_PASSWORD_INPUT} {plugin:CAPTCHA_QUESTION} {plugin:CAPTCHA_INPUT}
 			{EDIT_SUMMARY_TEXT} {EDIT_SUMMARY_INPUT} {CONTENT_SUBMIT} {CONTENT_PREVIEW}</p>{/CONTENT_FORM}
 		</td>
