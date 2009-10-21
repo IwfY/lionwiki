@@ -25,6 +25,9 @@ rm $work/plugins/wkp_Upload.php
 rm $work/plugins/wkp_Script.php
 rm $work/plugins/wkp_LatexImg.php
 rm -rf $work/plugins/LatexImg
+rm $work/plugins/wkp_Pacman.php
+rm -rf $work/pacman
+rm -rf $work/pokus.php*
 
 release=$path/$version
 
