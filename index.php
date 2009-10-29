@@ -57,7 +57,7 @@ $LANG_DIR = "lang/";
 if(empty($PASSWORD_MD5) && !empty($PASSWORD))
 	$PASSWORD_MD5 = md5($PASSWORD);
 
-$WIKI_VERSION = "LionWiki 3.1.1";
+$WIKI_VERSION = "LionWiki 3.1.2";
 
 umask(0); // sets default mask
 
@@ -799,8 +799,8 @@ function diff($f1, $f2) {
 }
 
 function diff_builtin($f1, $f2) {
-	$a1 = explode("\n", file_get_contents($f1));
-	$a2 = explode("\n", file_get_contents($f2));
+	$a1 = explode("\n", @file_get_contents($f1));
+	$a2 = explode("\n", @file_get_contents($f2));
 
 	$d1 = array_diff($a1, $a2);
 	$d2 = array_diff($a2, $a1);
