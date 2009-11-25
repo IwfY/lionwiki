@@ -13,7 +13,8 @@ class ListPlugins
 	);
 
 	// print nested functions/description
-	function getUL($arr) {
+	function getUL($arr)
+	{
 		$ret = "";
 
 		if(is_array($arr))
@@ -26,7 +27,8 @@ class ListPlugins
 		return $ret;
 	}
 
-	function action($a) {
+	function action($a)
+	{
 		global $plugins, $CON, $TITLE, $editable;
 
 		if($a == "listplugins") {
@@ -49,7 +51,8 @@ class ListPlugins
 		return false;
 	}
 
-	function template() {
+	function template()
+	{
 		global $html;
 
 		$html = template_replace("plugin:LIST_OF_PLUGINS", "<a href=\"$self?action=listplugins\" rel=\"nofollow\">List of installed plugins</a>", $html);

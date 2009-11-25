@@ -186,7 +186,7 @@ class Comments
 
 			$comments_html = preg_replace("/\{item\}.*\{\/item\}/Us", $items_str, $tmpl);
 
-			plugin_call_method("commentsTemplate");
+			plugin("commentsTemplate");
 
 			$html = template_replace("plugin:COMMENTS", $comments_html, $html);
 			$CON = str_replace("{COMMENTS}", $comments_html, $CON);
@@ -325,6 +325,17 @@ class Comments
 		array("TP_COMMENTS", "Comments"),
 		array("TP_DELETE", "Delete"),
 		array("TP_DELETE_CONFIRM", "Do you really want to delete this comment?")
+	);
+
+	var $fr_strings = array(
+		array("TP_FORM_NAME", "Votre nom"),
+		array("TP_FORM_EMAIL", "E-mail"),
+		array("TP_FORM_CONTENT", "Votre commentaire"),
+		array("TP_FORM_SUBMIT", "Envoyer"),
+		array("TP_REPLY_TO", "Répondre à ce commentaire"),
+		array("TP_COMMENTS", "Commentaires"),
+		array("TP_DELETE", "Supprimer"),
+		array("TP_DELETE_CONFIRM", "Voulez-vous supprimer ce commentaire ?")
 	);
 
 

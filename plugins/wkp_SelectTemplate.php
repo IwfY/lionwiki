@@ -50,7 +50,7 @@ class SelectTemplate
 		$CON = template_replace("SELECT_TEMPLATE", $select, $CON);
 	}
 
-	function pluginsLoaded()
+	function actionBegin()
 	{
 		global $TEMPLATE;
 

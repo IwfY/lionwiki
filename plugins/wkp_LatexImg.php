@@ -105,7 +105,7 @@ class LatexImg {
 		// Go through each instance of latex markup, latex it, store data
 		// and replace it with {tex} placeholder
 		$this->latex_data = array();
-		for ($i = 0; $i < count($tex_matches[0]); $i++) {
+		for ($i = 0, $c = count($tex_matches[0]); $i < $c; $i++) {
 			$pos = strpos($CON, $tex_matches[0][$i]);
 			$latex_formula = $tex_matches[1][$i];
 

@@ -12,17 +12,21 @@
 
 class Admin
 {
-	var $PASSWORD = "aaa"; // either $PASSWORD or $PASSWORD_MD5 must be set
-	var $PASSWORD_MD5 = ""; // if set, $PASSWORD is ignored
+	/*
+	 * If you want to set password, place following line to config.php (without leading asterisk)
+	 *
+	 * $Admin["PASSWORD"] = md5("my_admin_password");
+	 *
+	 * You could set it here too, but you'd loose this setting after upgrade ...
+	 */
+
+	var $PASSWORD = "1";
 	var $expire_login = 7200;
 	var $dir;
 
 	function Admin()
 	{
 		global $PLUGINS_DATA_DIR, $self;
-
-		if(empty($this->PASSWORD_MD5) && !empty($this->PASSWORD))
-			$this->PASSWORD_MD5 = md5($this->PASSWORD);
 
 		$this->dir = $GLOBALS["PLUGINS_DATA_DIR"];
 
@@ -209,12 +213,12 @@ class Admin
 
 	function pageLoaded()
 	{
-		global $PASSWORD_MD5, $action;
+		global $PASSWORD, $action;
 
 		if($action == "edit" && $this->checkPages(false) == false) {
 			// with this, user will be thought as unlogged, so password input will appear
 			$_COOKIE["LW_AUT"] = "1"; // just keep these two different
-			$PASSWORD_MD5 = "2";
+			$PASSWORD = "2";
 		}
 	}
 
@@ -232,7 +236,7 @@ class Admin
 
 			foreach($arr as $line)
 				if(!strcmp($page, trim($line))) {
-					if(!strcasecmp(md5($sc), $this->PASSWORD_MD5))
+					if(!strcasecmp(md5($sc), $this->PASSWORD))
 						return true;
 					else {
 						if($echo)
@@ -246,16 +250,16 @@ class Admin
 		return true;
 	}
 
-	// is it ok for all filters to save the page?
+	/*
+	 * is it ok for all filters to save the page?
+	 *
+	 * By convention, writingPage hook is expected to return false if
+	 * everything is ok and true if page should not be saved.
+	 */
+
 	function writingPage()
 	{
-		global $plugin_saveok, $error;
-
-		$plugin_saveok = $this->checkIPs() && $plugin_saveok;
-		$plugin_saveok = $this->checkBlacklist() && $plugin_saveok;
-		$plugin_saveok = $this->checkPages() && $plugin_saveok;
-
-		return true;
+		return !($this->checkIPs() && $this->checkBlacklist() && $this->checkPages());
 	}
 
 	// find out if page is editable by user
@@ -355,8 +359,8 @@ class Admin
 
 	function authentified()
 	{
-		if(strlen($this->PASSWORD_MD5) > 0 && $_COOKIE["LW_ADMIN"] == $this->PASSWORD_MD5 || (isset($_POST["sc"]) && md5($_POST["sc"]) == $this->PASSWORD_MD5)) {
-			setcookie("LW_ADMIN", $this->PASSWORD_MD5, time() + $this->expire_login);
+		if(strlen($this->PASSWORD) > 0 && $_COOKIE["LW_ADMIN"] == $this->PASSWORD || (isset($_POST["sc"]) && md5($_POST["sc"]) == $this->PASSWORD)) {
+			setcookie("LW_ADMIN", $this->PASSWORD, time() + $this->expire_login);
 
 			return true;
 		}

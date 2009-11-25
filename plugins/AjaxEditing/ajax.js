@@ -65,7 +65,6 @@ function ajaxAction(action, obj)
 	var content = getElementsByClassName("ajaxContentTextarea", contentDiv)[0].value;
 	var esum = getOrNothing("ajaxEsum", contentDiv);
 	var password = getOrNothing("ajaxPasswordInput", contentDiv);
-	var moveto = getOrNothing("ajaxRenameInput", contentDiv);
 	var showsource = getOrNothing("ajaxShowSource", contentDiv);
 	var qid = document.getElementById("captcha-id");
 	var ans = document.getElementById("captcha-input");
@@ -77,7 +76,6 @@ function ajaxAction(action, obj)
 			"last_changed": 2000000000,
 			"esum": esum,
 			"sc": password,
-			"moveto": moveto,
 			"showsource": showsource,
 			"qid": qid == null ? "" : qid.value,
 			"ans": ans == null ? "" : ans.value,

@@ -11,7 +11,7 @@ class Index
 		array("Index plugin", "gives list of pages in the wiki.")
 	);
 
-	function pages_list($type)
+	function pagesList($type)
 	{
 		global $TITLE, $page, $PAGES_DIR;
 
@@ -42,7 +42,7 @@ class Index
 	{
 		global $CON;
 
-		$CON = template_replace("INDEX_COMMA", $this->pages_list("comma"), $CON);
-		$CON = template_replace("INDEX_LIST", $this->pages_list("list"), $CON);
+		$CON = template_replace("INDEX_COMMA", $this->pagesList("comma"), $CON);
+		$CON = template_replace("INDEX_LIST", $this->pagesList("list"), $CON);
 	}
 }

@@ -15,12 +15,10 @@ class Slimbox
 
 	function template()
 	{
-		global $HEAD;
-
-		$HEAD .= "
-<script type=\"text/javascript\" src=\"plugins/Slimbox/js/jquery.js\"></script>
-<script type=\"text/javascript\" src=\"plugins/Slimbox/js/slimbox2.js\"></script>
-<link rel=\"stylesheet\" href=\"plugins/Slimbox/css/slimbox2.css\" />";
+		$GLOBALS["HEAD"] .= '
+<script type="text/javascript" src="plugins/Slimbox/js/jquery.js"></script>
+<script type="text/javascript" src="plugins/Slimbox/js/slimbox2.js"></script>
+<link rel="stylesheet" href="plugins/Slimbox/css/slimbox2.css" />';
 
 		return false;
 	}

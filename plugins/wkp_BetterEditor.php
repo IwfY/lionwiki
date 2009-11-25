@@ -15,8 +15,8 @@ class BetterEditor
 		array("BetterEditor", "provides toolbar and resizing of textareas.")
 	);
 
-	var $step_up = -100;
-	var $step_down = 100;
+	var $step_up = -200;
+	var $step_down = 200;
 
 	var $resize_html;
 	var $basic_toolbar_html; // used for comments
@@ -99,6 +99,20 @@ class BetterEditor
 		array("TP_CODE", array("code", "Code", "code")),
 		array("TP_HTML", array("HTML", "HTML", 'HTML code')),
 		array("TP_ULIST", array("list", "Unordered list", 'first item\\n** subitem\\n* second item'))
+	);
+
+	var $fr_strings = array(
+		array("TP_RESIZE_UP", "Réduire la fenêtre d'édition"),
+		array("TP_RESIZE_DOWN", "Agrandir la fenêtre d'édition"),
+		array("TP_BOLD", array("G", "Caractère gras", "gras")),
+		array("TP_ITALIC", array("I", "Caractère italique", "italique")),
+		array("TP_UNDERLINED", array("S", "Caractère souligné", "souligné")),
+		array("TP_STRIKETHROUGH", array("B", "Caractère barré", "barré")),
+		array("TP_LINK", array("lien", "Lien Web/Wiki", "http://")),
+		array("TP_IMAGE", array("image", "Insérer une image", "http://path/to/image")),
+		array("TP_CODE", array("code", "Insérer un paragraphe en mode Code", "code")),
+		array("TP_HTML", array("HTML", "Insérer du code HTML", 'code HTML')),
+		array("TP_ULIST", array("list", "Liste non ordonnée", 'premier item\\n** subitem\\n* second item'))
 	);
 
 	function localize()
