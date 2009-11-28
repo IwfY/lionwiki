@@ -211,11 +211,11 @@ class Admin
 	 * and in that case, page will be saved.
 	 */
 
-	function pageLoaded()
+	function actionBegin()
 	{
 		global $PASSWORD, $action;
 
-		if($action == "edit" && $this->checkPages(false) == false) {
+		if($this->checkPages(false) == false) {
 			// with this, user will be thought as unlogged, so password input will appear
 			$_COOKIE["LW_AUT"] = "1"; // just keep these two different
 			$PASSWORD = "2";

@@ -260,7 +260,7 @@ class Tags
 		return $t . "</div>\n";
 	}
 
-	function formatEnd()
+	function formatFinished()
 	{
 		global $CON, $action;
 

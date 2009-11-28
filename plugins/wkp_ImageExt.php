@@ -25,9 +25,12 @@ class ImageExt
 			$CON = str_replace($img[0], "{IMAGE}", $CON);
 	}
 
-	function formatEnd()
+	function formatFinished()
 	{
-		global $CON;
+		global $CON, $action;
+
+		if($action != "")
+			return;
 
 		foreach($this->imgs as $img) {
 			preg_match_all("/\|([^\]\|=]+)(=([^\]\|\"]+))?(?=[\]\|])/", $img[0], $options, PREG_SET_ORDER);

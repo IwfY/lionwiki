@@ -66,11 +66,11 @@ class SyntaxHighlighter
 			die("<pre>" . htmlspecialchars($this->codes[(int) $_GET["num"]][3]) . "</pre>");
 	}
 
-	function formatEnd()
+	function formatFinished()
 	{
-		global $CON, $PLUGINS_DIR, $page;
+		global $CON, $PLUGINS_DIR, $page, $action;
 
-		if($this->n_codes > 0) {
+		if($action == "" && $this->n_codes > 0) {
 			include_once $PLUGINS_DIR . 'SyntaxHighlighter/geshi.php';
 
 			$i = 0;

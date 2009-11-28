@@ -13,14 +13,14 @@ $PASSWORD = ""; // if left blank, no password is required to edit.
 
 $TEMPLATE = "templates/dandelion.html";  // presentation template
 $PROTECTED_READ = false; // if true, you need to fill password for reading pages too
-$NO_HTML = false; // XSS protection, meaningful only when password protection is enabled
+$NO_HTML = true; // XSS protection, meaningful only when password protection is enabled
 $USE_HISTORY = true; // If you don't want to keep history of pages, change to false
 
 $START_PAGE = "Main page"; // Which page should be default (start page)?
 $SYNTAX_PAGE = "http://lionwiki.0o.cz/?page=Syntax+reference";
 
 $DATE_FORMAT = "Y/m/d H:i";
-$LOCAL_HOUR = "0";
+$LOCAL_HOUR = 0;
 
 @ini_set("default_charset", "UTF-8");
 header("Content-type: text/html; charset=UTF-8");
@@ -108,13 +108,13 @@ if($_GET["erasecookie"]) // remove cookie without reloading
 $plugins = array();
 
 for($dir = @opendir($PLUGINS_DIR); $dir && $file = readdir($dir);)
-	if(preg_match("/^.*wkp_(.+)\.php$/", $file, $matches) > 0) {
+	if(preg_match("/wkp_(.+)\.php$/", $file, $m) > 0) {
 		require $PLUGINS_DIR . $file;
-		$plugins[$matches[1]] = new $matches[1]();
+		$plugins[$m[1]] = new $m[1]();
 
-		if(isset($$matches[1]))
-			foreach($$matches[1] as $name => $value)
-				$plugins[$matches[1]]->$name = $value;
+		if(isset($$m[1]))
+			foreach($$m[1] as $name => $value)
+				$plugins[$m[1]]->$name = $value;
 	}
 
 plugin("pluginsLoaded");
@@ -134,7 +134,7 @@ if($PROTECTED_READ && !authentified()) {
 	$CON = "<form action=\"$self\" method=\"post\"><p>$T_PROTECTED_READ <input id=\"passwordInput\" type=\"password\" name=\"sc\"/> <input class=\"submit\" type=\"submit\"/></p></form>";
 	$action = "view-html";
 }
-else if($page || empty($action)) { // setting $PAGE_TITLE
+else if($page || empty($action))
 	if(!$page)
 		die(header("Location:$self?page=" . u($START_PAGE)));
 	else if($action == "" && file_exists("$PAGES_DIR$page.$LANG.txt")) // language variant
@@ -142,20 +142,12 @@ else if($page || empty($action)) { // setting $PAGE_TITLE
 	else if(!file_exists("$PAGES_DIR$page.txt") && $action == "")
 		$action = "edit"; // create page if it doesn't exist
 
-	if($preview)
-		$TITLE = "$T_PREVIEW: $page";
-}
-else if($action == "search")
-	$TITLE = empty($query) ? $T_LIST_OF_ALL_PAGES : "$T_SEARCH_RESULTS $query";
-else if($action == "recent")
-	$TITLE = $T_RECENT_CHANGES;
-
 if($action == "save" && !$preview && authentified()) { // do we have page to save?
 	if(trim($content) == "" && !$par)
 		@unlink($PAGES_DIR . $page . ".txt");
 	elseif($last_changed < @filemtime($PAGES_DIR . $page . ".txt")) {
 		$action = "edit";
-		$error = str_replace("{DIFF}", "<a href=\"$self?page=".u($page)."&amp;action=diff\">$T_DIFF</a>", $T_EDIT_CONFLICT);
+		$error = str_replace("{DIFF}", "<a href=\"$self?page=".u($page)."&action=diff\">$T_DIFF</a>", $T_EDIT_CONFLICT);
 		$CON = $content;
 	}
 	else if(!plugin("writingPage")) { // are plugins OK with page? (e.g. checking for spam)
@@ -171,20 +163,20 @@ if($action == "save" && !$preview && authentified()) { // do we have page to sav
 		fclose($file);
 
 		if($USE_HISTORY) { // let's archive previous revision
-			$complete_dir = $HISTORY_DIR . $page;
+			$dir = $HISTORY_DIR . $page;
 
-			if(!is_dir($complete_dir))
-				mkdir($complete_dir);
+			if(!is_dir($dir))
+				mkdir($dir, 0777);
 
 			$rightnow = date("Ymd-Hi-s", time() + $LOCAL_HOUR * 3600);
 
-			if(!$bak = @fopen($complete_dir . "/" . $rightnow . ".bak", "w"))
-				die("Could not write backup $complete_dir of page!");
+			if(!$bak = @fopen("$dir/$rightnow.bak", "w"))
+				die("Could not write backup $dir of page!");
 
 			fwrite($bak, $content, strlen($content));
 			fclose($bak);
 
-			$es = fopen($complete_dir . "/meta.dat", "ab");
+			$es = fopen("$dir/meta.dat", "ab");
 
 			fwrite($es, "!" . $rightnow .
 				str_pad($_SERVER['REMOTE_ADDR'], 16, " ", STR_PAD_LEFT) .
@@ -193,8 +185,6 @@ if($action == "save" && !$preview && authentified()) { // do we have page to sav
 
 			fclose($es);
 		}
-
-		plugin("pageWritten", $file);
 
 		if($moveto != $page && strlen($moveto))
 			if(file_exists($PAGES_DIR . $moveto . ".txt"))
@@ -206,7 +196,9 @@ if($action == "save" && !$preview && authentified()) { // do we have page to sav
 				die("Unknown error2! Page was not moved.");
 			} else
 				$page = $moveto;
-		
+
+		plugin("pageWritten");
+
 		die(header("Location:$self?page=" . u($page) . ($par ? "&par=$par" : "") . ($_REQUEST["ajax"] ? "&ajax=1" : "")));
 	} else { // there's some problem with page, give user a chance to fix it (do not throw away submitted content)
 		$CON = $content;
@@ -220,7 +212,6 @@ if($action == "save" && !$preview && authentified()) { // do we have page to sav
 
 if(@file_exists($PAGES_DIR . $page . ".txt")) {
 	$last_changed_ts = @filemtime($PAGES_DIR . $page . ".txt");
-	$LAST_CHANGED = date($DATE_FORMAT, $last_changed_ts + $LOCAL_HOUR * 3600);
 
 	if(!$CON) {
 		$CON = @file_get_contents($PAGES_DIR . $page . ".txt");
@@ -228,29 +219,26 @@ if(@file_exists($PAGES_DIR . $page . ".txt")) {
 		if($par)
 			$CON = getParagraph($CON, $par);
 
-		if(substr($CON, 0, 10) == "{redirect:" && $action == "")
+		if(substr($CON, 0, 10) == "{redirect:" && $action == "" && $_REQUEST["redirect"] != "no")
 			die(header("Location:$self?page=".u(substr($CON, 10, strpos($CON, "}") - 10))));
 	}
 }
 
 // Restoring old version of page
-if($gtime && ($restore || $action == "rev")) {
-	$CON = file_get_contents($HISTORY_DIR.$page."/".$gtime);
+if($restore || $action == "rev") {
+	$CON = file_get_contents("$HISTORY_DIR$page/$gtime");
 
 	if($action == "rev") {
-		$rev_restore = "[$T_RESTORE|./$self?page=".u($page)."&amp;action=edit&amp;gtime=$gtime&amp;restore=1]";
-
+		$rev_restore = "[$T_RESTORE|./$self?page=".u($page)."&action=edit&gtime=$gtime&restore=1]";
 		$CON = str_replace(array("{TIME}", "{RESTORE}"), array(revTime($gtime), $rev_restore), $T_REVISION) . $CON;
 	}
 }
-
-plugin("pageLoaded");
 
 if($action)
 	$HEAD .= '<meta name="robots" content="noindex, nofollow"/>';
 
 if($action == "edit" || $preview) {
-	if(!authentified() && !$showsource) { // if not logged on, require password
+	if(!$showsource && !authentified()) { // if not logged on, require password
 		$FORM_PASSWORD = $T_PASSWORD;
 		$FORM_PASSWORD_INPUT = '<input id="passwordInput" type="password" name="sc"/>';
 	}
@@ -260,60 +248,52 @@ if($action == "edit" || $preview) {
 		$RENAME_INPUT = '<input id="renameInput" type="text" name="moveto" value="'.h($page).'"/>';
 	}
 
-	$CON_FORM_BEGIN = "<form action=\"$self\" id=\"contentForm\" method=\"post\"><input type=\"hidden\" name=\"action\" value=\"save\"/><input type=\"hidden\" name=\"last_changed\" value=\"$last_changed_ts\"/><input type=\"hidden\" name=\"showsource\" value=\"$showsource\"/><input type=\"hidden\" name=\"par\" value=\"$par\"/><input type=\"hidden\" name=\"page\" value=\"".h($page)."\"/>";
+	$CON_FORM_BEGIN = "<form action=\"$self\" id=\"contentForm\" method=\"post\"><input type=\"hidden\" name=\"action\" value=\"save\"/><input type=\"hidden\" name=\"last_changed\" value=\"$last_changed_ts\"/><input type=\"hidden\" name=\"showsource\" value=\"$showsource\"/><input type=\"hidden\" name=\"par\" value=\"".h($par)."\"/><input type=\"hidden\" name=\"page\" value=\"".h($page)."\"/>";
 	$CON_FORM_END = "</form>";
-	$CON_TEXTAREA = '<textarea id="contentTextarea" class="contentTextarea" name="content" cols="83" rows="30">'.h($CON).'</textarea>';
+	$CON_TEXTAREA = '<textarea id="contentTextarea" class="contentTextarea" name="content" style="width:100%" rows="30">'.h($CON).'</textarea>';
+	$CON_PREVIEW = "<input id=\"contentPreview\" class=\"submit\" type=\"submit\" name=\"preview\" value=\"$T_PREVIEW\"/>";
 
 	if(!$showsource) {
 		$CON_SUBMIT = "<input id=\"contentSubmit\" class=\"submit\" type=\"submit\" value=\"$T_DONE\"/>";
-
 		$EDIT_SUMMARY_TEXT = $T_EDIT_SUMMARY;
 		$EDIT_SUMMARY = '<input type="text" name="esum" id="esum" value="'.h($esum).'"/>';
 	}
 
-	$CON_PREVIEW = "<input id=\"contentPreview\" class=\"submit\" type=\"submit\" name=\"preview\" value=\"$T_PREVIEW\"/>";
-
 	if($preview) {
 		$action = "";
 		$CON = $content;
+		$TITLE = "$T_PREVIEW: $page";
 	}
 } elseif($action == "history") { // show whole history of page
-	$complete_dir = $HISTORY_DIR . $page . "/";
-
-	if($opening_dir = @opendir($complete_dir)) {
+	if($opening_dir = @opendir("$HISTORY_DIR$page/")) {
 		while($filename = @readdir($opening_dir))
 			if(substr($filename, -4) == ".bak")
 				$files[] = $filename;
 
 		rsort($files);
-
 		$CON = '<form action="'.$self.'" method="get"><input type="hidden" name="action" value="diff"/><input type="hidden" name="page" value="'.h($page).'"/>';
+		$meta = @fopen("$HISTORY_DIR$page/meta.dat", "rb");
 
-		$meta = @fopen($complete_dir . "meta.dat", "rb");
-
-		for($i = 0, $c = count($files); $i < $c; $i++) {
-			$m = meta_getline($meta, $i + 1);
+		for($i = 1, $c = count($files); $i <= $c; $i++) {
+			$m = meta_getline($meta, $i);
 
 			if($m && !strcmp(basename($files[$i], ".bak"), $m[0])) {
 				$ip = $m[1];
 				$size = " - ($m[2] B)";
 				$esum = h($m[3]);
-
-				$i++;
 			} else
 				$ip = $size = $esum = "";
 
-			$CON .= "<input type=\"radio\" name=\"f1\" value=\"".h($files[$i])."\"/><input type=\"radio\" name=\"f2\" value=\"".h($files[$i])."\"/>";
-			$CON .= "<a href=\"$self?page=".u($page)."&amp;action=rev&amp;gtime=".$files[$i]."\" rel=\"nofollow\">".revTime($files[$i])."</a> $size $ip <i>$esum</i><br />";
+			$CON .= '<input type="radio" name="f1" value="'.h($files[$i]).'"/><input type="radio" name="f2" value="'.h($files[$i]).'"/>';
+			$CON .= "<a href=\"$self?page=".u($page)."&action=rev&gtime=".$files[$i]."\" rel=\"nofollow\">".revTime($files[$i])."</a> $size $ip <i>".h($esum)."</i><br />";
 		}
 
 		$CON .= "<input id=\"diffButton\" type=\"submit\" class=\"submit\" value=\"$T_DIFF\"/></form>";
-	} else
-		$CON = $NO_HISTORY;
+	}
 } elseif($action == "diff") {
 	if(empty($f1) && $opening_dir = @opendir($HISTORY_DIR . $page . "/")) { // diff is made on two last revisions
 		while($filename = @readdir($opening_dir))
-			if(preg_match('/\.bak$/', $filename))
+			if(substr($filename, -4) == ".bak")
 				$files[] = $filename;
 
 		rsort($files);
@@ -328,10 +308,6 @@ if($action == "edit" || $preview) {
 
 	$CON .= diff($f1, $f2);
 } elseif($action == "search") {
-	// offer to create page if it doesn't exist
-	if($query && !file_exists($PAGES_DIR . $query . ".txt"))
-		$CON = "<p><i><a href=\"$self?action=edit&amp;page=".u($query)."\" rel=\"nofollow\">$T_CREATE_PAGE ".h($query)."</a>.</i></p><br />";
-
 	for($dir = opendir($PAGES_DIR); $file = readdir($dir);)
 		if(substr($file, -4) == ".txt" && (@$con = file_get_contents($PAGES_DIR . $file)))
 			if(empty($query) || stristr($con, $query) !== false || stristr($file, $query) !== false)
@@ -339,19 +315,15 @@ if($action == "edit" || $preview) {
 
 	sort($files);
 
-	foreach($files as $file) {
-		if(is_writable($PAGES_DIR . $file . ".txt")) {
-			$link_text = $T_EDIT;
-			$s_source = "";
-		} else {
-			$link_text = $T_SHOW_SOURCE;
-			$s_source = "&amp;showsource=1";
-		}
+	foreach($files as $file)
+		$list .= "<li><a href=\"$self?page=".u($file).'&redirect=no" rel="nofollow">'.h($file)."</a></li>";
 
-		$CON .= "<a href=\"$self?page=".u($file).'" rel="nofollow">'.h($file)."</a> (<a href=\"$self?page=".u($file)."&amp;action=edit$s_source\">$link_text</a>)<br />";
-	}
+	$CON = "<ul>$list</ul>";
 
-	$TITLE .= " (".count($files).")";
+	if($query && !file_exists("$PAGES_DIR$query.txt")) // offer to create page if it doesn't exist
+		$CON = "<p><i><a href=\"$self?action=edit&page=".u($query)."\" rel=\"nofollow\">$T_CREATE_PAGE ".h($query)."</a>.</i></p><br />" . $CON;
+
+	$TITLE = (empty($query) ? $T_LIST_OF_ALL_PAGES : "$T_SEARCH_RESULTS $query") . " (".count($files).")";
 } elseif($action == "recent") { // recent changes
 	for($dir = opendir($PAGES_DIR), $filetime = array(); $file = readdir($dir);)
 		if(substr($file, -4) == ".txt" )
@@ -370,48 +342,42 @@ if($action == "edit" || $preview) {
 		} else
 			$ip = $size = $esum = "";
 
-		$recent .= "<tr><td class=\"rc-diff\"><a href=\"$self?page=".u($filename)."&amp;action=diff\">$T_DIFF</a></td><td class=\"rc-date\" nowrap>".date($DATE_FORMAT, $timestamp + $LOCAL_HOUR * 3600)."</td><td class=\"rc-ip\">$ip</td><td class=\"rc-page\"><a href=\"$self?page=".u($filename)."\">".h($filename)."</a> <span class=\"rc-size\">($size)</span><i class=\"rc-esum\">$esum</i></td></tr>";
+		$recent .= "<tr><td class=\"rc-diff\"><a href=\"$self?page=".u($filename)."&action=diff\">$T_DIFF</a></td><td class=\"rc-date\" nowrap>".date($DATE_FORMAT, $timestamp + $LOCAL_HOUR * 3600)."</td><td class=\"rc-ip\">$ip</td><td class=\"rc-page\"><a href=\"$self?page=".u($filename)."&redirect=no\">".h($filename)."</a> <span class=\"rc-size\">($size)</span><i class=\"rc-esum\">".h($esum)."</i></td></tr>";
 	}
 
-	$CON .= "<table>$recent</table>";
+	$CON = "<table>$recent</table>";
+	$TITLE = $T_RECENT_CHANGES;
 } else if(!plugin("action", $action) && $action != "view-html")
 	$action = "";
 
 if($action == "") { // substituting $CON to be viewed as HTML
-	$CON = "\n$CON\n";
-
 	// Subpages
-	while(preg_match("/([^\^]){include:([^}]+)}/Um", $CON, $match)) {
-		if(!strcmp($match[2], $page)) // limited recursion protection
-			$CON = str_replace($match[0], "'''Warning: subpage recursion!'''", $CON);
-		elseif(file_exists($PAGES_DIR . $match[2] . ".txt")) {
-			$tpl = file_get_contents($PAGES_DIR . $match[2] . ".txt");
-
-			$CON = str_replace($match[0], $match[1] . $tpl, $CON);
-		} else
-			$CON = str_replace($match[0], "'''Warning: subpage $match[2] was not found!'''", $CON);
-	}
+	while(preg_match("/(?<!\^){include:([^}]+)}/Um", $CON, $m))
+		if(!strcmp($m[1], $page)) // limited recursion protection
+			$CON = str_replace($m[0], "'''Warning: subpage recursion!'''", $CON);
+		elseif(file_exists("$PAGES_DIR$m[1].txt"))
+			$CON = str_replace($m[0], file_get_contents("$PAGES_DIR$m[1].txt"), $CON);
+		else
+			$CON = str_replace($m[0], "'''Warning: subpage $m[1] was not found!'''", $CON);
 
 	plugin("subPagesLoaded");
 
 	// save content not intended for substitutions ({html} tag)
 	if($NO_HTML == false) { // XSS protection
-		$n_htmlcodes = preg_match_all("/[^\^](\{html\}(.+)\{\/html\})/Ums", $CON, $htmlcodes, PREG_PATTERN_ORDER);
-
-		foreach($htmlcodes[1] as $hcode)
-			$CON = str_replace($hcode, "{HTML}", $CON);
+		preg_match_all("/(?<!\^)\{html\}(.+)\{\/html\}/Ums", $CON, $htmlcodes, PREG_PATTERN_ORDER);
+		$CON = preg_replace("/(?<!\^)\{html\}.+\{\/html\}/Ums", "{HTML}", $CON);
 	}
 
-	$CON = preg_replace("/[^\^]<!--.*-->/U", "", $CON); // internal comments
+	$CON = preg_replace("/(?<!\^)<!--.*-->/U", "", $CON); // internal comments
 	$CON = preg_replace("/\^(.)/e", "'&#'.ord('$1').';'", $CON);
 	$CON = str_replace(array("<", "&"), array("&lt;", "&amp;"), $CON);
 	$CON = preg_replace("/&amp;([a-z]+;|\#[0-9]+;)/U", "&$1", $CON); // keep HTML entities
 	$CON = preg_replace("/(\r\n|\r)/", "\n", $CON); // unifying newlines to Unix ones
 
-	// {{CODE}}
-	$nbcode = preg_match_all("/{{(.+)}}/Ums", $CON, $matches_code, PREG_PATTERN_ORDER);
-	$CON = preg_replace("/{{(.+)}}/Ums", "<pre><code>{{CODE}}</code></pre>", $CON);
+	preg_match_all("/{{(.+)}}/Ums", $CON, $codes, PREG_PATTERN_ORDER);
+	$CON = preg_replace("/{{(.+)}}/Ums", "<pre><code>{CODE}</code></pre>", $CON);
 
+	// Spans
 	preg_match_all("/\{([\.#][^\s\"\}]*)(\s([^\}\"]*))?\}/m", $CON, $spans, PREG_SET_ORDER);
 
 	foreach($spans as $m) {
@@ -439,13 +405,13 @@ if($action == "") { // substituting $CON to be viewed as HTML
 
 	$CON = preg_replace("/^([^!\*#\n][^\n]+)$/Um", "<p>$1</p>", $CON); // paragraphs
 
-	if(preg_match('/\{title:([^}\n]*)\}/U', $CON, $m)) {
+	if(preg_match('/\{title:([^}\n]*)\}/U', $CON, $m)) { // Changing page title
 		$TITLE = html_entity_decode($m[1]);
 		$CON = str_replace($m[0], "", $CON);
 	}
 
+	// Links
 	$rg_url = "[0-9a-zA-Z\.\#/~\-_%=\?\&,\+\:@;!\(\)\*\$' ]*";
-
 	preg_match_all("#\[((https?://)?$rg_url\.(jpeg|jpg|gif|png))(\|[^\]]+)?\]#", $CON, $imgs, PREG_SET_ORDER);
 
 	foreach($imgs as $img) {
@@ -476,15 +442,15 @@ if($action == "") { // substituting $CON to be viewed as HTML
 
 	preg_match_all("/\[([^|\]]+\|)?([^\]#]+)(#[^\]]+)?\]/", $CON, $matches, PREG_SET_ORDER); // matching Wiki links
 
-	foreach($matches as $match) {
-		$match[1] = empty($match[1]) ? $match[2] : rtrim($match[1], "|"); // is page label same as its name?
+	foreach($matches as $m) {
+		$m[1] = empty($m[1]) ? $m[2] : rtrim($m[1], "|"); // is page label same as its name?
 
-		if($match[3]) // link to the heading
-			$match[3] = "#" . preg_replace("/[^\da-z]/i", "_", u(substr($match[3], 1, strlen($match[3]) - 1)));
+		if($m[3]) // link to the heading
+			$m[3] = "#" . preg_replace("/[^\da-z]/i", "_", u(substr($m[3], 1, strlen($m[3]) - 1)));
 
-		$attr = file_exists("$PAGES_DIR$match[2].txt") ? $match[3] : '&amp;action=edit" class="pending" rel="nofollow';
+		$attr = file_exists("$PAGES_DIR$m[2].txt") ? $m[3] : '&action=edit" class="pending" rel="nofollow';
 
-		$CON = str_replace($match[0], '<a href="'.$self.'?page='.u($match[2]).$attr.'">'.$match[1].'</a>', $CON);
+		$CON = str_replace($m[0], '<a href="'.$self.'?page='.u($m[2]).$attr.'">'.$m[1].'</a>', $CON);
 	}
 
 	for($i = 10; $i >= 1; $i--) { // LIST, ordered, unordered
@@ -493,43 +459,38 @@ if($action == "") { // substituting $CON to be viewed as HTML
 		$CON = preg_replace('#(</ol>\n?<ol>|</ul>\n?<ul>)#', "", $CON);
 	}
 
-	// Following three lines fix only XHTML validity of lists
-	$CON = preg_replace('#</li><([uo])l>#', "<$1l>", $CON);
-	$CON = preg_replace('#</([uo])l><li>#', "</$1l></li><li>", $CON);
-	$CON = preg_replace('#<(/?)([uo])l></?[uo]l>#', "<$1$2l><$1li><$1$2l>", $CON);
+	// Fixing XHTML validity of lists
+	$CON = preg_replace(array('#</li><([uo])l>#', '#</([uo])l><li>#', '#<(/?)([uo])l></?[uo]l>#'), array("<$1l>", "</$1l></li><li>", "<$1$2l><$1li><$1$2l>"), $CON);
 
-	function remove_a($link) { // remove anchors from a text
-		preg_match_all("#<a.+>([^<>]+)</a>#", $link, $txt);
-		return trim(join("", $txt[1]));
-	}
+	// Headings
+	preg_match_all('/^(!+?)(.*)$/Um', $CON, $matches, PREG_SET_ORDER);
 
-	$heading_id = $par ? $par : 1;
-	$headings = $head_stack = array();
+	$head_stack = array();
 
-	function addHeadings($matches) { // replace headings
-		global $headings, $heading_id, $head_stack, $T_EDIT, $page, $PAGES_DIR;
+	for($heading_id = $par ? $par : 1, $i = 0, $c = count($matches); $i < $c && $m = $matches[$i]; $i++, $heading_id++) {
+		$excl = strlen($m[1]) + 1;
+		$hash = preg_replace("/[^\da-z]/i", "_", $m[2]);
 
-		$headings[] = $h = array(strlen($matches[1]) + 1, preg_replace("/[^\da-z]/i", "_", remove_a($matches[2])), $matches[2]);
+		for($ret = ""; array_pop($head_stack) >= $excl; $ret .= "</div>");
 
-		for($ret = ""; !empty($head_stack) && $head_stack[count($head_stack) - 1] >= $h[0]; array_pop($head_stack))
-			$ret .= "</div>";
+		$head_stack[] = $excl;
 
-		$head_stack[] = $h[0];
-
-		$ret .= "<div class=\"par-div\" id=\"par-$heading_id\"><h$h[0]><a class=\"section-edit\" name=\"$h[1]\">$h[2]</a>";
+		$ret .= "<div class=\"par-div\" id=\"par-$heading_id\"><h$excl><a class=\"section-edit\" name=\"$hash\">$m[2]</a>";
 
 		if(is_writable($PAGES_DIR . $page . ".txt"))
-			$ret .=  "<span class=\"par-edit\">(<a href=\"$self?action=edit&amp;page=".u($page)."&amp;par=$heading_id\">$T_EDIT</a>)</span>";
+			$ret .=  "<span class=\"par-edit\">(<a href=\"$self?action=edit&page=".u($page)."&par=$heading_id\">$T_EDIT</a>)</span>";
 
-		$heading_id++;
+		$CON = str_replace($m[0], "$ret</h$excl>", $CON);
+		$TOC .= str_repeat("<ul>", $excl - 2).'<li><a href="'.$self.'?page='.u($page).'#'.u($hash).'">'.$m[2].'</a></li>'.str_repeat("</ul>", $excl - 2);
 
-		return $ret . "</h$h[0]>";
 	}
 
-	$CON = preg_replace_callback('/^(!+?)(.*)$/Um', "addHeadings", $CON);
-	$CON = preg_replace('/(-----*)/', '<hr />', $CON); // horizontal line
-	$CON = preg_replace("/<\/([uo])l>\n\n/U", "</$1l>", $CON);
-	$CON = preg_replace('#(</h[23456]>)<br />#', "$1", $CON);
+	$CON .= str_repeat("</div>", count($head_stack));
+
+	$TOC = '<ul id="toc">' . preg_replace(array_fill(0, 5, '#</ul>\n*<ul>#'), array_fill(0, 5, ''), $TOC) . "</ul>";
+	$TOC = str_replace(array('</li><ul>', '</ul><li>', '</ul></ul>', '<ul><ul>'), array('<ul>', '</ul></li><li>', '</ul></li></ul>', '<ul><li><ul>'), $TOC);
+
+	$CON = preg_replace('/-----*/', '<hr />', $CON); // horizontal line
 	$CON = preg_replace("/'--(.*)--'/Um", '<del>$1</del>', $CON); // strikethrough
 	$CON = str_replace("--", "&mdash;", $CON); // --
 	$CON = preg_replace("/'__(.*)__'/Um", '<u>$1</u>', $CON); // underlining
@@ -537,28 +498,8 @@ if($action == "") { // substituting $CON to be viewed as HTML
 	$CON = preg_replace("/''(.*)''/Um", '<em>$1</em>', $CON); // italic
 	$CON = str_replace("{br}", '<br style="clear:both"/>', $CON); // new line
 
-	foreach($headings as $h)
-		$TOC .= str_repeat("<ul>", $h[0] - 2).'<li><a href="'.$self.'?page='.u($page).'#'.u($h[1]).'">'.remove_a($h[2]).'</a></li>'.str_repeat("</ul>", $h[0] - 2);
-
-	for($i = 0; $i < 5; $i++) // five possible headings
-		$TOC = preg_replace('/<\/ul>\n*<ul>/', '', $TOC);
-
-	$TOC = "<ul id=\"toc\">$TOC</ul>";
-
-	$TOC = str_replace('</li><ul>', '<ul>', $TOC);
-	$TOC = str_replace('</ul><li>', '</ul></li><li>', $TOC);
-	$TOC = preg_replace('/<(\/?)ul><\/?ul>/', '<$1ul><$1li><$1ul>', $TOC);
-
-	if($nbcode > 0) // return content of {{CODE}}
-		$CON = preg_replace(array_fill(0, $nbcode, '/{{CODE}}/'), $matches_code[1], $CON, 1);
-
-	if($NO_HTML == false && $n_htmlcodes > 0) // {html} tag
-		$CON = preg_replace(array_fill(0, $n_htmlcodes, '/{HTML}/'), $htmlcodes[2], $CON, 1);
-
-	while(array_pop($head_stack))
-		$CON .= "</div>";
-
-	plugin("formatEnd");
+	$CON = preg_replace(array_fill(0, count($codes) + 1, '/{CODE}/'), $codes[1], $CON, 1); // put HTML and "normal" codes back
+	$CON = preg_replace(array_fill(0, count($htmlcodes) + 1, '/{HTML}/'), $htmlcodes[1], $CON, 1);
 }
 
 plugin("formatFinished");
@@ -573,12 +514,9 @@ while(preg_match("/{include:([^}]+)}/U", $html, $match)) {
 	$html = str_replace($match[0], $inc, $html);
 }
 
-plugin("template"); // plugin specific template substitutions
+plugin("template");
 
-$html = preg_replace("/\{([^}]* )?plugin:.+( [^}]*)?\}/U", "", $html); // getting rid of absent plugin tags
-
-if($page || empty($action))
-	$EDIT = "<a rel=\"nofollow\" href=\"$self?page=".u($page)."&amp;action=edit".(is_writable("$PAGES_DIR$page.txt") ? "\">$T_EDIT</a>" : "&showsource=1\">$T_SHOW_SOURCE</a>");
+$html = preg_replace("/\{([^}]* )?plugin:.+( [^}]*)?\}/U", "", $html); // get rid of absent plugin tags
 
 $tpl_subs = array(
 	"HEAD" => $HEAD,
@@ -589,22 +527,21 @@ $tpl_subs = array(
 	"HOME" => "<a href=\"$self?page=".u($START_PAGE)."\">$T_HOME</a>",
 	"RECENT_CHANGES" => "<a href=\"$self?action=recent\">$T_RECENT_CHANGES</a>",
 	"ERROR" => $error,
-	"HISTORY" => !empty($page) ? "<a href=\"$self?page=".u($page)."&amp;action=history\" rel=\"nofollow\">$T_HISTORY</a>" : "",
+	"HISTORY" => !empty($page) ? "<a href=\"$self?page=".u($page)."&action=history\" rel=\"nofollow\">$T_HISTORY</a>" : "",
 	"PAGE_TITLE" => h($page == $START_PAGE ? $WIKI_TITLE : $TITLE),
 	"PAGE_TITLE_HEAD" => h($page == $START_PAGE ? "" : $TITLE),
 	"PAGE_URL" => u($page),
-	"EDIT" => $EDIT,
+	"EDIT" => empty($action) ? ("<a rel=\"nofollow\" href=\"$self?page=".u($page)."&action=edit".(is_writable("$PAGES_DIR$page.txt") ? "\">$T_EDIT</a>" : "&showsource=1\">$T_SHOW_SOURCE</a>")) : "",
 	"WIKI_TITLE" => h($WIKI_TITLE),
-	"LAST_CHANGED_TEXT" => $LAST_CHANGED ? $T_LAST_CHANGED : "",
-	"LAST_CHANGED" => $LAST_CHANGED,
+	"LAST_CHANGED_TEXT" => $last_changed_ts ? $T_LAST_CHANGED : "",
+	"LAST_CHANGED" => $last_changed_ts ? date($DATE_FORMAT, $last_changed_ts + $LOCAL_HOUR * 3600) : "",
 	"CONTENT" => $action != "edit" ? $CON : "",
 	"TOC" => $TOC,
 	"LANG" => $LANG,
 	"LIST_OF_ALL_PAGES" => "<a href=\"$self?action=search\">$T_LIST_OF_ALL_PAGES</a>",
-	"WIKI_VERSION" => $WIKI_VERSION,
 	"SYNTAX" => $action == "edit" || $preview ? "<a href=\"$SYNTAX_PAGE\">$T_SYNTAX</a>" : "",
 	"SHOW_PAGE" => $action == "edit" || $preview ?  "<a href=\"$self?page=".u($page)."\">$T_SHOW_PAGE</a>" : "",
-	"COOKIE" => '<a href="'.$self.'?page='.u($page).'&amp;action='.u($action).'&amp;erasecookie=1" rel="nofollow">'.$T_ERASE_COOKIE.'</a>',
+	"COOKIE" => '<a href="'.$self.'?page='.u($page).'&action='.u($action).'&erasecookie=1" rel="nofollow">'.$T_ERASE_COOKIE.'</a>',
 	"CONTENT_FORM" => $CON_FORM_BEGIN,
 	"\/CONTENT_FORM" => $CON_FORM_END,
 	"CONTENT_TEXTAREA" => $CON_TEXTAREA,
@@ -645,13 +582,6 @@ function revTime($time) {
 	return date($GLOBALS["DATE_FORMAT"], mktime($m[4], $m[5], $m[6], $m[2], $m[3], $m[1]));
 }
 
-// Get number of exclamation marks at the beginning of the line
-function exclNum($l) {
-	for($i = 1, $c = strlen($l); $i < $c && $l[$i] == "!"; $i++);
-
-	return $i;
-}
-
 // get paragraph number $par_id.
 function getParagraph($text, $par_id) {
 	$par = array(); // paragraph
@@ -664,13 +594,15 @@ function getParagraph($text, $par_id) {
 
 	foreach($lines as $line) {
 		if($line[0] == "!" && !$inside_html && !$inside_code) {
+			for($excl = 1, $c = strlen($l); $excl < $c && $l[$excl] == "!"; $excl++);
+
 			if($count == $par_id) {
 				$par[] = $line;
 
-				$par_excl = exclNum($line);
+				$par_excl = $excl;
 			}
 			else if($par_excl)
-				if(exclNum($line) > $par_excl)
+				if($excl > $par_excl)
 					$par[] = $line;
 				else
 					break;
@@ -690,8 +622,7 @@ function getParagraph($text, $par_id) {
 }
 
 function diff($f1, $f2) {
-	if($f2 < $f1)
-		list($f1, $f2) = array($f2, $f1);
+	list($f1, $f2) = array(min($f1, $f2), max($f1, $f2));
 
 	$dir = $GLOBALS["HISTORY_DIR"] . $GLOBALS["page"] . "/";
 
@@ -755,17 +686,16 @@ function plugin($method) {
 	return $ret; // returns true if treated by a plugin
 }
 
-function fallback_template() { return '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+function fallback_template() { return '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="{LANG}" lang="{LANG}">
 <head>
-	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
 	<title>{WIKI_TITLE} {-  PAGE_TITLE_HEAD}</title>
 	<style type="text/css">
 *{margin:0;padding:0;}
 body{font-size:12px;line-height:16px;padding:10px 20px 20px 20px;}
-a{color:#006600;text-decoration:none;border-bottom:1px dotted #006600;}
 p{margin: 5px 0 5px 0;}
+a{color:#006600;text-decoration:none;border-bottom:1px dotted #006600;}
 a.pending{color:#990000;}
 a.external:after{content: "\2197";}
 pre{border:1px dotted #ccc;padding:4px;overflow:auto;margin:3px;}
@@ -775,25 +705,13 @@ h1 a:hover,h2 a:hover,h3 a:hover,h4 a:hover,h5 a:hover,h6 a:hover{color:#006600;
 h1 a,h2 a,h3 a,h4 a,h5 a,h6 a{border-bottom:none;}
 h2 span.par-edit, h3 span.par-edit, h4 span.par-edit, h5 span.par-edit, h6 span.par-edit {visibility:hidden;font-size:x-small;}
 h2:hover span.par-edit, h3:hover span.par-edit, h4:hover span.par-edit, h5:hover span.par-edit, h6:hover span.par-edit {visibility:visible;}
-h1{margin:18px 0 15px 15px;font-size : 22px;}
 hr{margin:10px 0 10px 0;height:0px;overflow:hidden;border:0px;border-top:1px solid #006600;}
 ul,ol{padding:5px 0px 5px 20px;}
 table{text-align:left;}
-.error{color:#F25A5A;font-weight:bold;}
-form{display:inline}
-#renameForm{display:block;margin-bottom:6px;}
-.submit{margin-top:6px;}
-.contentTextarea{width:100%;}
 input,select,textarea{border:1px solid #AAAAAA;padding:2px;font-size:12px;}
-.submit{padding:1px;}
-textarea{padding:3px;}
 #toc{border:1px dashed #006600;margin:5px 0 5px 10px;padding:6px 5px 7px 0px;float:right;padding-right:2em;list-style:none;}
 #toc ul{list-style:none;padding:3px 0 3px 10px;}
 #toc li{font-size:11px;padding-left:10px;}
-#toc ul li{font-size:10px;}
-#toc ul ul li{font-size:9px;}
-#toc ul ul ul li{font-size:8px;}
-#toc ul ul ul ul li{font-size:7px;}
 #diff{padding:1em;white-space:pre-wrap;word-wrap:break-word;white-space:-moz-pre-wrap;white-space:-pre-wrap;white-space:-o-pre-wrap;width:97%;}
 #diff ins{color:green;text-decoration:none;font-weight:bold;}
 #diff del{color:red;text-decoration:line-through;}
@@ -808,14 +726,14 @@ textarea{padding:3px;}
 </head>
 <body>
 <table border="0" width="100%" cellpadding="4" cellspacing="0">
-	<tr id="headerLinks">
+	<tr>
 		<td colspan="2">{HOME} {RECENT_CHANGES}</td>
 		<td style="text-align:right">{EDIT} {SYNTAX} {HISTORY}</td>
 	</tr>
 	<tr><th colspan="3"><hr /><h1 id="page-title">{PAGE_TITLE} {<span class="pageVersionsList">( plugin:VERSIONS_LIST )</span>}</h1></th></tr>
 	<tr>
-		<td id="mainContent" colspan="3">
-			{<div class="error"> ERROR </div>}
+		<td colspan="3">
+			{<div style="color:#F25A5A;font-weight:bold;"> ERROR </div>}
 			{CONTENT} {plugin:TAG_LIST}
 			{CONTENT_FORM} {RENAME_TEXT} {RENAME_INPUT <br /><br />} {CONTENT_TEXTAREA}
 			<p style="float:right;margin:6px">{FORM_PASSWORD} {FORM_PASSWORD_INPUT} {plugin:CAPTCHA_QUESTION} {plugin:CAPTCHA_INPUT}

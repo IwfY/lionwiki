@@ -129,18 +129,20 @@ class LatexImg {
 	}
 
 	/* formatEnd hook.  Replaces {tex} placeholders with images */
-	function formatEnd()
+	function formatFinished()
 	{
 		// Import the content to be processed
-		global $CON;
+		global $CON, $action;
 
-		// Detect all {TEX} placeholders
-		preg_match_all("/\{TEX\}/", $CON, $tex_matches);
+		if($action == "") {
+			// Detect all {TEX} placeholders
+			preg_match_all("/\{TEX\}/", $CON, $tex_matches);
 
-		// Go through each {TEX} placeholder and replace it with an image
-		for ($i = 0; $i < count($tex_matches[0]); $i++) {
-			$pos = strpos($CON, $tex_matches[0][$i]);
-			$CON = substr_replace($CON, "<img class = 'latex' src='" . $this->latex_data[0][$i] . "' title='" . $this->latex_data[1][$i] . "' alt='" . $this->latex_data[1][$i] ."'  />", $pos, strlen($tex_matches[0][$i]));
+			// Go through each {TEX} placeholder and replace it with an image
+			for ($i = 0; $i < count($tex_matches[0]); $i++) {
+				$pos = strpos($CON, $tex_matches[0][$i]);
+				$CON = substr_replace($CON, "<img class = 'latex' src='" . $this->latex_data[0][$i] . "' title='" . $this->latex_data[1][$i] . "' alt='" . $this->latex_data[1][$i] ."'  />", $pos, strlen($tex_matches[0][$i]));
+			}
 		}
 	}
 }

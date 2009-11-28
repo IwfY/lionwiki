@@ -62,9 +62,12 @@ class Menu
 		return array($link, $parts[0]);
 	}
 
-	function formatEnd()
+	function formatFinished()
 	{
-		global $CON;
+		global $CON, $action;
+
+		if($action != "")
+			return;
 
 		foreach($this->menus as $m) {
 			$template_file = $m[2];
