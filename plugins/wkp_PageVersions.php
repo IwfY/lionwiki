@@ -75,7 +75,7 @@ class PageVersions
 		$arr_versions = array();
 
 		foreach($versions as $code => $art)
-			$arr_versions[] = "<a href=\"$self?page=".urlencode(basename($art, ".txt") . ".$code")."\">".trim($this->lang_names[$code])."</a>";
+			$arr_versions[] = "<a href=\"$self?page=".u(basename($art, ".txt") . ".$code")."\">".trim($this->lang_names[$code])."</a>";
 
 		if(!empty($arr_versions))
 			$ul_list = "<ul class=\"subpage\"><li>\n" . implode("</li><li>\n", $arr_versions) . "</li></ul>";

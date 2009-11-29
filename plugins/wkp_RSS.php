@@ -65,7 +65,7 @@ class RSS {
 	<item>
 	  <title>$page</title>
 	  <pubDate>". date("r", $timestamp)."</pubDate>
-	  <link>$pagelink?page=".urlencode($page)."</link>
+	  <link>$pagelink?page=".u($page)."</link>
 	  <description>$newest</description>
 	</item>";
 		} else

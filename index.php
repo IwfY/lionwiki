@@ -285,7 +285,7 @@ if($action == "edit" || $preview) {
 				$ip = $size = $esum = "";
 
 			$CON .= '<input type="radio" name="f1" value="'.h($files[$i]).'"/><input type="radio" name="f2" value="'.h($files[$i]).'"/>';
-			$CON .= "<a href=\"$self?page=".u($page)."&action=rev&gtime=".$files[$i]."\" rel=\"nofollow\">".revTime($files[$i])."</a> $size $ip <i>".h($esum)."</i><br />";
+			$CON .= "<a href=\"$self?page=".u($page)."&action=rev&gtime=".$files[$i]."\">".revTime($files[$i])."</a> $size $ip <i>".h($esum)."</i><br />";
 		}
 
 		$CON .= "<input id=\"diffButton\" type=\"submit\" class=\"submit\" value=\"$T_DIFF\"/></form>";
@@ -301,8 +301,8 @@ if($action == "edit" || $preview) {
 		die(header("Location:$self?action=diff&page=".u($page)."&f1=$files[0]&f2=$files[1]"));
 	}
 
-	$r1 = "<a href=\"$self?page=".u($page)."&action=rev&gtime=$f1\" rel=\"nofollow\">".revTime($f1)."</a>";
-	$r2 = "<a href=\"$self?page=".u($page)."&action=rev&gtime=$f2\" rel=\"nofollow\">".revTime($f2)."</a>";
+	$r1 = "<a href=\"$self?page=".u($page)."&action=rev&gtime=$f1\">".revTime($f1)."</a>";
+	$r2 = "<a href=\"$self?page=".u($page)."&action=rev&gtime=$f2\">".revTime($f2)."</a>";
 
 	$CON = str_replace(array("{REVISION1}", "{REVISION2}"), array($r1, $r2), $T_REV_DIFF);
 
@@ -316,18 +316,18 @@ if($action == "edit" || $preview) {
 	sort($files);
 
 	foreach($files as $file)
-		$list .= "<li><a href=\"$self?page=".u($file).'&redirect=no" rel="nofollow">'.h($file)."</a></li>";
+		$list .= "<li><a href=\"$self?page=".u($file).'&redirect=no">'.h($file)."</a></li>";
 
 	$CON = "<ul>$list</ul>";
 
 	if($query && !file_exists("$PAGES_DIR$query.txt")) // offer to create page if it doesn't exist
-		$CON = "<p><i><a href=\"$self?action=edit&page=".u($query)."\" rel=\"nofollow\">$T_CREATE_PAGE ".h($query)."</a>.</i></p><br />" . $CON;
+		$CON = "<p><i><a href=\"$self?action=edit&page=".u($query)."\">$T_CREATE_PAGE ".h($query)."</a>.</i></p><br />" . $CON;
 
 	$TITLE = (empty($query) ? $T_LIST_OF_ALL_PAGES : "$T_SEARCH_RESULTS $query") . " (".count($files).")";
 } elseif($action == "recent") { // recent changes
 	for($dir = opendir($PAGES_DIR), $filetime = array(); $file = readdir($dir);)
 		if(substr($file, -4) == ".txt" )
-			$filetime[basename($file, ".txt")] = filemtime($PAGES_DIR . $file);
+			$filetime[substr($file, -4)] = filemtime($PAGES_DIR . $file);
 
 	arsort($filetime);
 
@@ -398,7 +398,6 @@ if($action == "") { // substituting $CON to be viewed as HTML
 
 	plugin("formatBegin");
 
-	// substituting special characters
 	$CON = strtr($CON, array("&lt;-->" => "&harr;", "-->" => "&rarr;", "&lt;--" => "&larr;", "(c)" => "&copy;", "(r)" => "&reg;"));
 	$CON = preg_replace("/\{small\}(.*)\{\/small\}/U", "<small>$1</small>", $CON); // small
 	$CON = preg_replace("/\{su([bp])\}(.*)\{\/su([bp])\}/U", "<su$1>$2</su$3>", $CON); // sup and sub
@@ -410,7 +409,7 @@ if($action == "") { // substituting $CON to be viewed as HTML
 		$CON = str_replace($m[0], "", $CON);
 	}
 
-	// Links
+	// Images
 	$rg_url = "[0-9a-zA-Z\.\#/~\-_%=\?\&,\+\:@;!\(\)\*\$' ]*";
 	preg_match_all("#\[((https?://)?$rg_url\.(jpeg|jpg|gif|png))(\|[^\]]+)?\]#", $CON, $imgs, PREG_SET_ORDER);
 
@@ -436,7 +435,7 @@ if($action == "") { // substituting $CON to be viewed as HTML
 
 	$CON = preg_replace('#([0-9a-zA-Z\./~\-_]+@[0-9a-z/~\-_]+\.[0-9a-z\./~\-_]+)#i', '<a href="mailto:$0">$0</a>', $CON); // mail recognition
 
-	// LINKS
+	// Links
 	$CON = preg_replace("#\[([^\]]+)\|(\./($rg_url)|(https?://$rg_url))\]#U", '<a href="$2" class="external">$1</a>', $CON);
 	$CON = preg_replace("#(?<!\")(https?://$rg_url)#i", '<a href="$0" class="external">$1</a>', $CON);
 
@@ -448,12 +447,12 @@ if($action == "") { // substituting $CON to be viewed as HTML
 		if($m[3]) // link to the heading
 			$m[3] = "#" . preg_replace("/[^\da-z]/i", "_", u(substr($m[3], 1, strlen($m[3]) - 1)));
 
-		$attr = file_exists("$PAGES_DIR$m[2].txt") ? $m[3] : '&action=edit" class="pending" rel="nofollow';
+		$attr = file_exists("$PAGES_DIR$m[2].txt") ? $m[3] : '&action=edit" class="pending"';
 
 		$CON = str_replace($m[0], '<a href="'.$self.'?page='.u($m[2]).$attr.'">'.$m[1].'</a>', $CON);
 	}
 
-	for($i = 10; $i >= 1; $i--) { // LIST, ordered, unordered
+	for($i = 10; $i >= 1; $i--) { // Lists, ordered, unordered
 		$CON = preg_replace('/^'.str_repeat('\*', $i).'(.*)(\n)/Um', str_repeat("<ul>", $i)."<li>$1</li>".str_repeat("</ul>", $i)."$2", $CON);
 		$CON = preg_replace('/^'.str_repeat('\#', $i).'(.*)(\n)/Um', str_repeat("<ol>", $i)."<li>$1</li>".str_repeat("</ol>", $i)."$2", $CON);
 		$CON = preg_replace('#(</ol>\n?<ol>|</ul>\n?<ul>)#', "", $CON);
@@ -490,13 +489,13 @@ if($action == "") { // substituting $CON to be viewed as HTML
 	$TOC = '<ul id="toc">' . preg_replace(array_fill(0, 5, '#</ul>\n*<ul>#'), array_fill(0, 5, ''), $TOC) . "</ul>";
 	$TOC = str_replace(array('</li><ul>', '</ul><li>', '</ul></ul>', '<ul><ul>'), array('<ul>', '</ul></li><li>', '</ul></li></ul>', '<ul><li><ul>'), $TOC);
 
-	$CON = preg_replace('/-----*/', '<hr />', $CON); // horizontal line
 	$CON = preg_replace("/'--(.*)--'/Um", '<del>$1</del>', $CON); // strikethrough
-	$CON = str_replace("--", "&mdash;", $CON); // --
 	$CON = preg_replace("/'__(.*)__'/Um", '<u>$1</u>', $CON); // underlining
 	$CON = preg_replace("/'''(.*)'''/Um", '<strong>$1</strong>', $CON); // bold
 	$CON = preg_replace("/''(.*)''/Um", '<em>$1</em>', $CON); // italic
 	$CON = str_replace("{br}", '<br style="clear:both"/>', $CON); // new line
+	$CON = preg_replace('/-----*/', '<hr />', $CON); // horizontal line
+	$CON = str_replace("--", "&mdash;", $CON); // --
 
 	$CON = preg_replace(array_fill(0, count($codes) + 1, '/{CODE}/'), $codes[1], $CON, 1); // put HTML and "normal" codes back
 	$CON = preg_replace(array_fill(0, count($htmlcodes) + 1, '/{HTML}/'), $htmlcodes[1], $CON, 1);
@@ -510,7 +509,7 @@ $html = file_exists($TEMPLATE) ? file_get_contents(sanitizeFilename($TEMPLATE)) 
 // including pages in pure HTML
 while(preg_match("/{include:([^}]+)}/U", $html, $match)) {
 	$inc = @file_get_contents($PAGES_DIR . $match[1] . ".txt");
-	$inc = str_replace(array("{html}", "{/html}"), array("", ""), $inc);
+	$inc = str_replace(array("{html}", "{/html}"), "", $inc);
 	$html = str_replace($match[0], $inc, $html);
 }
 
@@ -519,40 +518,40 @@ plugin("template");
 $html = preg_replace("/\{([^}]* )?plugin:.+( [^}]*)?\}/U", "", $html); // get rid of absent plugin tags
 
 $tpl_subs = array(
-	"HEAD" => $HEAD,
-	"SEARCH_FORM" => '<form action="'.$self.'" method="get" id="searchForm"><span><input type="hidden" name="action" value="search"/><input type="submit" style="display:none;"/>',
-	"\/SEARCH_FORM" => "</span></form>",
-	"SEARCH_INPUT" => '<input type="text" id="searchInput" name="query" value="'.h($query).'"/>',
-	"SEARCH_SUBMIT" => "<input class=\"submit\" type=\"submit\" value=\"$T_SEARCH\"/>",
-	"HOME" => "<a href=\"$self?page=".u($START_PAGE)."\">$T_HOME</a>",
-	"RECENT_CHANGES" => "<a href=\"$self?action=recent\">$T_RECENT_CHANGES</a>",
-	"ERROR" => $error,
-	"HISTORY" => !empty($page) ? "<a href=\"$self?page=".u($page)."&action=history\" rel=\"nofollow\">$T_HISTORY</a>" : "",
-	"PAGE_TITLE" => h($page == $START_PAGE ? $WIKI_TITLE : $TITLE),
-	"PAGE_TITLE_HEAD" => h($page == $START_PAGE ? "" : $TITLE),
-	"PAGE_URL" => u($page),
-	"EDIT" => empty($action) ? ("<a rel=\"nofollow\" href=\"$self?page=".u($page)."&action=edit".(is_writable("$PAGES_DIR$page.txt") ? "\">$T_EDIT</a>" : "&showsource=1\">$T_SHOW_SOURCE</a>")) : "",
-	"WIKI_TITLE" => h($WIKI_TITLE),
-	"LAST_CHANGED_TEXT" => $last_changed_ts ? $T_LAST_CHANGED : "",
-	"LAST_CHANGED" => $last_changed_ts ? date($DATE_FORMAT, $last_changed_ts + $LOCAL_HOUR * 3600) : "",
-	"CONTENT" => $action != "edit" ? $CON : "",
-	"TOC" => $TOC,
-	"LANG" => $LANG,
-	"LIST_OF_ALL_PAGES" => "<a href=\"$self?action=search\">$T_LIST_OF_ALL_PAGES</a>",
-	"SYNTAX" => $action == "edit" || $preview ? "<a href=\"$SYNTAX_PAGE\">$T_SYNTAX</a>" : "",
-	"SHOW_PAGE" => $action == "edit" || $preview ?  "<a href=\"$self?page=".u($page)."\">$T_SHOW_PAGE</a>" : "",
-	"COOKIE" => '<a href="'.$self.'?page='.u($page).'&action='.u($action).'&erasecookie=1" rel="nofollow">'.$T_ERASE_COOKIE.'</a>',
-	"CONTENT_FORM" => $CON_FORM_BEGIN,
-	"\/CONTENT_FORM" => $CON_FORM_END,
-	"CONTENT_TEXTAREA" => $CON_TEXTAREA,
-	"CONTENT_SUBMIT" => $CON_SUBMIT,
-	"CONTENT_PREVIEW" => $CON_PREVIEW,
-	"RENAME_TEXT" => $RENAME_TEXT,
-	"RENAME_INPUT" => $RENAME_INPUT,
-	"EDIT_SUMMARY_TEXT" => $EDIT_SUMMARY_TEXT,
-	"EDIT_SUMMARY_INPUT" => $EDIT_SUMMARY,
-	"FORM_PASSWORD" => $FORM_PASSWORD,
-	"FORM_PASSWORD_INPUT" => $FORM_PASSWORD_INPUT
+	'HEAD' => $HEAD,
+	'SEARCH_FORM' => '<form action="'.$self.'" method="get" id="searchForm"><span><input type="hidden" name="action" value="search"/><input type="submit" style="display:none;"/>',
+	'\/SEARCH_FORM' => "</span></form>",
+	'SEARCH_INPUT' => '<input type="text" id="searchInput" name="query" value="'.h($query).'"/>',
+	'SEARCH_SUBMIT' => "<input class=\"submit\" type=\"submit\" value=\"$T_SEARCH\"/>",
+	'HOME' => "<a href=\"$self?page=".u($START_PAGE)."\">$T_HOME</a>",
+	'RECENT_CHANGES' => "<a href=\"$self?action=recent\">$T_RECENT_CHANGES</a>",
+	'ERROR' => $error,
+	'HISTORY' => !empty($page) ? "<a href=\"$self?page=".u($page)."&action=history\">$T_HISTORY</a>" : "",
+	'PAGE_TITLE' => h($page == $START_PAGE && $page == $TITLE ? $WIKI_TITLE : $TITLE),
+	'PAGE_TITLE_HEAD' => h($TITLE),
+	'PAGE_URL' => u($page),
+	'EDIT' => empty($action) ? ("<a href=\"$self?page=".u($page)."&action=edit".(is_writable("$PAGES_DIR$page.txt") ? "\">$T_EDIT</a>" : "&showsource=1\">$T_SHOW_SOURCE</a>")) : "",
+	'WIKI_TITLE' => h($WIKI_TITLE),
+	'LAST_CHANGED_TEXT' => $last_changed_ts ? $T_LAST_CHANGED : "",
+	'LAST_CHANGED' => $last_changed_ts ? date($DATE_FORMAT, $last_changed_ts + $LOCAL_HOUR * 3600) : "",
+	'CONTENT' => $action != "edit" ? $CON : "",
+	'TOC' => $TOC,
+	'LANG' => $LANG,
+	'LIST_OF_ALL_PAGES' => "<a href=\"$self?action=search\">$T_LIST_OF_ALL_PAGES</a>",
+	'SYNTAX' => $action == "edit" || $preview ? "<a href=\"$SYNTAX_PAGE\">$T_SYNTAX</a>" : "",
+	'SHOW_PAGE' => $action == "edit" || $preview ?  "<a href=\"$self?page=".u($page)."\">$T_SHOW_PAGE</a>" : "",
+	'COOKIE' => '<a href="'.$self.'?page='.u($page).'&action='.u($action).'&erasecookie=1">'.$T_ERASE_COOKIE.'</a>',
+	'CONTENT_FORM' => $CON_FORM_BEGIN,
+	'\/CONTENT_FORM' => $CON_FORM_END,
+	'CONTENT_TEXTAREA' => $CON_TEXTAREA,
+	'CONTENT_SUBMIT' => $CON_SUBMIT,
+	'CONTENT_PREVIEW' => $CON_PREVIEW,
+	'RENAME_TEXT' => $RENAME_TEXT,
+	'RENAME_INPUT' => $RENAME_INPUT,
+	'EDIT_SUMMARY_TEXT' => $EDIT_SUMMARY_TEXT,
+	'EDIT_SUMMARY_INPUT' => $EDIT_SUMMARY,
+	'FORM_PASSWORD' => $FORM_PASSWORD,
+	'FORM_PASSWORD_INPUT' => $FORM_PASSWORD_INPUT
 );
 
 foreach($tpl_subs as $tpl => $rpl) // substituting values
@@ -577,7 +576,7 @@ function sanitizeFilename($filename) {
 }
 
 function revTime($time) {
-	preg_match("/([0-9][0-9][0-9][0-9])([0-9][0-9])([0-9][0-9])-([0-9][0-9])([0-9][0-9])-([0-9][0-9])/U", $time, $m);
+	preg_match("/(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})-(\d{2})/U", $time, $m);
 
 	return date($GLOBALS["DATE_FORMAT"], mktime($m[4], $m[5], $m[6], $m[2], $m[3], $m[1]));
 }
@@ -690,7 +689,7 @@ function fallback_template() { return '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="{LANG}" lang="{LANG}">
 <head>
 	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
-	<title>{WIKI_TITLE} {-  PAGE_TITLE_HEAD}</title>
+	<title>{PAGE_TITLE_HEAD  - }{WIKI_TITLE}</title>
 	<style type="text/css">
 *{margin:0;padding:0;}
 body{font-size:12px;line-height:16px;padding:10px 20px 20px 20px;}

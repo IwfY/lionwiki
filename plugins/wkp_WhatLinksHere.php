@@ -2,7 +2,7 @@
 /*
  * WhatLinksHere plugin for LionWiki searches for backreferences to current page
  *
- * (c) Adam Zivner 2008, adam.zivner@gmail.com, GPL'd
+ * (c) Adam Zivner 2008, 2009; adam.zivner@gmail.com, GPL'd
  */
 
 class WhatLinksHere {
@@ -36,12 +36,12 @@ class WhatLinksHere {
 				sort($files);
 
 				foreach($files as $file)
-					$CON .= "<li><a href=\"$self?page=".urlencode($file)."\">".htmlspecialchars($file)."</a></li>";
+					$CON .= "<li><a href=\"$self?page=".u($file)."\">".h($file)."</a></li>";
 			}
 
 			$CON .= "</ul>";
 
-			$TITLE = "What links to ".htmlspecialchars($page)."? (".count($files).")";
+			$TITLE = "What links to ".h($page)."? (".count($files).")";
 
 			return true;
 		}
@@ -56,8 +56,8 @@ class WhatLinksHere {
 		if(!empty($page)) {
 			$page_nolang = preg_replace("/\.[A-Za-z]{2}(-[A-Za-z]{2})?$/", "", $page);
 
-			$html = template_replace("plugin:WHAT_LINKS_HERE", "<a href=\"$self?action=whatlinkshere&amp;page=".urlencode($page_nolang)."\" rel=\"nofollow\">What links here?</a>", $html);
-			$html = template_replace("PAGE_TITLE", "<a href=\"$self?action=whatlinkshere&amp;page=".urlencode($page_nolang)."\" rel=\"nofollow\" title=\"What links to this page?\">".htmlspecialchars($page == $START_PAGE ? $WIKI_TITLE : $TITLE)."</a>", $html);
+			$html = template_replace("plugin:WHAT_LINKS_HERE", "<a href=\"$self?action=whatlinkshere&amp;page=".u($page_nolang)."\" rel=\"nofollow\">What links here?</a>", $html);
+			$html = template_replace("PAGE_TITLE", "<a href=\"$self?action=whatlinkshere&amp;page=".u($page_nolang)."\" rel=\"nofollow\" title=\"What links to this page?\">".h($page == $START_PAGE && $page == $TITLE ? $WIKI_TITLE : $TITLE)."</a>", $html);
 		}
 	}
 }

@@ -91,7 +91,7 @@ class Tags
 
 			$tag = trim($_GET["tag"]);
 
-			$TITLE = 'List of pages tagged with "' . htmlspecialchars($tag) . '"';
+			$TITLE = 'List of pages tagged with "' . h($tag) . '"';
 
 			$f = fopen($this->tagfile, "rb");
 
@@ -113,7 +113,7 @@ class Tags
 				$CON = "<ul>\n";
 
 				foreach($results as $r)
-					$CON .= "	<li><a href=\"$self?page=".urlencode($r)."\">".htmlspecialchars($r)."</a></li>\n";
+					$CON .= "	<li><a href=\"$self?page=".u($r)."\">".h($r)."</a></li>\n";
 
 				$CON .= "</ul>\n";
 
@@ -188,7 +188,7 @@ class Tags
 		$tag_array = array();
 
 		foreach($tags as $tag)
-			$tag_array[] = "<a class=\"tagLink\" href=\"$self?action=tagsearch&amp;tag=".urlencode(trim($tag))."\">".htmlspecialchars($tag)."</a>";
+			$tag_array[] = "<a class=\"tagLink\" href=\"$self?action=tagsearch&amp;tag=".u(trim($tag))."\">".h($tag)."</a>";
 
 		return empty($tag_array) ? "" : "<div class=\"tagList\">Tags: \n" . implode(", ", $tag_array) . "</div>\n";
 	}
@@ -254,7 +254,7 @@ class Tags
 			else
 				$tagsize = floor(($tag["count"] - $count_min) / ($count_max - $count_min) * ($this->font_max - $this->font_min) + $this->font_min);
 
-			$t .= "<a class=\"tagCloudLink\" style=\"font-size:{$tagsize}px\" href=\"$self?action=tagsearch&amp;tag=".urlencode($tag["name"])."\">".htmlspecialchars($tag["name"])."</a>\n";
+			$t .= "<a class=\"tagCloudLink\" style=\"font-size:{$tagsize}px\" href=\"$self?action=tagsearch&amp;tag=".u($tag["name"])."\">".h($tag["name"])."</a>\n";
 		}
 
 		return $t . "</div>\n";

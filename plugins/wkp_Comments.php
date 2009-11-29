@@ -78,12 +78,12 @@ class Comments
 				$match[1] = rtrim($match[1], "|");
 
 			if($match[3]) // link to the heading
-				$match[3] = "#" . preg_replace("/[^\da-z]/i", "_", urlencode(substr($match[3], 1, strlen($match[3]) - 1)));
+				$match[3] = "#" . preg_replace("/[^\da-z]/i", "_", u(substr($match[3], 1, strlen($match[3]) - 1)));
 
 			if(file_exists($PAGES_DIR . "$match[2].txt"))
-				$txt = str_replace($match[0], '<a href="'.$self.'?page=' . urlencode($match[2]) . $match[3] . '">' . $match[1] . '</a>', $txt);
+				$txt = str_replace($match[0], '<a href="'.$self.'?page=' . u($match[2]) . $match[3] . '">' . $match[1] . '</a>', $txt);
 			else
-				$txt = str_replace($match[0], '<a href="'.$self.'?page=' . urlencode($match[2]) . '&amp;action=edit" class="pending" rel="nofollow">' . $match[1] . '</a>', $txt);
+				$txt = str_replace($match[0], '<a href="'.$self.'?page=' . u($match[2]) . '&amp;action=edit" class="pending" rel="nofollow">' . $match[1] . '</a>', $txt);
 		}
 
 		$txt = preg_replace('#([0-9a-zA-Z\./~\-_]+@[0-9a-z/~\-_]+\.[0-9a-z\./~\-_]+)#i', '<a href="mailto:$0">$0</a>', $txt);
@@ -122,12 +122,12 @@ class Comments
 				"{FORM_EMAIL}" => $this->TP_FORM_EMAIL,
 				"{FORM_CONTENT}" => $this->TP_FORM_CONTENT,
 				// Following 3 are for failed captcha test
-				"{FORM_NAME_VALUE}" => $comment_captcha_failed ? htmlspecialchars($_POST["name"]) : "",
-							"{FORM_EMAIL_VALUE}" => $comment_captcha_failed ? htmlspecialchars($_POST["email"]) : "",
-				"{FORM_CONTENT_VALUE}" => $comment_captcha_failed ? htmlspecialchars($_POST["content"]) : "",
+				"{FORM_NAME_VALUE}" => $comment_captcha_failed ? h($_POST["name"]) : "",
+							"{FORM_EMAIL_VALUE}" => $comment_captcha_failed ? h($_POST["email"]) : "",
+				"{FORM_CONTENT_VALUE}" => $comment_captcha_failed ? h($_POST["content"]) : "",
 				"{FORM_SUBMIT}" => $this->TP_FORM_SUBMIT,
-				"{FORM_SELF}" => htmlspecialchars($self),
-				"{FORM_PAGE}" => htmlspecialchars($page),
+				"{FORM_SELF}" => h($self),
+				"{FORM_PAGE}" => h($page),
 				"{COMMENTS}" => $this->TP_COMMENTS
 			));
 
@@ -168,16 +168,16 @@ class Comments
 
 					$items_str .= strtr($item_tmpl, array(
 						"{CONTENT}" => $processed_content,
-						"{NAME}" => htmlspecialchars($name),
-						"{EMAIL}" => htmlspecialchars($email),
-						"{NAME_TO_EMAIL}" => $email == "" ? $name : ("<a href=\"mailto:".htmlspecialchars($email)."\">" . htmlspecialchars($name) . "</a>"),
+						"{NAME}" => h($name),
+						"{EMAIL}" => h($email),
+						"{NAME_TO_EMAIL}" => $email == "" ? $name : ("<a href=\"mailto:".h($email)."\">" . h($name) . "</a>"),
 						"{IP}" => $ip,
 						"{DATE}" => revTime(basename($filename, ".txt")),
 						"{ID}" => basename($filename, ".txt"),
 						"{NUMBER}" => $comment_num,
-						"{DELETE}" => htmlspecialchars($this->TP_DELETE),
-						"{DELETE_LINK}" => "$self?action=admin-deletecomment&amp;page=" . urlencode($page) . "&amp;filename=" . urlencode($filename),
-						"{DELETE_CONFIRM}" => htmlspecialchars($this->TP_DELETE_CONFIRM)
+						"{DELETE}" => h($this->TP_DELETE),
+						"{DELETE_LINK}" => "$self?action=admin-deletecomment&amp;page=" . u($page) . "&amp;filename=" . u($filename),
+						"{DELETE_CONFIRM}" => h($this->TP_DELETE_CONFIRM)
 					));
 				}
 			}
@@ -194,7 +194,7 @@ class Comments
 
 		$CON = str_replace("{NO_COMMENTS}", "", $CON);
 
-		$HEAD .= "\n<link rel=\"alternate\" type=\"application/rss+xml\" title=\"RSS ".htmlspecialchars($this->TP_COMMENTS)."\" href=\"$this->rss_file\" />\n";
+		$HEAD .= "\n<link rel=\"alternate\" type=\"application/rss+xml\" title=\"RSS ".h($this->TP_COMMENTS)."\" href=\"$this->rss_file\" />\n";
 	}
 
 	function actionBegin()
@@ -281,10 +281,10 @@ class Comments
 
 		$n_item = "
 <item>
-	<title>".htmlspecialchars($page)."</title>
+	<title>".h($page)."</title>
 	<pubDate>". date("r")."</pubDate>
-	<link>$pagelink?page=".urlencode($page)."#$id</link>
-	<description><pre>".htmlspecialchars($content)."</pre></description>
+	<link>$pagelink?page=".u($page)."#$id</link>
+	<description><pre>".h($content)."</pre></description>
 </item>";
 
 		$rss = str_replace('{WIKI_TITLE}', $WIKI_TITLE . ": " . $this->TP_COMMENTS, $this->rss_template);

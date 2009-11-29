@@ -1770,10 +1770,10 @@ class GeSHi {
     }
 
     /**
-     * Sets the encoding used for htmlspecialchars(), for international
+     * Sets the encoding used for h(), for international
      * support.
      *
-     * NOTE: This is not needed for now because htmlspecialchars() is not
+     * NOTE: This is not needed for now because h() is not
      * being used (it has a security hole in PHP4 that has not been patched).
      * Maybe in a future version it may make a return for speed reasons, but
      * I doubt it.
@@ -3161,9 +3161,9 @@ class GeSHi {
                             '{FNAMEU}',
                             '.'),
                         array(
-                            str_replace('+', '%20', urlencode($this->hsc($word))),
-                            str_replace('+', '%20', urlencode($this->hsc(strtolower($word)))),
-                            str_replace('+', '%20', urlencode($this->hsc(strtoupper($word)))),
+                            str_replace('+', '%20', u($this->hsc($word))),
+                            str_replace('+', '%20', u($this->hsc(strtolower($word)))),
+                            str_replace('+', '%20', u($this->hsc(strtoupper($word)))),
                             '<DOT>'),
                         $this->language_data['URLS'][$k]
                     ) . '">';
@@ -4132,22 +4132,22 @@ class GeSHi {
     }
 
     /**
-     * Secure replacement for PHP built-in function htmlspecialchars().
+     * Secure replacement for PHP built-in function h().
      *
      * See ticket #427 (http://wush.net/trac/wikka/ticket/427) for the rationale
      * for this replacement function.
      *
      * The INTERFACE for this function is almost the same as that for
-     * htmlspecialchars(), with the same default for quote style; however, there
+     * h(), with the same default for quote style; however, there
      * is no 'charset' parameter. The reason for this is as follows:
      *
      * The PHP docs say:
      *      "The third argument charset defines character set used in conversion."
      *
-     * I suspect PHP's htmlspecialchars() is working at the byte-value level and
+     * I suspect PHP's h() is working at the byte-value level and
      * thus _needs_ to know (or asssume) a character set because the special
      * characters to be replaced could exist at different code points in
-     * different character sets. (If indeed htmlspecialchars() works at
+     * different character sets. (If indeed h() works at
      * byte-value level that goes some  way towards explaining why the
      * vulnerability would exist in this function, too, and not only in
      * htmlentities() which certainly is working at byte-value level.)
@@ -4207,7 +4207,7 @@ class GeSHi {
                 unset($aTransSpecchar['"']);
                 break;
             case ENT_QUOTES: // convert single quotes as well
-                $aTransSpecchar["'"] = '&#39;'; // (apos) htmlspecialchars() uses '&#039;'
+                $aTransSpecchar["'"] = '&#39;'; // (apos) h() uses '&#039;'
                 break;
         }
 

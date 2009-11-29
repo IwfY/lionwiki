@@ -32,8 +32,8 @@ class SelectTemplate
 
 		$select = "
 <form action=\"$self\" method=\"get\">
-<input type=\"hidden\" name=\"page\" value=\"" . htmlspecialchars($page) . "\" />
-<input type=\"hidden\" name=\"action\" value=\"" . htmlspecialchars($action) . "\" />
+<input type=\"hidden\" name=\"page\" value=\"" . h($page) . "\" />
+<input type=\"hidden\" name=\"action\" value=\"" . h($action) . "\" />
 <input type=\"hidden\" name=\"permanent\" value=\"1\" />
 <select name=\"template\" id=\"selectTemplate\" onchange=\"this.form.submit();\">
 ";
@@ -41,7 +41,7 @@ class SelectTemplate
 		foreach($this->tpls as $t_file => $t_name) {
 			$selected = $TEMPLATE == $t_file ? " selected " : "";
 
-			$select .= "<option value=\"$t_file\"$selected>".htmlspecialchars($t_name)."</option>\n";
+			$select .= "<option value=\"$t_file\"$selected>".h($t_name)."</option>\n";
 		}
 
 		$select .= "</select></form>\n";

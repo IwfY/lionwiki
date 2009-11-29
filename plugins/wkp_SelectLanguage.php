@@ -65,7 +65,7 @@ class SelectLanguage
 		$select = "
 <form action=\"$self\" id=\"formSelectLanguage\" method=\"get\">
 <input type=\"hidden\" name=\"page\" value=\"" . basename($page, ".$LANG") . "\" />
-<input type=\"hidden\" name=\"action\" value=\"" . htmlspecialchars($action) . "\" />
+<input type=\"hidden\" name=\"action\" value=\"" . h($action) . "\" />
 <select name=\"lang\" id=\"selectLanguage\" onchange=\"this.form.submit();\">
 ";
 

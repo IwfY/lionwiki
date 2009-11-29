@@ -321,8 +321,8 @@ class Admin
 			$ret .= '
 <form action="'.$self.'" method="post">
 <input type="hidden" name="action" value="admin-deletecomment" />
-<input type="hidden" name="page" value="'.htmlspecialchars($_REQUEST["page"]).'" />
-<input type="hidden" name="filename" value="'.htmlspecialchars($_REQUEST["filename"]).'" />
+<input type="hidden" name="page" value="'.h($_REQUEST["page"]).'" />
+<input type="hidden" name="filename" value="'.h($_REQUEST["filename"]).'" />
 '.$T_PASSWORD.': <input type="text" name="sc" value="" />
 <input type="submit" value="Delete" />
 </form>';
@@ -337,7 +337,7 @@ class Admin
 			if(preg_match("/([0-9]{8}-[0-9]{4}-[0-9]{2})\.txt/", $filename, $m)) // is it really a comment file?
 				unlink($plugins["Comments"]->comments_dir . $page . "/" . $filename);
 
-			Header("Location:$self?page=" . urlencode($page) . "#commentWrap");
+			Header("Location:$self?page=" . u($page) . "#commentWrap");
 			die();
 		}
 	}

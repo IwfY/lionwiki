@@ -57,7 +57,7 @@ class Menu
 		list($name, $link) = $parts;
 
 		if(substr($link, 0, 4) != "http" && substr($link, 0, 4) != "http" && substr($link, 0, 2) != "./" && $link[0] != "/")
-			$link = $GLOBALS["self"] . "?page=" . urlencode($link);
+			$link = $GLOBALS["self"] . "?page=" . u($link);
 
 		return array($link, $parts[0]);
 	}
@@ -106,7 +106,7 @@ class Menu
 
 				$items_str .= strtr($item_tmpl, array(
 					"{class}" => $class,
-					"{name}" => htmlspecialchars($name),
+					"{name}" => h($name),
 					"{link}" => $link
 				));
 			}

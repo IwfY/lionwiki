@@ -54,13 +54,13 @@ class AjaxEditing
 
 		$CON_FORM_END = "</form>";
 
-		$CON_TEXTAREA = "<textarea name=\"content\" class=\"ajaxContentTextarea contentTextarea\" cols=\"83\" rows=\"$rows\">" . htmlspecialchars($content ? $content : $CON) . "</textarea><input type=\"hidden\" id=\"ajaxPage\" name=\"page\" value=\"$page\" />";
+		$CON_TEXTAREA = "<textarea name=\"content\" class=\"ajaxContentTextarea contentTextarea\" cols=\"83\" rows=\"$rows\">" . h($content ? $content : $CON) . "</textarea><input type=\"hidden\" id=\"ajaxPage\" name=\"page\" value=\"$page\" />";
 
 		if(!$showsource) {
 			$CON_SUBMIT = "<input class=\"submit ajaxContentSubmit\" onclick=\"ajaxAction('save', this);return false;\" type=\"submit\" value=\"$T_DONE\" />";
 
 			$EDIT_SUMMARY_TEXT = $T_EDIT_SUMMARY;
-			$EDIT_SUMMARY = "<input type=\"text\" name=\"esum\" class=\"ajaxEsum\" value=\"".htmlspecialchars($esum)."\" />";
+			$EDIT_SUMMARY = "<input type=\"text\" name=\"esum\" class=\"ajaxEsum\" value=\"".h($esum)."\" />";
 		}
 
 		$CON_PREVIEW = "<input class=\"ajaxContentPreview\" class=\"submit\" onclick=\"ajaxAction('edit&preview=1', this);return false;\" type=\"submit\" name=\"preview\" value=\"$T_PREVIEW\" /> <input type=\"submit\" onclick=\"ajaxAction('', this);return false;\" value=\"$T_DISCARD_CHANGES\" />";

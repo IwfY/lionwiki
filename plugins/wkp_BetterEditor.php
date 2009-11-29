@@ -28,8 +28,8 @@ class BetterEditor
 
 		$this->resize_html = '
 <span class="resizeTextarea">
-	<a href="javascript:" title="' . htmlspecialchars($this->TP_RESIZE_DOWN) . '" onclick="resizeTextarea(this, ' . $this->step_down . ');" class="resizeTextareaDown">&darr;</a>
-	<a href="javascript:" title="' . htmlspecialchars($this->TP_RESIZE_UP) . '" onclick="resizeTextarea(this, ' . $this->step_up . ');" class="resizeTextareaUp">&uarr;</a>
+	<a href="javascript:" title="' . h($this->TP_RESIZE_DOWN) . '" onclick="resizeTextarea(this, ' . $this->step_down . ');" class="resizeTextareaDown">&darr;</a>
+	<a href="javascript:" title="' . h($this->TP_RESIZE_UP) . '" onclick="resizeTextarea(this, ' . $this->step_up . ');" class="resizeTextareaUp">&uarr;</a>
 </span>';
 		$common_toolbar = '
 <span class="toolbarTextarea">
