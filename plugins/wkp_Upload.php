@@ -49,15 +49,15 @@ class Upload
 			$TITLE = $this->TP_FILE_UPLOAD;
 
 			if(is_dir($this->datadir)) {
-				$rel_dir = ltrim(sanitizeFilename($_REQUEST['curdir']), "/");
+				$rel_dir = ltrim(clear_path($_REQUEST['curdir']), "/");
 				$abs_dir = $this->datadir . $rel_dir;
 
 				if(authentified()) {
 					if(!empty($_POST['dir2create']))
-						@mkdir($abs_dir . '/' . sanitizeFilename($_POST['dir2create']), $this->chmod_dir);
+						@mkdir($abs_dir . '/' . clear_path($_POST['dir2create']), $this->chmod_dir);
 					elseif(!empty($_FILES['file']['tmp_name'])) { // anything to upload?
 						if(is_uploaded_file($_FILES['file']['tmp_name'])) {
-							$filename = sanitizeFilename($_FILES['file']['name']);
+							$filename = clear_path($_FILES['file']['name']);
 
 							foreach($this->blacklist as $file) // executable files not allowed
 								if(preg_match("/" . preg_quote($file) . "/i", $filename)) {
@@ -75,7 +75,7 @@ class Upload
 						$error = "$this->TP_ERROR_UPLOADING ($_FILES[file][error])";
 
 					if(isset($_GET['del'])) { // delete file/directory
-						$file = sanitizeFilename($_GET['del']);
+						$file = clear_path($_GET['del']);
 
 						$ret = is_dir($this->datadir . $file) ? @rmdir($this->datadir . $file) : @unlink($this->datadir . $file);
 					}

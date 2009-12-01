@@ -15,7 +15,7 @@ class Admin
 	/*
 	 * If you want to set password, place following line to config.php (without leading asterisk)
 	 *
-	 * $Admin["PASSWORD"] = md5("my_admin_password");
+	 * $Admin["PASSWORD"] = sha1("my_admin_password");
 	 *
 	 * You could set it here too, but you'd loose this setting after upgrade ...
 	 */
@@ -73,7 +73,7 @@ class Admin
 		if(!empty($_POST["action"]) && $this->authentified() == false)
 			$ret .= '<div class="error">Wrong password. List was not updated. You can try again.</div>';
 		else if(!empty($_POST["action"]))
-			if($f = fopen(sanitizeFilename($filename), "wb")) {
+			if($f = fopen(clear_path($filename), "wb")) {
 				fwrite($f, $_POST["$dataname"]);
 
 				fclose($f);
@@ -236,7 +236,7 @@ class Admin
 
 			foreach($arr as $line)
 				if(!strcmp($page, trim($line))) {
-					if(!strcasecmp(md5($sc), $this->PASSWORD))
+					if(!strcasecmp(sha1($sc), $this->PASSWORD))
 						return true;
 					else {
 						if($echo)
@@ -288,19 +288,9 @@ class Admin
 
 			$list = explode("\n", $fc);
 
-			$count = count($plugins);
-
-			$i = 0;
-
-			while($i < $count)
-				if(in_array(get_class($plugins[$i]), $list)) {
-					$plugins[$i] = $plugins[$count - 1];
-
-					array_pop($plugins);
-					$count--;
-				}
-				else
-					$i++;
+			foreach($list as $plug)
+				if(isset($plugins[$plug]))
+					unset($plugins[$plug]);
 		}
 	}
 
@@ -331,8 +321,8 @@ class Admin
 			return $ret;
 		}
 		else {
-			$filename = sanitizeFilename($_REQUEST["filename"]);
-			$page = sanitizeFilename($_REQUEST["page"]);
+			$filename = clear_path($_REQUEST["filename"]);
+			$page = clear_path($_REQUEST["page"]);
 
 			if(preg_match("/([0-9]{8}-[0-9]{4}-[0-9]{2})\.txt/", $filename, $m)) // is it really a comment file?
 				unlink($plugins["Comments"]->comments_dir . $page . "/" . $filename);
@@ -359,7 +349,7 @@ class Admin
 
 	function authentified()
 	{
-		if(strlen($this->PASSWORD) > 0 && $_COOKIE["LW_ADMIN"] == $this->PASSWORD || (isset($_POST["sc"]) && md5($_POST["sc"]) == $this->PASSWORD)) {
+		if(strlen($this->PASSWORD) > 0 && $_COOKIE["LW_ADMIN"] == $this->PASSWORD || (isset($_POST["sc"]) && sha1($_POST["sc"]) == $this->PASSWORD)) {
 			setcookie("LW_ADMIN", $this->PASSWORD, time() + $this->expire_login);
 
 			return true;

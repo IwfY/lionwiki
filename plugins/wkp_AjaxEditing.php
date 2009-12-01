@@ -90,6 +90,19 @@ class AjaxEditing
 		die(($preview ? $CON : "") . $html);
 	}
 
+	function pageWritten()
+	{
+		global $CON;
+
+		if($_REQUEST["ajax"]) {
+			$CON = $_REQUEST["content"];
+
+			return true;
+		}
+		else
+			return false;
+	}
+
 	function formatBegin()
 	{
 		$GLOBALS["HEAD"] .= '<script type="text/javascript" src="plugins/AjaxEditing/ajax.js"></script>';

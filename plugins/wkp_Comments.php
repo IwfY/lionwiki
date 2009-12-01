@@ -59,31 +59,20 @@ class Comments
 	{
 		global $PAGES_DIR;
 
-		$rg_url = "[0-9a-zA-Z\.\#/~\-_%=\?\&,\+\:@;!\(\)\*\$']*";
-		$rg_link_local = "(" . $rg_url . ")";
-		$rg_link_http = "h(ttps?://" . $rg_url . ")";
+		$rg_url = "[0-9a-zA-Z\.\#/~\-_%=\?\&,\+\:@;!\(\)\*\$' ]*";
 
-		$txt = preg_replace('#\[([^\]]+)\|' . $rg_link_http . '\]#U', '<a href="xx$2" class="url external">$1</a>', $txt);
-		// local links has to start either with / or ./
-		$txt = preg_replace('#\[([^\]]+)\|\.\/' . $rg_link_local . '\]#U', '<a href="$2" class="url">$1</a>', $txt);
-		$txt = preg_replace('#' . $rg_link_http . '#i', '<a href="$0" class="url external">xx$1</a>', $txt);
-		$txt = preg_replace('#xxttp#', 'http', $txt);
+		$txt = preg_replace("#\[([^\]]+)\|(\./($rg_url)|(https?://$rg_url))\]#U", '<a href="$2" class="external">$1</a>', $txt);
+		$txt = preg_replace("#(?<!\")(https?://$rg_url)#i", '<a href="$0" class="external">$1</a>', $txt);
 
-		preg_match_all("/\[([^|\]]+\|)?([^\]#]+)(#[^\]]+)?\]/", $txt, $matches, PREG_SET_ORDER); // matching Wiki links
+		preg_match_all("/\[(?:([^|\]]+)\|)?([^\]#]+)(?:#([^\]]+))?\]/", $txt, $matches, PREG_SET_ORDER); // matching Wiki links
 
-		foreach($matches as $match) {
-			if(empty($match[1])) // is page label same as its name?
-				$match[1] = $match[2];
-			else
-				$match[1] = rtrim($match[1], "|");
+		foreach($matches as $m) {
+			$m[1] = $m[1] ? $m[1] : $m[2]; // is page label same as its name?
+			$m[3] = $m[3] ? "#".u(preg_replace("/[^\da-z]/i", "_", $m[3])) : ""; // anchor
 
-			if($match[3]) // link to the heading
-				$match[3] = "#" . preg_replace("/[^\da-z]/i", "_", u(substr($match[3], 1, strlen($match[3]) - 1)));
+			$attr = file_exists("$PAGES_DIR$m[2].txt") ? $m[3] : '&action=edit" class="pending"';
 
-			if(file_exists($PAGES_DIR . "$match[2].txt"))
-				$txt = str_replace($match[0], '<a href="'.$self.'?page=' . u($match[2]) . $match[3] . '">' . $match[1] . '</a>', $txt);
-			else
-				$txt = str_replace($match[0], '<a href="'.$self.'?page=' . u($match[2]) . '&amp;action=edit" class="pending" rel="nofollow">' . $match[1] . '</a>', $txt);
+			$txt = str_replace($m[0], '<a href="'.$self.'?page='.u($m[2]).$attr.'">'.$m[1].'</a>', $txt);
 		}
 
 		$txt = preg_replace('#([0-9a-zA-Z\./~\-_]+@[0-9a-z/~\-_]+\.[0-9a-z\./~\-_]+)#i', '<a href="mailto:$0">$0</a>', $txt);
@@ -123,7 +112,7 @@ class Comments
 				"{FORM_CONTENT}" => $this->TP_FORM_CONTENT,
 				// Following 3 are for failed captcha test
 				"{FORM_NAME_VALUE}" => $comment_captcha_failed ? h($_POST["name"]) : "",
-							"{FORM_EMAIL_VALUE}" => $comment_captcha_failed ? h($_POST["email"]) : "",
+				"{FORM_EMAIL_VALUE}" => $comment_captcha_failed ? h($_POST["email"]) : "",
 				"{FORM_CONTENT_VALUE}" => $comment_captcha_failed ? h($_POST["content"]) : "",
 				"{FORM_SUBMIT}" => $this->TP_FORM_SUBMIT,
 				"{FORM_SELF}" => h($self),
@@ -172,7 +161,7 @@ class Comments
 						"{EMAIL}" => h($email),
 						"{NAME_TO_EMAIL}" => $email == "" ? $name : ("<a href=\"mailto:".h($email)."\">" . h($name) . "</a>"),
 						"{IP}" => $ip,
-						"{DATE}" => revTime(basename($filename, ".txt")),
+						"{DATE}" => rev_time(basename($filename, ".txt")),
 						"{ID}" => basename($filename, ".txt"),
 						"{NUMBER}" => $comment_num,
 						"{DELETE}" => h($this->TP_DELETE),
@@ -202,18 +191,14 @@ class Comments
 		global $page, $LOCAL_HOUR, $plugins, $action, $plugin_saveok, $error, $comment_captcha_failed;
 
 		if($action == "save-comment") {
-			if(isset($plugins["Captcha"])) {
-				$plugins["Captcha"]->checkCaptcha();
+			if(isset($plugins["Captcha"]) && $plugins["Captcha"]->checkCaptcha() == true) {
+				$comment_captcha_failed = true;
+				$action = "";
+				$error = ""; // suppress error messages
 
-				if($plugin_saveok == false) {
-					$comment_captcha_failed = true;
-					$action = "";
-					$error = ""; // suppress error messages
+				unset($_REQUEST["qid"]); // don't check captcha again
 
-					unset($_REQUEST["qid"]); // don't check captcha again
-
-					return true;
-				}
+				return true;
 			}
 
 			if(!is_dir(rtrim($this->comments_dir, "/"))) {

@@ -74,7 +74,7 @@ class Menu
 			list($parent_link, $parent_name) = $this->getLink($m[4]);
 			$item_string = $m[5];
 
-			$template_file = sanitizeFilename($template_file);
+			$template_file = clear_path($template_file);
 
 			if(empty($template_file) || !file_exists($this->template_dir . $template_file))
 				$template_file = $this->default_template; // use default.html template if none is provided or does not exist

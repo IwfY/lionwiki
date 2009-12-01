@@ -80,7 +80,7 @@ class ImageExt
 
 	function pathToFilename($path)
 	{
-		$path = sanitizeFilename($path);
+		$path = clear_path($path);
 
 		if(substr($path, 0, 7) == "http://")
 			$path = substr($path, 7);

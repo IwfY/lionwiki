@@ -1,10 +1,8 @@
-<?php
-/* Configuration file for LionWiki. */
-
+<?php /* Configuration file for LionWiki. */
 $WIKI_TITLE = "My new wiki"; // name of the site
 
-// MD5 hash of password. If empty (or commented out), no password is required
-// $PASSWORD = md5("my_password");
+// SHA1 hash of password. If empty (or commented out), no password is required
+// $PASSWORD = sha1("my_password");
 
 $TEMPLATE = "templates/dandelion.html"; // presentation template
 
