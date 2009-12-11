@@ -67,15 +67,15 @@ class Tags
 		 */
 
 		if($action == "regenerate-tags") {
-			global $PAGES_DIR, $page, $content, $CON;
+			global $PG_DIR, $page, $content, $CON;
 
 			@unlink($this->tagfile);
 
-			$dir = opendir($PAGES_DIR);
+			$dir = opendir($PG_DIR);
 
 			while($file = readdir($dir))
 				if(preg_match("/\.txt$/", $file)) {
-					$content = file_get_contents($PAGES_DIR . $file);
+					$content = file_get_contents($PG_DIR . $file);
 					$page = basename($file, ".txt");
 
 					$this->pageWritten();

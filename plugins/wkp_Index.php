@@ -13,11 +13,11 @@ class Index
 
 	function pagesList($type)
 	{
-		global $TITLE, $page, $PAGES_DIR;
+		global $TITLE, $page, $PG_DIR;
 
 		$list = array();
 
-		$dir = opendir($PAGES_DIR);
+		$dir = opendir($PG_DIR);
 
 		while($file = readdir($dir))
 			if(preg_match("/\.txt$/", $file))

@@ -57,7 +57,7 @@ class Comments
 
 	function processComment($txt)
 	{
-		global $PAGES_DIR;
+		global $PG_DIR;
 
 		$rg_url = "[0-9a-zA-Z\.\#/~\-_%=\?\&,\+\:@;!\(\)\*\$' ]*";
 
@@ -70,7 +70,7 @@ class Comments
 			$m[1] = $m[1] ? $m[1] : $m[2]; // is page label same as its name?
 			$m[3] = $m[3] ? "#".u(preg_replace("/[^\da-z]/i", "_", $m[3])) : ""; // anchor
 
-			$attr = file_exists("$PAGES_DIR$m[2].txt") ? $m[3] : '&action=edit" class="pending"';
+			$attr = file_exists("$PG_DIR$m[2].txt") ? $m[3] : '&action=edit" class="pending"';
 
 			$txt = str_replace($m[0], '<a href="'.$self.'?page='.u($m[2]).$attr.'">'.$m[1].'</a>', $txt);
 		}
@@ -90,7 +90,7 @@ class Comments
 
 	function template()
 	{
-		global $CON, $html, $action, $preview, $page, $PAGES_DIR, $HEAD, $self, $comments_html, $comment_captcha_failed;
+		global $CON, $html, $action, $preview, $page, $PG_DIR, $HEAD, $self, $comments_html, $comment_captcha_failed;
 
 		/*
 		 * Include comments if:

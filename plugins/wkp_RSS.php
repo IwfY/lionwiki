@@ -29,7 +29,7 @@ class RSS {
 
 	function pageWritten()
 	{
-		global $WIKI_TITLE, $PAGES_DIR, $page, $HISTORY_DIR, $LANG, $TIME_FORMAT, $VAR_DIR, $USE_HISTORY, $PROTECTED_READ;
+		global $WIKI_TITLE, $PG_DIR, $page, $HIST_DIR, $LANG, $TIME_FORMAT, $VAR_DIR, $USE_HISTORY, $PROTECTED_READ;
 
 		if(!$USE_HISTORY || $PROTECTED_READ)
 			return true;
@@ -50,7 +50,7 @@ class RSS {
 		if($pos) // if count is higher than $max_changes - 1, cut out the rest
 			$items = substr($items, 0, $pos + 7);
 
-		if($opening_dir = @opendir($HISTORY_DIR . $page . "/")) {
+		if($opening_dir = @opendir($HIST_DIR . $page . "/")) {
 			// find two last revisions of page
 			while($filename = @readdir($opening_dir))
 				if(preg_match('/\.bak.*$/', $filename))
@@ -59,7 +59,7 @@ class RSS {
 			rsort($files);
 
 			$newest = diff($files[0], $files[1], $this->short_diff); // LionWiki diff function
-			$timestamp = filemtime($PAGES_DIR . $page . ".txt");
+			$timestamp = filemtime($PG_DIR . $page . ".txt");
 
 			$n_item = "
 	<item>

@@ -17,10 +17,10 @@ $SYNTAX_PAGE = "http://lionwiki.0o.cz/?page=Syntax+reference";
 $DATE_FORMAT = "Y/m/d H:i";
 $LOCAL_HOUR = 0;
 
-@ini_set("default_charset", "UTF-8");
-umask(0);
 @error_reporting(E_ERROR | E_WARNING | E_PARSE);
+@ini_set("default_charset", "UTF-8");
 set_magic_quotes_runtime(0);
+umask(0);
 
 if(get_magic_quotes_gpc()) // magic_quotes_gpc can't be turned off
 	for($i = 0, $_SG = array(&$_GET, &$_POST, &$_COOKIE, &$_REQUEST), $c = count($_SG); $i < $c; ++$i)
@@ -29,8 +29,8 @@ if(get_magic_quotes_gpc()) // magic_quotes_gpc can't be turned off
 $self = $_SERVER['PHP_SELF'];
 $REAL_PATH = realpath(dirname(__FILE__))."/";
 $VAR_DIR = "var/";
-$PAGES_DIR = $VAR_DIR."pages/";
-$HISTORY_DIR = $VAR_DIR."history/";
+$PG_DIR = $VAR_DIR."pages/";
+$HIST_DIR = $VAR_DIR."history/";
 $PLUGINS_DIR = "plugins/";
 $PLUGINS_DATA_DIR = $VAR_DIR."plugins/";
 $LANG_DIR = "lang/";
@@ -83,7 +83,7 @@ else
 if(!file_exists($VAR_DIR) && !mkdir(rtrim($VAR_DIR, "/")))
 	die("Can't create directory $VAR_DIR. Please create $VAR_DIR with 0777 rights.");
 
-foreach(array($PAGES_DIR, $HISTORY_DIR, $PLUGINS_DATA_DIR) as $DIR)
+foreach(array($PG_DIR, $HIST_DIR, $PLUGINS_DATA_DIR) as $DIR)
 	if(!file_exists($DIR)) {
 		mkdir(rtrim($DIR, "/"), 0777);
 		$f = fopen($DIR . ".htaccess", "w"); fwrite($f, "deny from all"); fclose($f);
@@ -110,39 +110,37 @@ for($dir = @opendir($PLUGINS_DIR); $dir && $file = readdir($dir);)
 
 plugin("pluginsLoaded");
 
-$req_conv = array("action", "query", "sc", "content", "page", "moveto", "restore", "f1", "f2", "error", "time", "esum", "preview", "last_changed", "gtime", "showsource", "par");
+$req_conv = array("action", "query", "sc", "content", "page", "moveto", "restore", "f1", "f2", "error", "time", "esum", "preview", "last_changed", "showsource", "par");
 
 foreach($req_conv as $req) // export variables to main namespace
 	$$req = $_REQUEST[$req];
 
-$TITLE = $page = clear_path($page); $moveto = clear_path($moveto); $gtime = clear_path($gtime);
-$f1 = clear_path($f1); $f2 = clear_path($f2);
+$TITLE = $page = clear_path($page); $moveto = clear_path($moveto); $f1 = clear_path($f1); $f2 = clear_path($f2);
 
 plugin("actionBegin");
 
 if(!$action)
 	if(!$page)
 		die(header("Location:$self?page=" . u($START_PAGE)));
-	else if(file_exists("$PAGES_DIR$page.$LANG.txt")) // language variant
+	else if(file_exists("$PG_DIR$page.$LANG.txt")) // language variant
 		die(header("Location:$self?page=" . u("$page.$LANG")));
-	else if(!file_exists("$PAGES_DIR$page.txt"))
+	else if(!file_exists("$PG_DIR$page.txt"))
 		$action = "edit"; // create page if it doesn't exist
 
-// does user need password to read content of site. If yes, ask for it.
-if($PROTECTED_READ && !authentified()) {
+if($PROTECTED_READ && !authentified()) { // does user need password to read content of site. If yes, ask for it.
 	$CON = "<form action=\"$self\" method=\"post\"><p>$T_PROTECTED_READ <input type=\"password\" name=\"sc\"/> <input class=\"submit\" type=\"submit\"/></p></form>";
 	$action = "view-html";
 }
-else if($restore || $action == "rev") {
-	$CON = @file_get_contents("$HISTORY_DIR$page/$gtime");
+else if($restore || $action == "rev") { // Show old revision
+	$CON = @file_get_contents("$HIST_DIR$page/$f1");
 
 	if($action == "rev") {
-		$rev_restore = "[$T_RESTORE|./$self?page=".u($page)."&action=edit&gtime=$gtime&restore=1]";
-		$CON = str_replace(array("{TIME}", "{RESTORE}"), array(rev_time($gtime), $rev_restore), $T_REVISION) . $CON;
+		$rev_restore = "[$T_RESTORE|./$self?page=".u($page)."&action=edit&f1=$f1&restore=1]";
+		$CON = str_replace(array("{TIME}", "{RESTORE}"), array(rev_time($f1), $rev_restore), $T_REVISION) . $CON;
 	}
-} else if($page) {
-	$last_changed_ts = @filemtime("$PAGES_DIR$page.txt");
-	$CON = @file_get_contents("$PAGES_DIR$page.txt");
+} else if($page) { // Load the page
+	$last_changed_ts = @filemtime("$PG_DIR$page.txt");
+	$CON = @file_get_contents("$PG_DIR$page.txt");
 
 	if($par)
 		$CON = get_paragraph($CON, $par);
@@ -152,62 +150,59 @@ else if($restore || $action == "rev") {
 }
 
 if($action == "save" && !$preview && authentified()) { // do we have page to save?
-	if(!trim($content) && !$par)
-		@unlink("$PAGES_DIR$page.txt");
-	elseif($last_changed < @filemtime("$PAGES_DIR$page.txt")) {
+	if(!trim($content) && !$par) // Delete empty page (keep history)
+		@unlink("$PG_DIR$page.txt");
+	elseif($last_changed < @filemtime("$PG_DIR$page.txt")) {
 		$action = "edit";
 		$error = str_replace("{DIFF}", "<a href=\"$self?page=".u($page)."&action=diff\">$T_DIFF</a>", $T_EDIT_CONFLICT);
 		$CON = $content;
 	}
 	else if(!plugin("writingPage")) { // are plugins OK with page? (e.g. checking for spam)
 		if($par)
-			$content = str_replace($CON, $content, @file_get_contents("$PAGES_DIR$page.txt"));
+			$content = str_replace($CON, $content, @file_get_contents("$PG_DIR$page.txt"));
 
-		if(!$file = @fopen("$PAGES_DIR$page.txt", "w"))
-			die("Could not write page $PAGES_DIR$page.txt!");
+		if(!$file = @fopen("$PG_DIR$page.txt", "w"))
+			die("Could not write page $PG_DIR$page.txt!");
 
-		fwrite($file, $content, strlen($content));
-		fclose($file);
+		fwrite($file, $content, strlen($content)); fclose($file);
 
 		// Backup old revision
-		if(!is_dir($HISTORY_DIR.$page))
-			mkdir($HISTORY_DIR.$page, 0777);
+		mkdir($HIST_DIR.$page, 0777); // Create directory if does not exist
 
 		$rightnow = date("Ymd-Hi-s", time() + $LOCAL_HOUR * 3600);
 
-		if(!$bak = @fopen("$HISTORY_DIR$page/$rightnow.bak", "w"))
-			die("Could not write to $HISTORY_DIR$page!");
+		if(!$bak = @fopen("$HIST_DIR$page/$rightnow.bak", "w"))
+			die("Could not write to $HIST_DIR$page!");
 
-		fwrite($bak, $content, strlen($content));
-		fclose($bak);
+		fwrite($bak, $content, strlen($content)); fclose($bak);
 
-		$es = fopen("$HISTORY_DIR$page/meta.dat", "ab");
+		$es = fopen("$HIST_DIR$page/meta.dat", "ab");
 
 		fwrite($es, "!" . $rightnow .
 			str_pad($_SERVER['REMOTE_ADDR'], 16, " ", STR_PAD_LEFT) .
-			str_pad(filesize("$PAGES_DIR$page.txt"), 11, " ", STR_PAD_LEFT) . " " .
+			str_pad(filesize("$PG_DIR$page.txt"), 11, " ", STR_PAD_LEFT) . " " .
 			str_pad(substr($esum, 0, 128), 128 + 2)) . "\n";
 
 		fclose($es);
 
 		if($moveto != $page && $moveto)
-			if(file_exists("$PAGES_DIR$moveto.txt"))
+			if(file_exists("$PG_DIR$moveto.txt"))
 				die("Error: target filename already exists. Page was not moved.");
-			else if(!rename("$PAGES_DIR$page.txt", "$PAGES_DIR$moveto.txt"))
+			else if(!rename("$PG_DIR$page.txt", "$PG_DIR$moveto.txt"))
 				die("Unknown error! Page was not moved.");
-			else if(!rename($HISTORY_DIR.$page, $HISTORY_DIR.$moveto)) {
-				rename("$PAGES_DIR$moveto.txt", "$PAGES_DIR$page.txt"); // revert previous change
+			else if(!rename($HIST_DIR.$page, $HIST_DIR.$moveto)) {
+				rename("$PG_DIR$moveto.txt", "$PG_DIR$page.txt"); // revert previous change
 				die("Unknown error2! Page was not moved.");
 			} else
 				$page = $moveto;
 
 		if(!plugin("pageWritten"))
 			die(header("Location:$self?page=" . u($page) . "&redirect=no" . ($par ? "&par=$par" : "") . ($_REQUEST["ajax"] ? "&ajax=1" : "")));
-	} else { // there's some problem with page, give user a chance to fix it (do not throw away submitted content)
+	} else { // there's some problem with page, give user a chance to fix it
 		$CON = $content;
 		$action = "edit";
 	}
-} else if($action == "save" && !$preview) { // wrong password, give user another chance (do not throw away submitted content)
+} else if($action == "save" && !$preview) { // wrong password, give user another chance
 	$error = $TE_WRONG_PASSWORD;
 	$CON = $content;
 	$action = "edit";
@@ -217,16 +212,6 @@ if($action)
 	$HEAD .= '<meta name="robots" content="noindex, nofollow"/>';
 
 if($action == "edit" || $preview) {
-	if(!$showsource && !authentified()) { // if not logged on, require password
-		$FORM_PASSWORD = $T_PASSWORD;
-		$FORM_PASSWORD_INPUT = '<input type="password" name="sc"/>';
-	}
-
-	if(!$showsource && !$par) {
-		$RENAME_TEXT = $T_MOVE_TEXT;
-		$RENAME_INPUT = '<input type="text" name="moveto" value="'.h($page).'"/>';
-	}
-
 	$CON_FORM_BEGIN = "<form action=\"$self\" method=\"post\"><input type=\"hidden\" name=\"action\" value=\"save\"/><input type=\"hidden\" name=\"last_changed\" value=\"$last_changed_ts\"/><input type=\"hidden\" name=\"showsource\" value=\"$showsource\"/><input type=\"hidden\" name=\"par\" value=\"".h($par)."\"/><input type=\"hidden\" name=\"page\" value=\"".h($page)."\"/>";
 	$CON_FORM_END = "</form>";
 	$CON_TEXTAREA = '<textarea class="contentTextarea" name="content" style="width:100%" rows="30">'.h($CON).'</textarea>';
@@ -236,6 +221,16 @@ if($action == "edit" || $preview) {
 		$CON_SUBMIT = "<input class=\"submit\" type=\"submit\" value=\"$T_DONE\"/>";
 		$EDIT_SUMMARY_TEXT = $T_EDIT_SUMMARY;
 		$EDIT_SUMMARY = '<input type="text" name="esum" value="'.h($esum).'"/>';
+
+		if(!authentified()) { // if not logged on, require password
+			$FORM_PASSWORD = $T_PASSWORD;
+			$FORM_PASSWORD_INPUT = '<input type="password" name="sc"/>';
+		}
+
+		if(!$par) {
+			$RENAME_TEXT = $T_MOVE_TEXT;
+			$RENAME_INPUT = '<input type="text" name="moveto" value="'.h($page).'"/>';
+		}
 	}
 
 	if($preview) {
@@ -244,26 +239,26 @@ if($action == "edit" || $preview) {
 		$TITLE = "$T_PREVIEW: $page";
 	}
 } elseif($action == "history") { // show whole history of page
-	for($dir = @opendir("$HISTORY_DIR$page/"); $file = @readdir($dir);)
+	for($dir = @opendir("$HIST_DIR$page/"); $file = @readdir($dir);)
 		if(substr($file, -4) == ".bak")
 			$files[] = $file;
 
 	rsort($files);
 	$CON = '<form action="'.$self.'" method="get"><input type="hidden" name="action" value="diff"/><input type="hidden" name="page" value="'.h($page).'"/><input type="submit" class="submit" value="'.$T_DIFF.'"/><br/>';
-	$meta = @fopen("$HISTORY_DIR$page/meta.dat", "rb");
+	$meta = @fopen("$HIST_DIR$page/meta.dat", "rb");
 
 	for($i = 0, $mi = 1, $c = count($files); $i < $c; $i++) {
 		if(($m = meta_getline($meta, $mi)) && !strcmp(basename($files[$i], ".bak"), $m[0]))
 			$mi++;
 
 		$CON .= '<input type="radio" name="f1" value="'.h($files[$i]).'"/><input type="radio" name="f2" value="'.h($files[$i]).'"/>';
-		$CON .= "<a href=\"$self?page=".u($page)."&action=rev&gtime=".$files[$i]."\">".rev_time($files[$i])."</a>  - ($m[2] B) $m[1] <i>".h($m[3])."</i><br/>";
+		$CON .= "<a href=\"$self?page=".u($page)."&action=rev&f1=".$files[$i]."\">".rev_time($files[$i])."</a>  - ($m[2] B) $m[1] <i>".h($m[3])."</i><br/>";
 	}
 
 	$CON .= "</form>";
 } elseif($action == "diff") {
-	if(!$f1 && $opening_dir = @opendir($HISTORY_DIR . $page . "/")) { // diff is made on two last revisions
-		while($f = @readdir($opening_dir))
+	if(!$f1 && $dir = @opendir("$HIST_DIR$page/")) { // diff is made on two last revisions
+		while($f = @readdir($dir))
 			if(substr($f, -4) == ".bak")
 				$files[] = $f;
 
@@ -272,14 +267,14 @@ if($action == "edit" || $preview) {
 		die(header("Location:$self?action=diff&page=".u($page)."&f1=$files[0]&f2=$files[1]"));
 	}
 
-	$r1 = "<a href=\"$self?page=".u($page)."&action=rev&gtime=$f1\">".rev_time($f1)."</a>";
-	$r2 = "<a href=\"$self?page=".u($page)."&action=rev&gtime=$f2\">".rev_time($f2)."</a>";
+	$r1 = "<a href=\"$self?page=".u($page)."&action=rev&f1=$f1\">".rev_time($f1)."</a>";
+	$r2 = "<a href=\"$self?page=".u($page)."&action=rev&f1=$f2\">".rev_time($f2)."</a>";
 
 	$CON = str_replace(array("{REVISION1}", "{REVISION2}"), array($r1, $r2), $T_REV_DIFF);
 	$CON .= diff($f1, $f2);
 } elseif($action == "search") {
-	for($dir = opendir($PAGES_DIR); $file = readdir($dir);)
-		if(substr($file, -4) == ".txt" && ($con = @file_get_contents($PAGES_DIR . $file)))
+	for($files = array(), $dir = opendir($PG_DIR); $file = readdir($dir);)
+		if(substr($file, -4) == ".txt" && ($con = @file_get_contents($PG_DIR . $file)))
 			if(!$query || stristr($file . $con, $query) !== false)
 				$files[] = substr($file, 0, -4);
 
@@ -290,19 +285,19 @@ if($action == "edit" || $preview) {
 
 	$CON = "<ul>$list</ul>";
 
-	if($query && !file_exists("$PAGES_DIR$query.txt")) // offer to create the page
+	if($query && !file_exists("$PG_DIR$query.txt")) // offer to create the page
 		$CON = "<p><i><a href=\"$self?action=edit&page=".u($query)."\">$T_CREATE_PAGE ".h($query)."</a>.</i></p>".$CON;
 
 	$TITLE = (!$query ? $T_LIST_OF_ALL_PAGES : "$T_SEARCH_RESULTS $query") . " (".count($files).")";
 } elseif($action == "recent") { // recent changes
-	for($dir = opendir($PAGES_DIR), $files = array(); $f = readdir($dir);)
+	for($files = array(), $dir = opendir($PG_DIR); $f = readdir($dir);)
 		if(substr($f, -4) == ".txt")
-			$files[substr($f, 0, -4)] = filemtime($PAGES_DIR . $f);
+			$files[substr($f, 0, -4)] = filemtime($PG_DIR . $f);
 
 	arsort($files);
 
 	foreach(array_slice($files, 0, 100) as $f => $ts) { // just first 100 files
-		if($meta = @fopen($HISTORY_DIR . basename($f, ".txt") . "/meta.dat", "r")) {
+		if($meta = @fopen($HIST_DIR . basename($f, ".txt") . "/meta.dat", "r")) {
 			$m = meta_getline($meta, 1);
 			fclose($meta);
 		}
@@ -325,8 +320,8 @@ if(!$action) { // page parsing
 	while(preg_match("/(?<!\^){include:([^}]+)}/Um", $CON, $m))
 		if(!strcmp($m[1], $page)) // limited recursion protection
 			$CON = str_replace($m[0], "'''Warning: subpage recursion!'''", $CON);
-		elseif(file_exists("$PAGES_DIR$m[1].txt"))
-			$CON = str_replace($m[0], file_get_contents("$PAGES_DIR$m[1].txt"), $CON);
+		elseif(file_exists("$PG_DIR$m[1].txt"))
+			$CON = str_replace($m[0], file_get_contents("$PG_DIR$m[1].txt"), $CON);
 		else
 			$CON = str_replace($m[0], "'''Warning: subpage $m[1] was not found!'''", $CON);
 
@@ -352,7 +347,6 @@ if(!$action) { // page parsing
 
 	foreach($spans as $m) {
 		$class = $id = "";
-
 		$parts = preg_split("/([\.#])/", $m[1], -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
 
 		for($i = 0, $c = count($parts); $c > 1 && $i < $c; $i += 2)
@@ -410,8 +404,7 @@ if(!$action) { // page parsing
 		$m[1] = $m[1] ? $m[1] : $m[2]; // is page label same as its name?
 		$m[3] = $m[3] ? "#".u(preg_replace("/[^\da-z]/i", "_", $m[3])) : ""; // anchor
 
-		$attr = file_exists("$PAGES_DIR$m[2].txt") ? $m[3] : '&action=edit" class="pending"';
-
+		$attr = file_exists("$PG_DIR$m[2].txt") ? $m[3] : '&action=edit" class="pending"';
 		$CON = str_replace($m[0], '<a href="'.$self.'?page='.u($m[2]).$attr.'">'.$m[1].'</a>', $CON);
 	}
 
@@ -438,12 +431,11 @@ if(!$action) { // page parsing
 
 		$ret .= "<div class=\"par-div\" id=\"par-$h_id\"><h$excl><a class=\"section-edit\" name=\"$hash\">$m[2]</a>";
 
-		if(is_writable($PAGES_DIR . $page . ".txt"))
+		if(is_writable($PG_DIR . $page . ".txt"))
 			$ret .=  "<span class=\"par-edit\">(<a href=\"$self?action=edit&page=".u($page)."&par=$h_id\">$T_EDIT</a>)</span>";
 
 		$CON = str_replace($m[0], "$ret</h$excl>", $CON);
 		$TOC .= str_repeat("<ul>", $excl - 2).'<li><a href="'.$self.'?page='.u($page).'#'.u($hash).'">'.$m[2].'</a></li>'.str_repeat("</ul>", $excl - 2);
-
 	}
 
 	$CON .= str_repeat("</div>", count($stack));
@@ -470,7 +462,7 @@ $html = file_exists($TEMPLATE) ? file_get_contents(clear_path($TEMPLATE)) : fall
 
 // including pages in pure HTML
 while(preg_match("/{include:([^}]+)}/U", $html, $m)) {
-	$inc = str_replace(array("{html}", "{/html}"), "", @file_get_contents("$PAGES_DIR$m[1].txt"));
+	$inc = str_replace(array("{html}", "{/html}"), "", @file_get_contents("$PG_DIR$m[1].txt"));
 	$html = str_replace($match[0], $inc, $html);
 }
 
@@ -491,7 +483,7 @@ $tpl_subs = array(
 	'PAGE_TITLE' => h($page == $START_PAGE && $page == $TITLE ? $WIKI_TITLE : $TITLE),
 	'PAGE_TITLE_HEAD' => h($TITLE),
 	'PAGE_URL' => u($page),
-	'EDIT' => !$action ? ("<a href=\"$self?page=".u($page)."&action=edit".(is_writable("$PAGES_DIR$page.txt") ? "\">$T_EDIT</a>" : "&showsource=1\">$T_SHOW_SOURCE</a>")) : "",
+	'EDIT' => !$action ? ("<a href=\"$self?page=".u($page)."&action=edit".(is_writable("$PG_DIR$page.txt") ? "\">$T_EDIT</a>" : "&showsource=1\">$T_SHOW_SOURCE</a>")) : "",
 	'WIKI_TITLE' => h($WIKI_TITLE),
 	'LAST_CHANGED_TEXT' => $last_changed_ts ? $T_LAST_CHANGED : "",
 	'LAST_CHANGED' => $last_changed_ts ? date($DATE_FORMAT, $last_changed_ts + $LOCAL_HOUR * 3600) : "",
@@ -519,7 +511,7 @@ foreach($tpl_subs as $tpl => $rpl) // substituting values
 	$html = template_replace($tpl, $rpl, $html);
 
 header("Content-type: text/html; charset=UTF-8");
-die($html); // voila
+die($html);
 
 // Function library
 
@@ -531,8 +523,7 @@ function template_match($what, $where, &$dest) { return preg_match("/\{(([^}]*) 
 
 function clear_path($s) {
 	for($i = 0, $ret = "", $c = strlen($s); $i < $c; $i++)
-		if(!ctype_cntrl($s[$i]))
-			$ret .= $s[$i];
+		$ret .= ctype_cntrl($s[$i]) ? "" : $s[$i];
 
 	return trim(str_replace("..", "", $ret), "/");
 }
@@ -585,7 +576,7 @@ function get_paragraph($text, $par_id) {
 function diff($f1, $f2) {
 	list($f1, $f2) = array(min($f1, $f2), max($f1, $f2));
 
-	$dir = $GLOBALS["HISTORY_DIR"] . $GLOBALS["page"] . "/";
+	$dir = $GLOBALS["HIST_DIR"] . $GLOBALS["page"] . "/";
 
 	return plugin("diff", $dir.$f1, $dir.$f2) ? $GLOBALS["plugin_ret_diff"] : diff_builtin($dir.$f1, $dir.$f2);
 }
@@ -619,17 +610,12 @@ function authentified() {
 
 // returns "line" from meta.dat files. $lnum is number of line from the end of file starting with 1
 function meta_getline($file, $lnum) {
-	if(fseek($file, -($lnum * 175), SEEK_END))
-		return false;
-
-	$line = fread($file, 175);
-
-	if($line[0] != "!") // control character
+	if(fseek($file, -($lnum * 175), SEEK_END) || !($line = fread($file, 175)) || $line[0] != "!") // ! is control character
 		return false;
 
 	$date = substr($line, 1, 16);
 	$ip = trim(substr($line, 19, 15));
-	$size = (int) trim(substr($line, 35, 10));
+	$size = (int) substr($line, 35, 10);
 	$esum = trim(substr($line, 45, 128));
 
 	return array($date, $ip, $size, $esum);
@@ -641,8 +627,7 @@ function plugin($method) {
 	$args = array_slice(func_get_args(), 1);
 
 	foreach($GLOBALS["plugins"] as $plugin)
-		if(method_exists($plugin, $method))
-			$ret |= call_user_func_array(array($plugin, $method), $args);
+		$ret |= method_exists($plugin, $method) && call_user_func_array(array($plugin, $method), $args);
 
 	return $ret; // returns true if treated by a plugin
 }

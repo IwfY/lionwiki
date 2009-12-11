@@ -50,7 +50,7 @@ class PageVersions
 
 	function template()
 	{
-		global $CON, $html, $page, $PAGES_DIR, $action;
+		global $CON, $html, $page, $PG_DIR, $action;
 
 		if(!empty($action))
 			return;
@@ -62,7 +62,7 @@ class PageVersions
 
 		$versions = array();
 
-		if($dir = @opendir($PAGES_DIR))
+		if($dir = @opendir($PG_DIR))
 			while($file = readdir($dir))
 				if(preg_match("/$p\.([a-z\-]+)\.txt|$p\.txt/", $file, $match))
 					$versions[isset($match[1]) ? $match[1] : $this->default_lang] = $p;

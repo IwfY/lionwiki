@@ -14,17 +14,17 @@ class WhatLinksHere {
 
 	function action($a)
 	{
-		global $TITLE, $page, $PAGES_DIR, $CON;
+		global $TITLE, $page, $PG_DIR, $CON;
 
 		if($a == "whatlinkshere") {
 			$CON = "<ul>";
 
 			$editable = false;
-			$dir = opendir($PAGES_DIR);
+			$dir = opendir($PG_DIR);
 
 			while($file = readdir($dir)) {
 				if(preg_match("/\.txt$/", $file)) {
-					@$con = file_get_contents($PAGES_DIR . $file);
+					@$con = file_get_contents($PG_DIR . $file);
 					$query = preg_quote($page);
 
 					if(@preg_match("/\[([^|\]]+\|)? *$query(#[^\]]+)? *\]/i", $con))
