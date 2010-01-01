@@ -144,9 +144,43 @@ class Captcha
 
 	function writingPage() { return $this->checkCaptcha(); }
 
+	/*
+	 * If JavaScript is enabled, user does not have to fill the form ...
+	 *
+	 * We rely on that spam bots don't interpret javascript.
+	 */
+
+	function fillAnswerWithJavascript($question_id)
+	{
+		$answers = explode(",", $this->getQuestion($question_id, 2));
+
+		return '
+<script type="text/javascript">
+function fillCaptchaAnswer()
+{
+	var input = document.getElementById("captcha-input");
+
+	input.style.display = "none";
+	input.value = "'.trim($answers[0]).'";
+
+	document.getElementById("captcha-question").style.display = "none";
+}
+
+if(typeof wons == "undefined")
+	wons = new Array();
+
+wons.push("fillCaptchaAnswer()");
+
+window.onload = function() {
+	for(var i = 0; i < wons.length; i++)
+		eval(wons[i]);
+}
+</script>';
+	}
+
 	function template()
 	{
-		global $html, $PASSWORD, $action, $preview;
+		global $html, $PASSWORD, $action, $preview, $HEAD;
 
 		if(($action != "edit" && !$preview) || !empty($PASSWORD)
 			|| ($this->permanent && $_COOKIE["LW_CAPTCHA"] == $this->cookie_password))
@@ -156,13 +190,15 @@ class Captcha
 		$question_id = rand(1, $question_count);
 		$question_text = trim($this->getQuestion($question_id, 1));
 
-		$html = template_replace("plugin:CAPTCHA_QUESTION", $question_text, $html);
+		$html = template_replace("plugin:CAPTCHA_QUESTION", '<span id="captcha-question">' . $question_text . "</span>", $html);
 		$html = template_replace("plugin:CAPTCHA_INPUT", "<input type=\"hidden\" id=\"captcha-id\" name=\"qid\" value=\"$question_id\" /><input type=\"text\" id=\"captcha-input\" name=\"ans\" class=\"input\" value=\"\" />", $html);
+
+		$HEAD .= $this->fillAnswerWithJavascript($question_id);
 	}
 
 	function commentsTemplate()
 	{
-		global $comments_html, $PASSWORD;
+		global $comments_html, $PASSWORD, $HEAD;
 
 		if(!empty($PASSWORD) || ($this->permanent && $_COOKIE["LW_CAPTCHA"] == $this->cookie_password)) {
 			$comments_html = template_replace("plugin:CAPTCHA_QUESTION", "", $comments_html);
@@ -175,7 +211,9 @@ class Captcha
 		$question_id = rand(1, $question_count);
 		$question_text = trim($this->getQuestion($question_id, 1));
 
-		$comments_html = template_replace("plugin:CAPTCHA_QUESTION", $question_text, $comments_html);
+		$comments_html = template_replace("plugin:CAPTCHA_QUESTION", '<span id="captcha-question">' . $question_text . "</span>", $comments_html);
 		$comments_html = template_replace("plugin:CAPTCHA_INPUT", "<input type=\"hidden\" id=\"captcha-id\" name=\"qid\" value=\"$question_id\" /><input type=\"text\" id=\"captcha-input\" name=\"ans\" class=\"input\" value=\"\" />", $comments_html);
+	
+		$HEAD .= $this->fillAnswerWithJavascript($question_id);
 	}
 }
