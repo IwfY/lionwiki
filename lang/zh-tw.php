@@ -24,4 +24,4 @@ $T_MOVE_TEXT = "新名字";
 $T_DIFF = "比較";
 $T_CREATE_PAGE = "新頁面";
 $T_PROTECTED_READ = "必須輸入密碼才能瀏覽: ";
-$TE_WRONG_PASSWORD = "密碼不對";
+$T_WRONG_PASSWORD = "密碼不對";

@@ -24,4 +24,4 @@ $T_MOVE_TEXT = "Uusi nimi";
 $T_DIFF = "Muutokset";
 $T_CREATE_PAGE = "Luo sivu";
 $T_PROTECTED_READ = "Tarvitset salasanan selataksesi sisältöä sivulla: ";
-$TE_WRONG_PASSWORD = "Väärä salasana.";
+$T_WRONG_PASSWORD = "Väärä salasana.";

@@ -25,4 +25,4 @@ $T_SHOW_SOURCE = 'Mostrar el código fuente';
 $T_SHOW_PAGE = 'Mostrar la página';
 $T_PROTECTED_READ = 'Debes escribir tu contraseña para ver el contenido: ';
 $T_EDIT_CONFLICT = 'Conflicto de edición: alguien hizo cambios a esta página mientras la editabas. Antes de guardarla es recomendable mirar las últimas {DIFF}.';
-$T_ERR_WRONG_PASSWORD = 'Contraseña incorrecta.';
+$T_WRONG_PASSWORD = 'Contraseña incorrecta.';

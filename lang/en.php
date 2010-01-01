@@ -3,7 +3,6 @@
 	This file is actually never used but provides easier access to translators as they will
 	probably translate from english.
 */
-
 $T_HOME = "Main page";
 $T_SYNTAX = "Syntax";
 $T_DONE = "Save changes";
@@ -29,4 +28,4 @@ $T_MOVE_TEXT = "New name";
 $T_DIFF = "diff";
 $T_CREATE_PAGE = "Create page";
 $T_PROTECTED_READ = "You need to enter password to view content of site: ";
-$TE_WRONG_PASSWORD = "Password is incorrect.";
+$T_WRONG_PASSWORD = "Password is incorrect.";

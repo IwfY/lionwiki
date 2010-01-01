@@ -41,7 +41,7 @@ class Upload
 
 	function action($action)
 	{
-		global $CON, $TITLE, $editable, $T_PASSWORD, $TE_WRONG_PASSWORD, $error;
+		global $CON, $TITLE, $editable, $T_PASSWORD, $T_WRONG_PASSWORD, $error;
 
 		if($action == "upload") {
 			$CON = "";
@@ -80,7 +80,7 @@ class Upload
 						$ret = is_dir($this->datadir . $file) ? @rmdir($this->datadir . $file) : @unlink($this->datadir . $file);
 					}
 				} elseif($_SERVER['REQUEST_METHOD'] == 'POST')
-					$error = $TE_WRONG_PASSWORD;
+					$error = $T_WRONG_PASSWORD;
 
 				// list of files
 				if($opening_dir = @opendir($abs_dir)) {

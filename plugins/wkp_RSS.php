@@ -32,7 +32,7 @@ class RSS {
 		global $WIKI_TITLE, $PG_DIR, $page, $HIST_DIR, $LANG, $TIME_FORMAT, $VAR_DIR, $USE_HISTORY, $PROTECTED_READ;
 
 		if(!$USE_HISTORY || $PROTECTED_READ)
-			return true;
+			return false;
 
 		$pagelink = "http://" . $_SERVER["SERVER_NAME"] . $_SERVER["SCRIPT_NAME"];
 
@@ -80,13 +80,13 @@ class RSS {
 		if(!$file = @fopen($VAR_DIR . "rss.xml", "w")) {
 			echo "Opening file for writing RSS file is not possible! Please create file rss.xml in your var directory and make it writable (chmod 666).";
 
-			return true;
+			return false;
 		}
 
 		fwrite($file, $rss);
 		fclose($file);
 
-		return true;
+		return false;
 	}
 
 	function template()

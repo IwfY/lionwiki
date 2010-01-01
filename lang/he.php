@@ -24,4 +24,4 @@ $T_MOVE_TEXT = "שם חדש";
 $T_DIFF = "הבדל";
 $T_CREATE_PAGE = "יצירת דף";
 $T_PROTECTED_READ = "יש להזין סיסמה כדי לצפות בתוכן האתר: ";
-$TE_WRONG_PASSWORD = "הסיסמה שגויה.";
+$T_WRONG_PASSWORD = "הסיסמה שגויה.";

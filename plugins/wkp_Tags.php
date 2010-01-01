@@ -171,6 +171,8 @@ class Tags
 
 			fclose($f);
 		}
+
+		return false;
 	}
 
 	/*

@@ -25,4 +25,4 @@ $T_SHOW_SOURCE = 'Montri la fontkodon';
 $T_SHOW_PAGE = 'Montri la paĝon';
 $T_PROTECTED_READ = 'Via pasvorto necesas por vidi la enhavon';
 $T_EDIT_CONFLICT = 'Konflikto de modifoj: iu finmodifis ĉi paĝon dum vi modifadis ĝin. Antaŭ ol registri la paĝon, rekomendindas konsulti la lastajn {DIFF}-n.';
-$T_ERR_WRONG_PASSWORD = 'Erara pasvorto';
+$T_WRONG_PASSWORD = 'Erara pasvorto';

@@ -24,4 +24,4 @@ $T_MOVE_TEXT = "Neue Bezeichnung";
 $T_DIFF = "Vergleich";
 $T_CREATE_PAGE = "Seite erstellen mit dem Namen:";
 $T_PROTECTED_READ = "Du musst das Passwort eingeben, bevor der Inhalt der Seite angezeigt wird: ";
-$TE_WRONG_PASSWORD = "Passwort fehlerhaft.";
+$T_WRONG_PASSWORD = "Passwort fehlerhaft.";

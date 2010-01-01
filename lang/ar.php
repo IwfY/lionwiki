@@ -1,10 +1,9 @@
-<?
+<?php
 /*
 	Arabic translation 12/2008
 	Mohamed Magdy, mohamedmk@gmail.com
 	Updated 4/2009, Mohamed Magdy
 */
-
 $T_HOME = "الصفحة الرئيسية";
 $T_SYNTAX = "القواعد";
 $T_DONE = "احفظ التغييرات";
@@ -30,4 +29,4 @@ $T_MOVE_TEXT = "اسم جديد";
 $T_DIFF = "فرق";
 $T_CREATE_PAGE = "أنشىء الصفحة";
 $T_PROTECTED_READ = "لابد أن توفر كلمة سر لترى محتوى الموقع: ";
-$TE_WRONG_PASSWORD = "كلمة سر خطأ.";
+$T_WRONG_PASSWORD = "كلمة سر خطأ.";

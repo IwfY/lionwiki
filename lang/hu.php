@@ -24,4 +24,4 @@ $T_MOVE_TEXT = "Új név";
 $T_DIFF = "különbség";
 $T_CREATE_PAGE = "Oldal létrehozása";
 $T_PROTECTED_READ = "Az oldal tartalmának megtekintéséhez jelszó megadása szükséges: ";
-$TE_WRONG_PASSWORD = "Érvénytelen jelszó.";
+$T_WRONG_PASSWORD = "Érvénytelen jelszó.";

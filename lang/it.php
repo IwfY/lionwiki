@@ -25,4 +25,4 @@ $T_SHOW_SOURCE = "Show source";
 $T_SHOW_PAGE = "Visualizza pagina";
 $T_ERASE_COOKIE = "cancella i cookie";
 $T_PROTECTED_READ = "Dovete inserire la password per visualizzare i contenuti del sito: ";
-$TE_WRONG_PASSWORD = "La password non � corretta.";
+$T_WRONG_PASSWORD = "La password non � corretta.";

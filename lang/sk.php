@@ -16,6 +16,6 @@ $T_ERASE_COOKIE = "Zmazať cookies";
 $T_MOVE_TEXT = "Nové meno:";
 $T_CREATE_PAGE = "Vytvoriť stránku s názvom";
 $T_PROTECTED_READ = "Na zobrazenie obsahu stránok je potrebné zadať heslo: ";
-$TE_WRONG_PASSWORD = "Zadané heslo nie je správne.";
+$T_WRONG_PASSWORD = "Zadané heslo nie je správne.";
 
 $DATE_FORMAT = "d. m. Y H:i";

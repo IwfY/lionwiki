@@ -1,7 +1,6 @@
 <?php // LionWiki 3.2.0, (c) Adam Zivner, licensed under GNU/GPL v2
-
-foreach($_REQUEST as $key => $value)
-	unset($$key); // register_globals = off
+foreach($_REQUEST as $k => $v)
+	unset($$k); // register_globals = off
 
 // SETTINGS - default settings, can be overridden in config.php
 $WIKI_TITLE = "My new wiki"; // name of the site
@@ -63,21 +62,17 @@ $T_MOVE_TEXT = "New name";
 $T_DIFF = "diff";
 $T_CREATE_PAGE = "Create page";
 $T_PROTECTED_READ = "You need to enter password to view content of site: ";
-$TE_WRONG_PASSWORD = "Password is incorrect.";
+$T_WRONG_PASSWORD = "Password is incorrect.";
 
 if($_GET["lang"]) {
 	$LANG = clear_path($_GET["lang"]);
 	setcookie('LW_LANG', $LANG, time() + 365 * 86400);
-} else if($_COOKIE["LW_LANG"])
+} elseif($_COOKIE["LW_LANG"])
 	$LANG = clear_path($_COOKIE["LW_LANG"]);
 else
 	list($LANG) = explode(",", $_SERVER['HTTP_ACCEPT_LANGUAGE']);
 
-if(@file_exists("$LANG_DIR$LANG.php"))
-	@include "$LANG_DIR$LANG.php";
-else if(@file_exists($LANG_DIR . substr($LANG, 0, 2) . ".php"))
-	@include $LANG_DIR . substr($LANG, 0, 2) . ".php";
-else
+if(!@include("$LANG_DIR$LANG.php") && !@include($LANG_DIR . substr($LANG, 0, 2) . ".php"))
 	$LANG = "en";
 
 if(!file_exists($VAR_DIR) && !mkdir(rtrim($VAR_DIR, "/")))
@@ -90,17 +85,17 @@ foreach(array($PG_DIR, $HIST_DIR, $PLUGINS_DATA_DIR) as $DIR)
 	}
 
 if($_GET["erasecookie"]) // remove cookie without reloading
-	foreach($_COOKIE as $key => $value)
-		if(substr($key, 0, 3) == "LW_") {
-			setcookie($key);
-			unset($_COOKIE[$key]);
+	foreach($_COOKIE as $k => $v)
+		if(substr($k, 0, 3) == "LW_") {
+			setcookie($k);
+			unset($_COOKIE[$k]);
 		}
 
 $plugins = array();
 
-for($dir = @opendir($PLUGINS_DIR); $dir && $file = readdir($dir);)
-	if(preg_match("/wkp_(.+)\.php$/", $file, $m) > 0) {
-		require $PLUGINS_DIR . $file;
+for($dir = @opendir($PLUGINS_DIR); $dir && $f = readdir($dir);)
+	if(preg_match("/wkp_(.+)\.php$/", $f, $m) > 0) {
+		require $PLUGINS_DIR . $f;
 		$plugins[$m[1]] = new $m[1]();
 
 		if(isset($$m[1]))
@@ -110,10 +105,8 @@ for($dir = @opendir($PLUGINS_DIR); $dir && $file = readdir($dir);)
 
 plugin("pluginsLoaded");
 
-$req_conv = array("action", "query", "sc", "content", "page", "moveto", "restore", "f1", "f2", "error", "time", "esum", "preview", "last_changed", "showsource", "par");
-
-foreach($req_conv as $req) // export variables to main namespace
-	$$req = $_REQUEST[$req];
+foreach(array("action", "query", "sc", "content", "page", "moveto", "restore", "f1", "f2", "error", "time", "esum", "preview", "last_changed", "showsource", "par") as $req)
+	$$req = $_REQUEST[$req]; // export request  variables to global namespace
 
 $TITLE = $page = clear_path($page); $moveto = clear_path($moveto); $f1 = clear_path($f1); $f2 = clear_path($f2);
 
@@ -122,23 +115,22 @@ plugin("actionBegin");
 if(!$action)
 	if(!$page)
 		die(header("Location:$self?page=" . u($START_PAGE)));
-	else if(file_exists("$PG_DIR$page.$LANG.txt")) // language variant
+	elseif(file_exists("$PG_DIR$page.$LANG.txt")) // language variant
 		die(header("Location:$self?page=" . u("$page.$LANG")));
-	else if(!file_exists("$PG_DIR$page.txt"))
+	elseif(!file_exists("$PG_DIR$page.txt"))
 		$action = "edit"; // create page if it doesn't exist
 
 if($PROTECTED_READ && !authentified()) { // does user need password to read content of site. If yes, ask for it.
 	$CON = "<form action=\"$self\" method=\"post\"><p>$T_PROTECTED_READ <input type=\"password\" name=\"sc\"/> <input class=\"submit\" type=\"submit\"/></p></form>";
 	$action = "view-html";
-}
-else if($restore || $action == "rev") { // Show old revision
+} elseif($restore || $action == "rev") { // Show old revision
 	$CON = @file_get_contents("$HIST_DIR$page/$f1");
 
 	if($action == "rev") {
 		$rev_restore = "[$T_RESTORE|./$self?page=".u($page)."&action=edit&f1=$f1&restore=1]";
 		$CON = str_replace(array("{TIME}", "{RESTORE}"), array(rev_time($f1), $rev_restore), $T_REVISION) . $CON;
 	}
-} else if($page) { // Load the page
+} elseif($page) { // Load the page
 	$last_changed_ts = @filemtime("$PG_DIR$page.txt");
 	$CON = @file_get_contents("$PG_DIR$page.txt");
 
@@ -156,8 +148,7 @@ if($action == "save" && !$preview && authentified()) { // do we have page to sav
 		$action = "edit";
 		$error = str_replace("{DIFF}", "<a href=\"$self?page=".u($page)."&action=diff\">$T_DIFF</a>", $T_EDIT_CONFLICT);
 		$CON = $content;
-	}
-	else if(!plugin("writingPage")) { // are plugins OK with page? (e.g. checking for spam)
+	} elseif(!plugin("writingPage")) { // are plugins OK with page? (e.g. checking for spam)
 		if($par)
 			$content = str_replace($CON, $content, @file_get_contents("$PG_DIR$page.txt"));
 
@@ -167,7 +158,7 @@ if($action == "save" && !$preview && authentified()) { // do we have page to sav
 		fwrite($file, $content, strlen($content)); fclose($file);
 
 		// Backup old revision
-		mkdir($HIST_DIR.$page, 0777); // Create directory if does not exist
+		@mkdir($HIST_DIR.$page, 0777); // Create directory if does not exist
 
 		$rightnow = date("Ymd-Hi-s", time() + $LOCAL_HOUR * 3600);
 
@@ -188,9 +179,9 @@ if($action == "save" && !$preview && authentified()) { // do we have page to sav
 		if($moveto != $page && $moveto)
 			if(file_exists("$PG_DIR$moveto.txt"))
 				die("Error: target filename already exists. Page was not moved.");
-			else if(!rename("$PG_DIR$page.txt", "$PG_DIR$moveto.txt"))
+			elseif(!rename("$PG_DIR$page.txt", "$PG_DIR$moveto.txt"))
 				die("Unknown error! Page was not moved.");
-			else if(!rename($HIST_DIR.$page, $HIST_DIR.$moveto)) {
+			elseif(!rename($HIST_DIR.$page, $HIST_DIR.$moveto)) {
 				rename("$PG_DIR$moveto.txt", "$PG_DIR$page.txt"); // revert previous change
 				die("Unknown error2! Page was not moved.");
 			} else
@@ -202,8 +193,8 @@ if($action == "save" && !$preview && authentified()) { // do we have page to sav
 		$CON = $content;
 		$action = "edit";
 	}
-} else if($action == "save" && !$preview) { // wrong password, give user another chance
-	$error = $TE_WRONG_PASSWORD;
+} elseif($action == "save" && !$preview) { // wrong password, give user another chance
+	$error = $T_WRONG_PASSWORD;
 	$CON = $content;
 	$action = "edit";
 }
@@ -239,9 +230,9 @@ if($action == "edit" || $preview) {
 		$TITLE = "$T_PREVIEW: $page";
 	}
 } elseif($action == "history") { // show whole history of page
-	for($dir = @opendir("$HIST_DIR$page/"); $file = @readdir($dir);)
-		if(substr($file, -4) == ".bak")
-			$files[] = $file;
+	for($dir = @opendir("$HIST_DIR$page/"); $f = @readdir($dir);)
+		if(substr($f, -4) == ".bak")
+			$files[] = $f;
 
 	rsort($files);
 	$CON = '<form action="'.$self.'" method="get"><input type="hidden" name="action" value="diff"/><input type="hidden" name="page" value="'.h($page).'"/><input type="submit" class="submit" value="'.$T_DIFF.'"/><br/>';
@@ -273,15 +264,15 @@ if($action == "edit" || $preview) {
 	$CON = str_replace(array("{REVISION1}", "{REVISION2}"), array($r1, $r2), $T_REV_DIFF);
 	$CON .= diff($f1, $f2);
 } elseif($action == "search") {
-	for($files = array(), $dir = opendir($PG_DIR); $file = readdir($dir);)
-		if(substr($file, -4) == ".txt" && ($con = @file_get_contents($PG_DIR . $file)))
-			if(!$query || stristr($file . $con, $query) !== false)
-				$files[] = substr($file, 0, -4);
+	for($files = array(), $dir = opendir($PG_DIR); $f = readdir($dir);)
+		if(substr($f, -4) == ".txt" && ($con = @file_get_contents($PG_DIR . $f)))
+			if(!$query || stristr($f . $con, $query) !== false)
+				$files[] = substr($f, 0, -4);
 
 	sort($files);
 
-	foreach($files as $file)
-		$list .= "<li><a href=\"$self?page=".u($file).'&redirect=no">'.h($file)."</a></li>";
+	foreach($files as $f)
+		$list .= "<li><a href=\"$self?page=".u($f).'&redirect=no">'.h($f)."</a></li>";
 
 	$CON = "<ul>$list</ul>";
 
@@ -307,7 +298,7 @@ if($action == "edit" || $preview) {
 
 	$CON = "<table>$recent</table>";
 	$TITLE = $T_RECENT_CHANGES;
-} else if(!plugin("action", $action) && $action != "view-html")
+} elseif(!plugin("action", $action) && $action != "view-html")
 	$action = "";
 
 if(!$action) { // page parsing
@@ -379,14 +370,14 @@ if(!$action) { // page parsing
 
 		foreach($options as $o)
 			if($o[1] == "center") $center = true;
-			else if($o[1] == "right" || $o[1] == "left") $i_attr .= " style=\"float:$o[1]\"";
-			else if($o[1] == "link") $link = substr($o[3], 0, 4) == "http" ? $o[3] : "$self?page=" . u($o[3]);
-			else if($o[1] == "alt") $i_attr .= " alt=\"$o[3]\"";
-			else if($o[1] == "title") $a_attr .= " title=\"$o[3]\"";
+			elseif($o[1] == "right" || $o[1] == "left") $i_attr .= " style=\"float:$o[1]\"";
+			elseif($o[1] == "link") $link = substr($o[3], 0, 4) == "http" ? $o[3] : "$self?page=" . u($o[3]);
+			elseif($o[1] == "alt") $i_attr .= " alt=\"$o[3]\"";
+			elseif($o[1] == "title") $a_attr .= " title=\"$o[3]\"";
 
 		$tag = "<img src=\"$img[1]\" alt=\"$alt\"$i_attr/>";
 
-		if($link)   $tag = "<a href=\"$link\"$a_attr>$tag</a>";
+		if($link) $tag = "<a href=\"$link\"$a_attr>$tag</a>";
 		if($center) $tag = "<div style=\"text-align:center\">$tag</div>";
 
 		$CON = str_replace($img[0], $tag, $CON);
@@ -490,7 +481,6 @@ $tpl_subs = array(
 	'CONTENT' => $action != "edit" ? $CON : "",
 	'TOC' => $TOC,
 	'LANG' => $LANG,
-	'LIST_OF_ALL_PAGES' => "<a href=\"$self?action=search\">$T_LIST_OF_ALL_PAGES</a>",
 	'SYNTAX' => $action == "edit" || $preview ? "<a href=\"$SYNTAX_PAGE\">$T_SYNTAX</a>" : "",
 	'SHOW_PAGE' => $action == "edit" || $preview ?  "<a href=\"$self?page=".u($page)."\">$T_SHOW_PAGE</a>" : "",
 	'COOKIE' => '<a href="'.$self.'?page='.u($page).'&action='.u($action).'&erasecookie=1">'.$T_ERASE_COOKIE.'</a>',
@@ -537,11 +527,9 @@ function rev_time($time) {
 // get paragraph number $par_id.
 function get_paragraph($text, $par_id) {
 	$par = array(); // paragraph
-
 	$count = 1; // paragraph count
 	$par_excl = 0; // number of !
 	$inside_code = $inside_html = false; // exclamation marks inside {{}} and {html}{/html} are not headings
-
 	$lines = explode("\n", $text);
 
 	foreach($lines as $l) {
@@ -550,10 +538,8 @@ function get_paragraph($text, $par_id) {
 
 			if($count == $par_id) {
 				$par[] = $l;
-
 				$par_excl = $excl;
-			}
-			else if($par_excl)
+			} elseif($par_excl)
 				if($excl > $par_excl)
 					$par[] = $l;
 				else
@@ -561,7 +547,7 @@ function get_paragraph($text, $par_id) {
 
 			$count++;
 		}
-		else if($par_excl)
+		elseif($par_excl)
 			$par[] = $l;
 
 		if(preg_match("/(?<!\^)\{html\}/", $l)) $inside_html = true;
@@ -602,7 +588,6 @@ function authentified() {
 
 	if(!$PASSWORD || !strcasecmp($_COOKIE['LW_AUT'], $PASSWORD) || !strcasecmp(sha1($sc), $PASSWORD)) {
 		setcookie('LW_AUT', $PASSWORD, time() + ($PROTECTED_READ ? 4 * 3600 : 365 * 86400));
-
 		return true;
 	} else
 		return false;
@@ -610,8 +595,8 @@ function authentified() {
 
 // returns "line" from meta.dat files. $lnum is number of line from the end of file starting with 1
 function meta_getline($file, $lnum) {
-	if(fseek($file, -($lnum * 175), SEEK_END) || !($line = fread($file, 175)) || $line[0] != "!") // ! is control character
-		return false;
+	if(fseek($file, -($lnum * 175), SEEK_END) || !($line = fread($file, 175)) || $line[0] != "!")
+		return false; // ! is control character
 
 	$date = substr($line, 1, 16);
 	$ip = trim(substr($line, 19, 15));
@@ -635,43 +620,43 @@ function plugin($method) {
 function fallback_template() { return '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="{LANG}" lang="{LANG}">
 <head>
-	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+	<meta http-equiv="content-type" content="text/html;charset=utf-8"/>
 	<title>{PAGE_TITLE_HEAD  - }{WIKI_TITLE}</title>
 	<style type="text/css">
-*{margin:0;padding:0;}
-body{font-size:12px;line-height:16px;padding:10px 20px 20px 20px;}
-p{margin: 5px 0 5px 0;}
-a{color:#006600;text-decoration:none;border-bottom:1px dotted #006600;}
-a.pending{color:#990000;}
-a.external:after{content: "\2197";}
-pre{border:1px dotted #ccc;padding:4px;overflow:auto;margin:3px;}
-img,a img{border:0px}
-h1,h2,h3,h4,h5,h6{letter-spacing:2px;font-weight:normal;margin:15px 0 15px 0px;color:#006600;}
-h1 a:hover,h2 a:hover,h3 a:hover,h4 a:hover,h5 a:hover,h6 a:hover{color:#006600;}
-h1 a,h2 a,h3 a,h4 a,h5 a,h6 a{border-bottom:none;}
-h2 span.par-edit, h3 span.par-edit, h4 span.par-edit, h5 span.par-edit, h6 span.par-edit {visibility:hidden;font-size:x-small;}
-h2:hover span.par-edit, h3:hover span.par-edit, h4:hover span.par-edit, h5:hover span.par-edit, h6:hover span.par-edit {visibility:visible;}
-hr{margin:10px 0 10px 0;height:0px;overflow:hidden;border:0px;border-top:1px solid #006600;}
-ul,ol{padding:5px 0px 5px 20px;}
-table{text-align:left;}
-input,select,textarea{border:1px solid #AAAAAA;padding:2px;font-size:12px;}
-#toc{border:1px dashed #006600;margin:5px 0 5px 10px;padding:6px 5px 7px 0px;float:right;padding-right:2em;list-style:none;}
-#toc ul{list-style:none;padding:3px 0 3px 10px;}
-#toc li{font-size:11px;padding-left:10px;}
-#diff{padding:1em;white-space:pre-wrap;word-wrap:break-word;white-space:-moz-pre-wrap;white-space:-pre-wrap;white-space:-o-pre-wrap;width:97%;}
-#diff ins{color:green;text-decoration:none;font-weight:bold;}
-#diff del{color:red;text-decoration:line-through;}
-#diff .orig{color:#666;font-size:90%;}
+*{margin:0;padding:0}
+body{font-size:12px;line-height:16px;padding:10px 20px 20px 20px}
+p{margin:5px}
+a{color:#006600;text-decoration:none;border-bottom:1px dotted #060}
+a.pending{color:#900}
+a.external:after{content:"\2197"}
+pre{border:1px dotted #ccc;padding:4px;overflow:auto;margin:3px}
+img,a img{border:0}
+h1,h2,h3,h4,h5,h6{letter-spacing:2px;font-weight:normal;margin:15px 0 15px 0;color:#060}
+h1 a:hover,h2 a:hover,h3 a:hover,h4 a:hover,h5 a:hover,h6 a:hover{color:#060}
+h1 a,h2 a,h3 a,h4 a,h5 a,h6 a{border-bottom:0}
+h2 .par-edit,h3 .par-edit,h4 .par-edit,h5 .par-edit,h6 .par-edit{visibility:hidden;font-size:x-small}
+h2:hover .par-edit,h3:hover .par-edit,h4:hover .par-edit,h5:hover .par-edit,h6:hover .par-edit{visibility:visible}
+hr{margin:10px 0 10px 0;height:1px;overflow:hidden;border:0;background:#060}
+ul,ol{padding:5px 0px 5px 20px}
+table{text-align:left}
+input,select,textarea{border:1px solid #AAA;padding:2px;font-size:12px}
+#toc{border:1px dashed #060;margin:5px 0 5px 10px;padding:6px 5px 7px 0;float:right;padding-right:2em;list-style:none}
+#toc ul{list-style:none;padding:3px 0 3px 10px}
+#toc li{font-size:11px;padding-left:10px}
+#diff{padding:1em;white-space:pre-wrap;width:97%}
+#diff ins{color:green;font-weight:bold}
+#diff del{color:red;text-decoration:line-through}
+#diff .orig{color:#666;font-size:90%}
 /* Plugins */
-.tagList{padding:0.2em 0.4em 0.2em 0.4em;margin-top:0.5em;border:1px dashed #006600;clear:right;}
-.tagCloud{float:right;width:200px;padding:0.5em;margin:1em;border:1px dashed #006600;clear:right;}
-.pageVersionsList{letter-spacing:0px;font-variant:normal;font-size:12px;}
-.resizeTextarea a{border-bottom:none;}
+.tagList{padding:0.2em 0.4em 0.2em 0.4em;margin-top:0.5em;border:1px dashed #060;clear:right}
+.tagCloud{float:right;width:200px;padding:0.5em;margin:1em;border:1px dashed #060;clear:right}
+.pageVersionsList{letter-spacing:0;font-variant:normal;font-size:12px}
+.resizeTextarea a{border-bottom:none}
 	</style>
 	{HEAD}
 </head>
 <body>
-<table border="0" width="100%" cellpadding="4" cellspacing="0">
+<table width="100%" cellpadding="4">
 	<tr>
 		<td colspan="2">{HOME} {RECENT_CHANGES}</td>
 		<td style="text-align:right">{EDIT} {SYNTAX} {HISTORY}</td>

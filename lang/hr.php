@@ -24,4 +24,4 @@ $T_MOVE_TEXT = "Novo ime stranice";
 $T_DIFF = "Razlike";
 $T_CREATE_PAGE = "Stvori stranicu";
 $T_PROTECTED_READ = "Za pristup stranici, unesite lozinku: ";
-$TE_WRONG_PASSWORD = "Netočna lozinka.";
+$T_WRONG_PASSWORD = "Netočna lozinka.";
