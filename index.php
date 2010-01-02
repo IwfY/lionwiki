@@ -109,6 +109,7 @@ foreach(array("action", "query", "sc", "content", "page", "moveto", "restore", "
 	$$req = $_REQUEST[$req]; // export request  variables to global namespace
 
 $TITLE = $page = clear_path($page); $moveto = clear_path($moveto); $f1 = clear_path($f1); $f2 = clear_path($f2);
+$CON = $content;
 
 plugin("actionBegin");
 
@@ -130,12 +131,11 @@ if($PROTECTED_READ && !authentified()) { // does user need password to read cont
 		$rev_restore = "[$T_RESTORE|./$self?page=".u($page)."&action=edit&f1=$f1&restore=1]";
 		$CON = str_replace(array("{TIME}", "{RESTORE}"), array(rev_time($f1), $rev_restore), $T_REVISION) . $CON;
 	}
-} elseif($page) { // Load the page
+} elseif($page && !$action) { // Load the page
 	$last_changed_ts = @filemtime("$PG_DIR$page.txt");
-	$CON = @file_get_contents("$PG_DIR$page.txt");
 
-	if($par)
-		$CON = get_paragraph($CON, $par);
+	$CON = @file_get_contents("$PG_DIR$page.txt");
+	$CON = $par ? get_paragraph($CON, $par) : $CON;
 
 	if(!$action && substr($CON, 0, 10) == "{redirect:" && $_REQUEST["redirect"] != "no")
 		die(header("Location:$self?page=".u(substr($CON, 10, strpos($CON, "}") - 10))));
@@ -147,7 +147,6 @@ if($action == "save" && !$preview && authentified()) { // do we have page to sav
 	elseif($last_changed < @filemtime("$PG_DIR$page.txt")) {
 		$action = "edit";
 		$error = str_replace("{DIFF}", "<a href=\"$self?page=".u($page)."&action=diff\">$T_DIFF</a>", $T_EDIT_CONFLICT);
-		$CON = $content;
 	} elseif(!plugin("writingPage")) { // are plugins OK with page? (e.g. checking for spam)
 		if($par)
 			$content = str_replace($CON, $content, @file_get_contents("$PG_DIR$page.txt"));
@@ -189,27 +188,21 @@ if($action == "save" && !$preview && authentified()) { // do we have page to sav
 
 		if(!plugin("pageWritten"))
 			die(header("Location:$self?page=" . u($page) . "&redirect=no" . ($par ? "&par=$par" : "") . ($_REQUEST["ajax"] ? "&ajax=1" : "")));
-	} else { // there's some problem with page, give user a chance to fix it
-		$CON = $content;
+	} else // there's some problem with page, give user a chance to fix it
 		$action = "edit";
-	}
 } elseif($action == "save" && !$preview) { // wrong password, give user another chance
 	$error = $T_WRONG_PASSWORD;
-	$CON = $content;
 	$action = "edit";
 }
 
-if($action)
-	$HEAD .= '<meta name="robots" content="noindex, nofollow"/>';
-
 if($action == "edit" || $preview) {
 	$CON_FORM_BEGIN = "<form action=\"$self\" method=\"post\"><input type=\"hidden\" name=\"action\" value=\"save\"/><input type=\"hidden\" name=\"last_changed\" value=\"$last_changed_ts\"/><input type=\"hidden\" name=\"showsource\" value=\"$showsource\"/><input type=\"hidden\" name=\"par\" value=\"".h($par)."\"/><input type=\"hidden\" name=\"page\" value=\"".h($page)."\"/>";
-	$CON_FORM_END = "</form>";
+	$CON_FORM_END = '</form>';
 	$CON_TEXTAREA = '<textarea class="contentTextarea" name="content" style="width:100%" rows="30">'.h($CON).'</textarea>';
-	$CON_PREVIEW = "<input class=\"submit\" type=\"submit\" name=\"preview\" value=\"$T_PREVIEW\"/>";
+	$CON_PREVIEW = '<input class="submit" type="submit" name="preview" value="'.$T_PREVIEW.'"/>';
 
 	if(!$showsource) {
-		$CON_SUBMIT = "<input class=\"submit\" type=\"submit\" value=\"$T_DONE\"/>";
+		$CON_SUBMIT = '<input class="submit" type="submit" value="'.$T_DONE.'"/>';
 		$EDIT_SUMMARY_TEXT = $T_EDIT_SUMMARY;
 		$EDIT_SUMMARY = '<input type="text" name="esum" value="'.h($esum).'"/>';
 
@@ -224,11 +217,8 @@ if($action == "edit" || $preview) {
 		}
 	}
 
-	if($preview) {
-		$action = "";
-		$CON = $content;
+	if($preview)
 		$TITLE = "$T_PREVIEW: $page";
-	}
 } elseif($action == "history") { // show whole history of page
 	for($dir = @opendir("$HIST_DIR$page/"); $f = @readdir($dir);)
 		if(substr($f, -4) == ".bak")
@@ -298,10 +288,10 @@ if($action == "edit" || $preview) {
 
 	$CON = "<table>$recent</table>";
 	$TITLE = $T_RECENT_CHANGES;
-} elseif(!plugin("action", $action) && $action != "view-html")
-	$action = "";
+} else
+	plugin("action", $action);
 
-if(!$action) { // page parsing
+if(!$action || $preview) { // page parsing
 	if(preg_match('/(?<!\^)\{title:([^}\n]*)\}/U', $CON, $m)) { // Change page title
 		$TITLE = $m[1];
 		$CON = str_replace($m[0], "", $CON);
@@ -328,7 +318,7 @@ if(!$action) { // page parsing
 	$CON = preg_replace("/\^(.)/e", "'&#'.ord('$1').';'", $CON);
 	$CON = str_replace(array("<", "&"), array("&lt;", "&amp;"), $CON);
 	$CON = preg_replace("/&amp;([a-z]+;|\#[0-9]+;)/U", "&$1", $CON); // keep HTML entities
-	$CON = preg_replace("/(\r\n|\r)/", "\n", $CON); // unifying newlines to Unix ones
+	$CON = preg_replace('/(\r\n|\r)/', "\n", $CON); // unifying newlines to Unix ones
 
 	preg_match_all("/{{(.+)}}/Ums", $CON, $codes, PREG_PATTERN_ORDER);
 	$CON = preg_replace("/{{(.+)}}/Ums", "<pre>{CODE}</pre>", $CON);
@@ -387,7 +377,7 @@ if(!$action) { // page parsing
 
 	// Links
 	$CON = preg_replace("#\[([^\]]+)\|(\./($rg_url)|(https?://$rg_url))\]#U", '<a href="$2" class="external">$1</a>', $CON);
-	$CON = preg_replace("#(?<!\")(https?://$rg_url)#i", '<a href="$0" class="external">$1</a>', $CON);
+	$CON = preg_replace("#^https?://$rg_url#i", '<a href="$0" class="external">$0</a>', $CON);
 
 	preg_match_all("/\[(?:([^|\]]+)\|)?([^\]#]+)(?:#([^\]]+))?\]/", $CON, $matches, PREG_SET_ORDER); // matching Wiki links
 
@@ -462,7 +452,7 @@ plugin("template");
 $html = preg_replace("/\{([^}]* )?plugin:.+( [^}]*)?\}/U", "", $html); // get rid of absent plugin tags
 
 $tpl_subs = array(
-	'HEAD' => $HEAD,
+	'HEAD' => $HEAD . ($action ? '<meta name="robots" content="noindex, nofollow"/>' : ''),
 	'SEARCH_FORM' => '<form action="'.$self.'" method="get"><span><input type="hidden" name="action" value="search"/><input type="submit" style="display:none;"/>',
 	'\/SEARCH_FORM' => "</span></form>",
 	'SEARCH_INPUT' => '<input type="text" name="query" value="'.h($query).'"/>',

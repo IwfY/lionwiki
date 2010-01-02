@@ -34,6 +34,29 @@ function findClosest(classname, node)
 	return arr[0];
 }
 
+function processKeyDown(obj)
+{
+	//alert(obj.innerHTML);
+}
+
+function registerOnKeyDown()
+{
+	var txt = getElementsByClassName("contentTextarea");
+
+	for(idx in txt)
+		txt[idx].onkeydown = processKeyDown;
+}
+
+if(typeof wons == "undefined")
+	wons = new Array();
+
+wons.push("registerOnKeyDown()");
+
+window.onload = function() {
+	for(var i = 0; i < wons.length; i++)
+		eval(wons[i]);
+}
+
 function getElementsByClassName(classname, node)
 {
 	if(!node)
