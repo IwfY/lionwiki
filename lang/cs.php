@@ -26,4 +26,4 @@ $T_REV_DIFF = "<b>Rozdíl mezi verzemi z {REVISION1} a z {REVISION2}.</b>";
 $T_REVISION = "'''Tahle revize je z {TIME}. Můžete ji {RESTORE} a pak uložit, tak se stane aktuální revizí.'''\n\n";
 $T_WRONG_PASSWORD = "Zadané heslo není správné.";
 
-$DATE_FORMAT = "d. m. Y H:i";
+$DATE_FORMAT = "j. n. Y H:i";

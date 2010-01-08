@@ -6,7 +6,7 @@ foreach($_REQUEST as $k => $v)
 $WIKI_TITLE = "My new wiki"; // name of the site
 $PASSWORD = ""; // SHA1 hash
 
-$TEMPLATE = "templates/dandelion.html";  // presentation template
+$TEMPLATE = "templates/dandelion.html"; // presentation template
 $PROTECTED_READ = false; // if true, you need to fill password for reading pages too
 $NO_HTML = true; // XSS protection
 
@@ -25,7 +25,7 @@ if(get_magic_quotes_gpc()) // magic_quotes_gpc can't be turned off
 	for($i = 0, $_SG = array(&$_GET, &$_POST, &$_COOKIE, &$_REQUEST), $c = count($_SG); $i < $c; ++$i)
 		$_SG[$i] = array_map("stripslashes", $_SG[$i]);
 
-$self = $_SERVER['PHP_SELF'];
+$self = basename($_SERVER['PHP_SELF']);
 $REAL_PATH = realpath(dirname(__FILE__))."/";
 $VAR_DIR = "var/";
 $PG_DIR = $VAR_DIR."pages/";
@@ -75,14 +75,12 @@ else
 if(!@include("$LANG_DIR$LANG.php") && !@include($LANG_DIR . substr($LANG, 0, 2) . ".php"))
 	$LANG = "en";
 
+// Creating essential directories if they don't exist
 if(!file_exists($VAR_DIR) && !mkdir(rtrim($VAR_DIR, "/")))
 	die("Can't create directory $VAR_DIR. Please create $VAR_DIR with 0777 rights.");
-
-foreach(array($PG_DIR, $HIST_DIR, $PLUGINS_DATA_DIR) as $DIR)
-	if(!file_exists($DIR)) {
-		mkdir(rtrim($DIR, "/"), 0777);
-		$f = fopen($DIR . ".htaccess", "w"); fwrite($f, "deny from all"); fclose($f);
-	}
+else foreach(array($PG_DIR, $HIST_DIR, $PLUGINS_DATA_DIR) as $DIR)
+	if(@mkdir(rtrim($DIR, "/"), 0777)) {
+		$f = fopen($DIR . ".htaccess", "w"); fwrite($f, "deny from all"); fclose($f); }
 
 if($_GET["erasecookie"]) // remove cookie without reloading
 	foreach($_COOKIE as $k => $v)
@@ -106,7 +104,7 @@ for($dir = @opendir($PLUGINS_DIR); $dir && $f = readdir($dir);)
 plugin("pluginsLoaded");
 
 foreach(array("action", "query", "sc", "content", "page", "moveto", "restore", "f1", "f2", "error", "time", "esum", "preview", "last_changed", "showsource", "par") as $req)
-	$$req = $_REQUEST[$req]; // export request  variables to global namespace
+	$$req = $_REQUEST[$req]; // export request variables to global namespace
 
 $TITLE = $page = clear_path($page); $moveto = clear_path($moveto); $f1 = clear_path($f1); $f2 = clear_path($f2);
 $CON = $content;
@@ -129,20 +127,25 @@ if($PROTECTED_READ && !authentified()) { // does user need password to read cont
 
 	if($action == "rev") {
 		$rev_restore = "[$T_RESTORE|./$self?page=".u($page)."&action=edit&f1=$f1&restore=1]";
-		$CON = str_replace(array("{TIME}", "{RESTORE}"), array(rev_time($f1), $rev_restore), $T_REVISION) . $CON;
+		$CON = strtr($T_REVISION, array("{TIME}" => rev_time($f1), "{RESTORE}" => $rev_restore)) . $CON;
+		$action = "";
 	}
-} elseif($page && !$action) { // Load the page
+}
+
+if($page) { // Load the page
 	$last_changed_ts = @filemtime("$PG_DIR$page.txt");
 
-	$CON = @file_get_contents("$PG_DIR$page.txt");
-	$CON = $par ? get_paragraph($CON, $par) : $CON;
+	if(!$action || $action == "edit") {
+		$CON = @file_get_contents("$PG_DIR$page.txt");
+		$CON = $par ? get_paragraph($CON, $par) : $CON;
 
-	if(!$action && substr($CON, 0, 10) == "{redirect:" && $_REQUEST["redirect"] != "no")
-		die(header("Location:$self?page=".u(substr($CON, 10, strpos($CON, "}") - 10))));
+		if(!$action && substr($CON, 0, 10) == "{redirect:" && $_REQUEST["redirect"] != "no")
+			die(header("Location:$self?page=".u(substr($CON, 10, strpos($CON, "}") - 10))));
+	}
 }
 
 if($action == "save" && !$preview && authentified()) { // do we have page to save?
-	if(!trim($content) && !$par) // Delete empty page (keep history)
+	if(!trim($content) && !$par) // delete empty page
 		@unlink("$PG_DIR$page.txt");
 	elseif($last_changed < @filemtime("$PG_DIR$page.txt")) {
 		$action = "edit";
@@ -233,7 +236,7 @@ if($action == "edit" || $preview) {
 			$mi++;
 
 		$CON .= '<input type="radio" name="f1" value="'.h($files[$i]).'"/><input type="radio" name="f2" value="'.h($files[$i]).'"/>';
-		$CON .= "<a href=\"$self?page=".u($page)."&action=rev&f1=".$files[$i]."\">".rev_time($files[$i])."</a>  - ($m[2] B) $m[1] <i>".h($m[3])."</i><br/>";
+		$CON .= "<a href=\"$self?page=".u($page)."&action=rev&f1=".$files[$i]."\">".rev_time($files[$i])."</a> - ($m[2] B) $m[1] <i>".h($m[3])."</i><br/>";
 	}
 
 	$CON .= "</form>";
@@ -297,7 +300,7 @@ if(!$action || $preview) { // page parsing
 		$CON = str_replace($m[0], "", $CON);
 	}
 
-	// Subpages
+	// subpages
 	while(preg_match("/(?<!\^){include:([^}]+)}/Um", $CON, $m))
 		if(!strcmp($m[1], $page)) // limited recursion protection
 			$CON = str_replace($m[0], "'''Warning: subpage recursion!'''", $CON);
@@ -323,7 +326,7 @@ if(!$action || $preview) { // page parsing
 	preg_match_all("/{{(.+)}}/Ums", $CON, $codes, PREG_PATTERN_ORDER);
 	$CON = preg_replace("/{{(.+)}}/Ums", "<pre>{CODE}</pre>", $CON);
 
-	// Spans
+	// spans
 	preg_match_all("/\{([\.#][^\s\"\}]*)(\s([^\}\"]*))?\}/m", $CON, $spans, PREG_SET_ORDER);
 
 	foreach($spans as $m) {
@@ -349,7 +352,7 @@ if(!$action || $preview) { // page parsing
 
 	$CON = preg_replace("/^([^!\*#\n][^\n]+)$/Um", "<p>$1</p>", $CON); // paragraphs
 
-	// Images
+	// images
 	$rg_url = "[0-9a-zA-Z\.\#/~\-_%=\?\&,\+\:@;!\(\)\*\$' ]*";
 	preg_match_all("#\[((https?://)?$rg_url\.(jpeg|jpg|gif|png))(\|[^\]]+)?\]#", $CON, $imgs, PREG_SET_ORDER);
 
@@ -375,7 +378,7 @@ if(!$action || $preview) { // page parsing
 
 	$CON = preg_replace('#([0-9a-zA-Z\./~\-_]+@[0-9a-z/~\-_]+\.[0-9a-z\./~\-_]+)#i', '<a href="mailto:$0">$0</a>', $CON); // mail recognition
 
-	// Links
+	// links
 	$CON = preg_replace("#\[([^\]]+)\|(\./($rg_url)|(https?://$rg_url))\]#U", '<a href="$2" class="external">$1</a>', $CON);
 	$CON = preg_replace("#^https?://$rg_url#i", '<a href="$0" class="external">$0</a>', $CON);
 
@@ -395,10 +398,10 @@ if(!$action || $preview) { // page parsing
 		$CON = preg_replace('#(</ol>\n?<ol>|</ul>\n?<ul>)#', "", $CON);
 	}
 
-	// Fixing XHTML validity of lists
+	// fixing XHTML validity of lists
 	$CON = preg_replace(array('#</li><([uo])l>#', '#</([uo])l><li>#', '#<(/?)([uo])l></?[uo]l>#'), array("<$1l>", "</$1l></li><li>", "<$1$2l><$1li><$1$2l>"), $CON);
 
-	// Headings
+	// headings
 	preg_match_all('/^(!+?)(.*)$/Um', $CON, $matches, PREG_SET_ORDER);
 	$stack = array();
 
@@ -413,7 +416,7 @@ if(!$action || $preview) { // page parsing
 		$ret .= "<div class=\"par-div\" id=\"par-$h_id\"><h$excl><a class=\"section-edit\" name=\"$hash\">$m[2]</a>";
 
 		if(is_writable($PG_DIR . $page . ".txt"))
-			$ret .=  "<span class=\"par-edit\">(<a href=\"$self?action=edit&page=".u($page)."&par=$h_id\">$T_EDIT</a>)</span>";
+			$ret .= "<span class=\"par-edit\">(<a href=\"$self?action=edit&page=".u($page)."&par=$h_id\">$T_EDIT</a>)</span>";
 
 		$CON = str_replace($m[0], "$ret</h$excl>", $CON);
 		$TOC .= str_repeat("<ul>", $excl - 2).'<li><a href="'.$self.'?page='.u($page).'#'.u($hash).'">'.$m[2].'</a></li>'.str_repeat("</ul>", $excl - 2);
@@ -440,15 +443,7 @@ plugin("formatFinished");
 
 // Loading template. If does not exist, use built-in default
 $html = file_exists($TEMPLATE) ? file_get_contents(clear_path($TEMPLATE)) : fallback_template();
-
-// including pages in pure HTML
-while(preg_match("/{include:([^}]+)}/U", $html, $m)) {
-	$inc = str_replace(array("{html}", "{/html}"), "", @file_get_contents("$PG_DIR$m[1].txt"));
-	$html = str_replace($match[0], $inc, $html);
-}
-
-plugin("template");
-
+plugin("template"); // plugin templating
 $html = preg_replace("/\{([^}]* )?plugin:.+( [^}]*)?\}/U", "", $html); // get rid of absent plugin tags
 
 $tpl_subs = array(
@@ -470,9 +465,8 @@ $tpl_subs = array(
 	'LAST_CHANGED' => $last_changed_ts ? date($DATE_FORMAT, $last_changed_ts + $LOCAL_HOUR * 3600) : "",
 	'CONTENT' => $action != "edit" ? $CON : "",
 	'TOC' => $TOC,
-	'LANG' => $LANG,
 	'SYNTAX' => $action == "edit" || $preview ? "<a href=\"$SYNTAX_PAGE\">$T_SYNTAX</a>" : "",
-	'SHOW_PAGE' => $action == "edit" || $preview ?  "<a href=\"$self?page=".u($page)."\">$T_SHOW_PAGE</a>" : "",
+	'SHOW_PAGE' => $action == "edit" || $preview ? "<a href=\"$self?page=".u($page)."\">$T_SHOW_PAGE</a>" : "",
 	'COOKIE' => '<a href="'.$self.'?page='.u($page).'&action='.u($action).'&erasecookie=1">'.$T_ERASE_COOKIE.'</a>',
 	'CONTENT_FORM' => $CON_FORM_BEGIN,
 	'\/CONTENT_FORM' => $CON_FORM_END,
@@ -574,10 +568,8 @@ function diff_builtin($f1, $f2) {
 }
 
 function authentified() {
-	global $PASSWORD, $PROTECTED_READ, $sc;
-
-	if(!$PASSWORD || !strcasecmp($_COOKIE['LW_AUT'], $PASSWORD) || !strcasecmp(sha1($sc), $PASSWORD)) {
-		setcookie('LW_AUT', $PASSWORD, time() + ($PROTECTED_READ ? 4 * 3600 : 365 * 86400));
+	if(!$GLOBALS["PASSWORD"] || !strcasecmp($_COOKIE['LW_AUT'], $GLOBALS["PASSWORD"]) || !strcasecmp(sha1($GLOBALS["sc"]), $GLOBALS["PASSWORD"])) {
+		setcookie('LW_AUT', $GLOBALS["PASSWORD"], time() + ($GLOBALS["PROTECTED_READ"] ? 4 * 3600 : 365 * 86400));
 		return true;
 	} else
 		return false;
@@ -608,7 +600,7 @@ function plugin($method) {
 }
 
 function fallback_template() { return '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="{LANG}" lang="{LANG}">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 	<meta http-equiv="content-type" content="text/html;charset=utf-8"/>
 	<title>{PAGE_TITLE_HEAD  - }{WIKI_TITLE}</title>
@@ -647,26 +639,26 @@ input,select,textarea{border:1px solid #AAA;padding:2px;font-size:12px}
 </head>
 <body>
 <table width="100%" cellpadding="4">
-	<tr>
-		<td colspan="2">{HOME} {RECENT_CHANGES}</td>
-		<td style="text-align:right">{EDIT} {SYNTAX} {HISTORY}</td>
-	</tr>
-	<tr><th colspan="3"><hr/><h1 id="page-title">{PAGE_TITLE} {<span class="pageVersionsList">( plugin:VERSIONS_LIST )</span>}</h1></th></tr>
-	<tr>
-		<td colspan="3">
-			{<div style="color:#F25A5A;font-weight:bold;"> ERROR </div>}
-			{CONTENT} {plugin:TAG_LIST}
-			{CONTENT_FORM} {RENAME_TEXT} {RENAME_INPUT <br/><br/>} {CONTENT_TEXTAREA}
-			<p style="float:right;margin:6px">{FORM_PASSWORD} {FORM_PASSWORD_INPUT} {plugin:CAPTCHA_QUESTION} {plugin:CAPTCHA_INPUT}
-			{EDIT_SUMMARY_TEXT} {EDIT_SUMMARY_INPUT} {CONTENT_SUBMIT} {CONTENT_PREVIEW}</p>{/CONTENT_FORM}
-		</td>
-	</tr>
-	<tr><td colspan="3"><hr/></td></tr>
-	<tr>
-		<td><div>{SEARCH_FORM}{SEARCH_INPUT}{SEARCH_SUBMIT}{/SEARCH_FORM}</div></td>
-		<td>Powered by <a href="http://lionwiki.0o.cz/">LionWiki</a>. {LAST_CHANGED_TEXT}: {LAST_CHANGED} {COOKIE}</td>
-		<td style="text-align:right">{EDIT} {SYNTAX} {HISTORY}</td>
-	</tr>
+<tr>
+	<td colspan="2">{HOME} {RECENT_CHANGES}</td>
+	<td style="text-align:right">{EDIT} {SYNTAX} {HISTORY}</td>
+</tr>
+<tr><th colspan="3"><hr/><h1 id="page-title">{PAGE_TITLE} {<span class="pageVersionsList">( plugin:VERSIONS_LIST )</span>}</h1></th></tr>
+<tr>
+	<td colspan="3">
+		{<div style="color:#F25A5A;font-weight:bold;"> ERROR </div>}
+		{CONTENT} {plugin:TAG_LIST}
+		{CONTENT_FORM} {RENAME_TEXT} {RENAME_INPUT <br/><br/>} {CONTENT_TEXTAREA}
+		<p style="float:right;margin:6px">{FORM_PASSWORD} {FORM_PASSWORD_INPUT} {plugin:CAPTCHA_QUESTION} {plugin:CAPTCHA_INPUT}
+		{EDIT_SUMMARY_TEXT} {EDIT_SUMMARY_INPUT} {CONTENT_SUBMIT} {CONTENT_PREVIEW}</p>{/CONTENT_FORM}
+	</td>
+</tr>
+<tr><td colspan="3"><hr/></td></tr>
+<tr>
+	<td><div>{SEARCH_FORM}{SEARCH_INPUT}{SEARCH_SUBMIT}{/SEARCH_FORM}</div></td>
+	<td>Powered by <a href="http://lionwiki.0o.cz/">LionWiki</a>. {LAST_CHANGED_TEXT}: {LAST_CHANGED} {COOKIE}</td>
+	<td style="text-align:right">{EDIT} {SYNTAX} {HISTORY}</td>
+</tr>
 </table>
 </body>
 </html>'; }
