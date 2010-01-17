@@ -89,9 +89,7 @@ if($_GET["erasecookie"]) // remove cookie without reloading
 			unset($_COOKIE[$k]);
 		}
 
-$plugins = array();
-
-for($dir = @opendir($PLUGINS_DIR); $dir && $f = readdir($dir);)
+for($plugins = array(), $dir = @opendir($PLUGINS_DIR); $dir && $f = readdir($dir);) // load plugins
 	if(preg_match("/wkp_(.+)\.php$/", $f, $m) > 0) {
 		require $PLUGINS_DIR . $f;
 		$plugins[$m[1]] = new $m[1]();
@@ -191,6 +189,8 @@ if($action == "save" && !$preview && authentified()) { // do we have page to sav
 
 		if(!plugin("pageWritten"))
 			die(header("Location:$self?page=" . u($page) . "&redirect=no" . ($par ? "&par=$par" : "") . ($_REQUEST["ajax"] ? "&ajax=1" : "")));
+		else
+			$action = ""; // display content ...
 	} else // there's some problem with page, give user a chance to fix it
 		$action = "edit";
 } elseif($action == "save" && !$preview) { // wrong password, give user another chance
@@ -551,7 +551,7 @@ function get_paragraph($text, $par_id) {
 	return join("\n", $par);
 }
 
-function diff($f1, $f2) {
+function diff($f1, $f2) { // executes either builtin simple diff or complex diff plugin, if present ...
 	list($f1, $f2) = array(min($f1, $f2), max($f1, $f2));
 
 	$dir = $GLOBALS["HIST_DIR"] . $GLOBALS["page"] . "/";
@@ -577,10 +577,21 @@ function diff_builtin($f1, $f2) {
 
 function authentified() {
 	if(!$GLOBALS["PASSWORD"] || !strcasecmp($_COOKIE['LW_AUT'], $GLOBALS["PASSWORD"]) || !strcasecmp(sha1($GLOBALS["sc"]), $GLOBALS["PASSWORD"])) {
-		setcookie('LW_AUT', $GLOBALS["PASSWORD"], time() + ($GLOBALS["PROTECTED_READ"] ? 4 * 3600 : 365 * 86400));
+		setsafecookie('LW_AUT', $GLOBALS["PASSWORD"], time() + ($GLOBALS["PROTECTED_READ"] ? 4 * 3600 : 365 * 86400));
 		return true;
 	} else
 		return false;
+}
+
+function setsafecookie() { // setcookie for sensitive informations
+	$args = func_get_args();
+
+	if(version_compare(PHP_VERSION, "5.2.0") >= 0) {
+		while(count($args) != 6)
+			$args[] = '';
+
+		$args[] = true; // httponly, supported only in some browsers and PHP >= 5.2.0. Successfully prevents XSS attacks.
+	}
 }
 
 // returns "line" from meta.dat files. $lnum is number of line from the end of file starting with 1

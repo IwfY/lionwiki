@@ -350,7 +350,7 @@ class Admin
 	function authentified()
 	{
 		if(strlen($this->PASSWORD) > 0 && $_COOKIE["LW_ADMIN"] == $this->PASSWORD || (isset($_POST["sc"]) && sha1($_POST["sc"]) == $this->PASSWORD)) {
-			setcookie("LW_ADMIN", $this->PASSWORD, time() + $this->expire_login);
+			setsafecookie("LW_ADMIN", $this->PASSWORD, time() + $this->expire_login);
 
 			return true;
 		}
