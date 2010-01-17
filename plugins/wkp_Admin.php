@@ -193,7 +193,7 @@ class Admin
 				$line = trim($line);
 
 				if(!empty($line) && preg_match("/$line/U", $content)) {
-					$error .= "Remove all occurences of $line and try again";
+					$error .= "Remove all occurences of \"$line\" and try again";
 
 					return false;
 				}

@@ -63,7 +63,7 @@ class AjaxEditing
 			$EDIT_SUMMARY = "<input type=\"text\" name=\"esum\" class=\"ajaxEsum\" value=\"".h($esum)."\" />";
 		}
 
-		$CON_PREVIEW = "<input class=\"ajaxContentPreview\" class=\"submit\" onclick=\"ajaxAction('edit&preview=1', this);return false;\" type=\"submit\" name=\"preview\" value=\"$T_PREVIEW\" /> <input type=\"submit\" onclick=\"ajaxAction('', this);return false;\" value=\"$T_DISCARD_CHANGES\" />";
+		$CON_PREVIEW = "<input class=\"ajaxContentPreview\" class=\"submit\" onclick=\"ajaxAction('save&preview=1', this);return false;\" type=\"submit\" name=\"preview\" value=\"$T_PREVIEW\" /> <input type=\"submit\" onclick=\"ajaxAction('', this);return false;\" value=\"$T_DISCARD_CHANGES\" />";
 
 		$subs = array(
 			array("CONTENT_FORM", $CON_FORM_BEGIN),
@@ -88,19 +88,6 @@ class AjaxEditing
 		$html = preg_replace("/\{([^}]* )?plugin:.+( [^}]*)?\}/U", "", $html); // getting rid of absent plugin tags
 
 		die(($preview ? $CON : "") . $html);
-	}
-
-	function pageWritten()
-	{
-		global $CON;
-
-		if($_REQUEST["ajax"]) {
-			$CON = $_REQUEST["content"];
-
-			return true;
-		}
-		else
-			return false;
 	}
 
 	function formatBegin()

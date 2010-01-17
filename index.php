@@ -103,7 +103,7 @@ for($dir = @opendir($PLUGINS_DIR); $dir && $f = readdir($dir);)
 
 plugin("pluginsLoaded");
 
-foreach(array("action", "query", "sc", "content", "page", "moveto", "restore", "f1", "f2", "error", "time", "esum", "preview", "last_changed", "showsource", "par") as $req)
+foreach(array("action", "content", "error", "esum", "f1", "f2",  "last_changed", "moveto", "page", "par", "preview", "query", "restore", "sc", "showsource", "time") as $req)
 	$$req = $_REQUEST[$req]; // export request variables to global namespace
 
 $TITLE = $page = clear_path($page); $moveto = clear_path($moveto); $f1 = clear_path($f1); $f2 = clear_path($f2);
@@ -135,7 +135,7 @@ if($PROTECTED_READ && !authentified()) { // does user need password to read cont
 if($page) { // Load the page
 	$last_changed_ts = @filemtime("$PG_DIR$page.txt");
 
-	if(!$action || $action == "edit") {
+	if(!$action || $action == "edit" || $action == "save") {
 		$CON = @file_get_contents("$PG_DIR$page.txt");
 		$CON = $par ? get_paragraph($CON, $par) : $CON;
 
@@ -443,7 +443,15 @@ plugin("formatFinished");
 
 // Loading template. If does not exist, use built-in default
 $html = file_exists($TEMPLATE) ? file_get_contents(clear_path($TEMPLATE)) : fallback_template();
+
+// including pages in pure HTML
+while(preg_match("/{include:([^}]+)}/U", $html, $m)) {
+	$inc = str_replace(array("{html}", "{/html}"), "", @file_get_contents("$PG_DIR$m[1].txt"));
+	$html = str_replace($m[0], $inc, $html);
+}
+
 plugin("template"); // plugin templating
+
 $html = preg_replace("/\{([^}]* )?plugin:.+( [^}]*)?\}/U", "", $html); // get rid of absent plugin tags
 
 $tpl_subs = array(
