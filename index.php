@@ -133,7 +133,7 @@ if($PROTECTED_READ && !authentified()) { // does user need password to read cont
 if($page) { // Load the page
 	$last_changed_ts = @filemtime("$PG_DIR$page.txt");
 
-	if(!$action || $action == "edit" || $action == "save") {
+	if(!$action || $action == "edit") {
 		$CON = @file_get_contents("$PG_DIR$page.txt");
 		$CON = $par ? get_paragraph($CON, $par) : $CON;
 
@@ -149,8 +149,10 @@ if($action == "save" && !$preview && authentified()) { // do we have page to sav
 		$action = "edit";
 		$error = str_replace("{DIFF}", "<a href=\"$self?page=".u($page)."&action=diff\">$T_DIFF</a>", $T_EDIT_CONFLICT);
 	} elseif(!plugin("writingPage")) { // are plugins OK with page? (e.g. checking for spam)
-		if($par)
-			$content = str_replace($CON, $content, @file_get_contents("$PG_DIR$page.txt"));
+		if($par) {
+			$c = @file_get_contents("$PG_DIR$page.txt");
+			$content = str_replace(get_paragraph($c, $par), $content, $c);
+		}
 
 		if(!$file = @fopen("$PG_DIR$page.txt", "w"))
 			die("Could not write page $PG_DIR$page.txt!");
@@ -353,8 +355,7 @@ if(!$action || $preview) { // page parsing
 	$CON = preg_replace("/^([^!\*#\n][^\n]+)$/Um", "<p>$1</p>", $CON); // paragraphs
 
 	// images
-	$rg_url = "[0-9a-zA-Z\.\#/~\-_%=\?\&,\+\:@;!\(\)\*\$' ]*";
-	preg_match_all("#\[((https?://)?$rg_url\.(jpeg|jpg|gif|png))(\|[^\]]+)?\]#", $CON, $imgs, PREG_SET_ORDER);
+	preg_match_all("#\[((https?://)?[^\]]+\.(jpeg|jpg|gif|png))(\|[^\]]+)?\]#", $CON, $imgs, PREG_SET_ORDER);
 
 	foreach($imgs as $img) {
 		preg_match_all("/\|([^\]\|=]+)(=([^\]\|\"]+))?(?=[\]\|])/", $img[0], $options, PREG_SET_ORDER);
@@ -379,8 +380,8 @@ if(!$action || $preview) { // page parsing
 	$CON = preg_replace('#([0-9a-zA-Z\./~\-_]+@[0-9a-z/~\-_]+\.[0-9a-z\./~\-_]+)#i', '<a href="mailto:$0">$0</a>', $CON); // mail recognition
 
 	// links
-	$CON = preg_replace("#\[([^\]]+)\|(\./($rg_url)|(https?://$rg_url))\]#U", '<a href="$2" class="external">$1</a>', $CON);
-	$CON = preg_replace("#^https?://$rg_url#i", '<a href="$0" class="external">$0</a>', $CON);
+	$CON = preg_replace("#\[([^\]\|]+)\|(\./([^\]]+)|(https?://[^\]]+))\]#U", '<a href="$2" class="external">$1</a>', $CON);
+	$CON = preg_replace("#(?<!\")https?://[0-9a-zA-Z\.\#/~\-_%=\?\&,\+\:@;!\(\)\*\$']*#i", '<a href="$0" class="external">$0</a>', $CON);
 
 	preg_match_all("/\[(?:([^|\]]+)\|)?([^\]#]+)(?:#([^\]]+))?\]/", $CON, $matches, PREG_SET_ORDER); // matching Wiki links
 

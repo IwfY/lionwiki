@@ -64,9 +64,9 @@ class Menu
 
 	function formatFinished()
 	{
-		global $CON, $action;
+		global $CON, $action, $preview;
 
-		if($action != "")
+		if($action && !$preview)
 			return;
 
 		foreach($this->menus as $m) {

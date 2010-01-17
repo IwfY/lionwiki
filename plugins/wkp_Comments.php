@@ -59,10 +59,8 @@ class Comments
 	{
 		global $PG_DIR;
 
-		$rg_url = "[0-9a-zA-Z\.\#/~\-_%=\?\&,\+\:@;!\(\)\*\$' ]*";
-
-		$txt = preg_replace("#\[([^\]]+)\|(\./($rg_url)|(https?://$rg_url))\]#U", '<a href="$2" class="external">$1</a>', $txt);
-		$txt = preg_replace("#(?<!\")(https?://$rg_url)#i", '<a href="$0" class="external">$1</a>', $txt);
+		$txt = preg_replace("#\[([^\]\|]+)\|(\./([^\]]+)|(https?://[^\]]+))\]#U", '<a href="$2" class="external">$1</a>', $txt);
+		$txt = preg_replace("#(?<!\")(https?://[^\]]+)#i", '<a href="$0" class="external">$1</a>', $txt);
 
 		preg_match_all("/\[(?:([^|\]]+)\|)?([^\]#]+)(?:#([^\]]+))?\]/", $txt, $matches, PREG_SET_ORDER); // matching Wiki links
 

@@ -22,9 +22,9 @@ class Footnotes {
 
 	function formatFinished()
 	{
-		global $CON, $action;
+		global $CON, $action, $preview;
 
-		if($action == "")
+		if(!$action || $preview)
 			$CON = preg_replace_callback("/\{footnote\}(.*)\{\/footnote\}/U", array($this, "footnote"), $CON);
 	}
 

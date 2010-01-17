@@ -18,8 +18,7 @@ class ImageExt
 	{
 		global $CON;
 
-		$rg_url = "[0-9a-zA-Z\.\#/~\-_%=\?\&,\+\:@;!\(\)\*\$' ]*";
-		preg_match_all("#\[((https?://)?$rg_url\.(jpeg|jpg|gif|png))(\|[^\]]+)?\]#", $CON, $this->imgs, PREG_SET_ORDER);
+		preg_match_all("#\[((https?://)?[^\]\|]+\.(jpeg|jpg|gif|png))(\|[^\]]+)?\]#", $CON, $this->imgs, PREG_SET_ORDER);
 
 		foreach($this->imgs as $img)
 			$CON = str_replace($img[0], "{IMAGE}", $CON);

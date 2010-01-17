@@ -27,8 +27,7 @@ class Slimbox
 	{
 		global $CON;
 
-		$rg_url = "[0-9a-zA-Z\.\#/~\-_%=\?\&,\+\:@;!\(\)\*\$']*";
-		$rg_img_local = "($rg_url\.(jpeg|jpg|gif|png))";
+		$rg_img_local = "([^\]\|]+\.(jpeg|jpg|gif|png))";
 
 		$regex = "#\[$rg_img_local\|$rg_img_local\|(.+)\]#U";
 

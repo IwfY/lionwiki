@@ -36,6 +36,7 @@ class SyntaxHighlighter
 	var $plain_text_link = true; // link to the plain text version, for usable copy&paste in FF with line numbers turned on
 
 	var $version = "1.0";
+	var $n_codes = 0;
 
 	var $desc = array(
 		array("SyntaxHighlighter plugin", "plugin provides syntax highlighting for a lot of programming languages. Syntax: {source php} echo 'This is my code!'; {/source}.")
@@ -70,7 +71,7 @@ class SyntaxHighlighter
 	{
 		global $CON, $PLUGINS_DIR, $page, $action;
 
-		if($action == "" && $this->n_codes > 0) {
+		if($this->n_codes > 0) {
 			include_once $PLUGINS_DIR . 'SyntaxHighlighter/geshi.php';
 
 			$i = 0;
