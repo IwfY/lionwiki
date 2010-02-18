@@ -400,7 +400,8 @@ if(!$action || $preview) { // page parsing
 	}
 
 	// headings
-	preg_match_all('/^(!+?)(.*)$/Um', $CON, $matches, PREG_SET_ORDER);
+	preg_match_all('/^(!+)(.*)$/m', $CON, $matches, PREG_SET_ORDER);
+	
 	$stack = array();
 
 	for($h_id = max($par, 1), $i = 0, $c = count($matches); $i < $c && $m = $matches[$i]; $i++, $h_id++) {
@@ -416,7 +417,7 @@ if(!$action || $preview) { // page parsing
 		if(is_writable($PG_DIR . $page . ".txt"))
 			$ret .= "<span class=\"par-edit\">(<a href=\"$self?action=edit&page=".u($page)."&par=$h_id\">$T_EDIT</a>)</span>";
 
-		$CON = str_replace($m[0], "$ret</h$excl>", $CON);
+		$CON = str_replace("\n$m[0]\n", "\n$ret</h$excl>\n", $CON);
 		$TOC .= str_repeat("<ul>", $excl - 2).'<li><a href="'.$self.'?page='.u($page).'#'.u($hash).'">'.$m[2].'</a></li>'.str_repeat("</ul>", $excl - 2);
 	}
 

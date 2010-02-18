@@ -1,4 +1,7 @@
 <?php
+/**
+ * Extended image functions plugin for LionWiki, (c) 2009, 2010 Adam Zivner, GPL'd
+ */
 
 class ImageExt
 {
