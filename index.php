@@ -355,7 +355,7 @@ if(!$action || $preview) { // page parsing
 	$CON = preg_replace("/^([^!\*#\n][^\n]+)$/Um", "<p>$1</p>", $CON); // paragraphs
 
 	// images
-	preg_match_all("#\[((https?://)?[^\]]+\.(jpeg|jpg|gif|png))(\|[^\]]+)?\]#", $CON, $imgs, PREG_SET_ORDER);
+	preg_match_all("#\[((https?://|\./)[^\]]+\.(jpeg|jpg|gif|png))(\|[^\]]+)?\]#", $CON, $imgs, PREG_SET_ORDER);
 
 	foreach($imgs as $img) {
 		preg_match_all("/\|([^\]\|=]+)(=([^\]\|\"]+))?(?=[\]\|])/", $img[0], $options, PREG_SET_ORDER);
@@ -396,11 +396,8 @@ if(!$action || $preview) { // page parsing
 	for($i = 10; $i >= 1; $i--) { // Lists, ordered, unordered
 		$CON = preg_replace('/^'.str_repeat('\*', $i).'(.*)(\n)/Um', str_repeat("<ul>", $i)."<li>$1</li>".str_repeat("</ul>", $i)."$2", $CON);
 		$CON = preg_replace('/^'.str_repeat('\#', $i).'(.*)(\n)/Um', str_repeat("<ol>", $i)."<li>$1</li>".str_repeat("</ol>", $i)."$2", $CON);
-		$CON = preg_replace('#(</ol>\n?<ol>|</ul>\n?<ul>)#', "", $CON);
+		$CON = preg_replace("#(</ol>\n?<ol>|</ul>\n?<ul>)#", "", $CON);
 	}
-
-	// fixing XHTML validity of lists
-	$CON = preg_replace(array('#</li><([uo])l>#', '#</([uo])l><li>#', '#<(/?)([uo])l></?[uo]l>#'), array("<$1l>", "</$1l></li><li>", "<$1$2l><$1li><$1$2l>"), $CON);
 
 	// headings
 	preg_match_all('/^(!+?)(.*)$/Um', $CON, $matches, PREG_SET_ORDER);
