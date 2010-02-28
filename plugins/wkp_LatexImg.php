@@ -129,10 +129,10 @@ class LatexImg {
 	}
 
 	/* formatEnd hook.  Replaces {tex} placeholders with images */
-	function formatFinished()
+	function formatEnd()
 	{
 		// Import the content to be processed
-		global $CON, $action;
+		global $CON;
 
 		// Detect all {TEX} placeholders
 		preg_match_all("/\{TEX\}/", $CON, $tex_matches);

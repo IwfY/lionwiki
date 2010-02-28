@@ -20,12 +20,11 @@ class Footnotes {
 		return "<sup><a name=\"ft_up_" . count($this->ft) . "\" href=\"#ft_down_" . count($this->ft) . "\">[" . count($this->ft) . "]</a></sup>";
 	}
 
-	function formatFinished()
+	function formatEnd()
 	{
-		global $CON, $action, $preview;
+		global $CON;
 
-		if(!$action || $preview)
-			$CON = preg_replace_callback("/\{footnote\}(.*)\{\/footnote\}/U", array($this, "footnote"), $CON);
+		$CON = preg_replace_callback("/\{footnote\}(.*)\{\/footnote\}/U", array($this, "footnote"), $CON);
 	}
 
 	function template()

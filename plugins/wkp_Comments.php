@@ -286,6 +286,23 @@ class Comments
 		fclose($file);
 	}
 
+	/*
+	 * Need to move comments together with the page (during rename operation)
+	 */
+
+	function pageWritten()
+	{
+		global $moveto, $PG_DIR;
+
+		// page is already set to $moveto, we need to take original page name from the request
+		$orig_name = $_REQUEST["page"];
+
+		if(!$moveto || $moveto == $orig_name) // page was not moved, nothing to do
+			return;
+
+		rename($this->comments_dir . $orig_name, $this->comments_dir . $moveto);
+	}
+
 	// Localization strings
 
 	var $cs_strings = array(

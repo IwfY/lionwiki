@@ -313,7 +313,7 @@ class Admin
 <input type="hidden" name="action" value="admin-deletecomment" />
 <input type="hidden" name="page" value="'.h($_REQUEST["page"]).'" />
 <input type="hidden" name="filename" value="'.h($_REQUEST["filename"]).'" />
-'.$T_PASSWORD.': <input type="text" name="sc" value="" />
+'.$T_PASSWORD.': <input type="password" name="sc" value="" />
 <input type="submit" value="Delete" />
 </form>';
 			$action = "view-html";

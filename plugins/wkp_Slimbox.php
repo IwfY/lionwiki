@@ -11,7 +11,7 @@ class Slimbox
 		array("Slimbox plugin", "plugin provides Slimbox galleries using syntax: [images/thumb/thumbnail.png|images/picture.jpg|Caption of the image].")
 	);
 
-	var $version = "1.0";
+	var $version = "1.1";
 
 	function template()
 	{
@@ -29,7 +29,7 @@ class Slimbox
 
 		$rg_img_local = "([^\]\|]+\.(jpeg|jpg|gif|png))";
 
-		$regex = "#\[$rg_img_local\|$rg_img_local\|(.+)\]#U";
+		$regex = "#\[$rg_img_local\|link=$rg_img_local\|title=(.+)\]#U";
 
 		$CON = preg_replace($regex, '<a href="$3" class="lightbox" rel="lightbox[]" title="$5"><img src="$1" alt="$5"/></a>', $CON);
 	 }

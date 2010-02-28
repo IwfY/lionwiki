@@ -262,12 +262,9 @@ class Tags
 		return $t . "</div>\n";
 	}
 
-	function formatFinished()
+	function formatEnd()
 	{
-		global $CON, $action;
-
-		if(!empty($action))
-			return;
+		global $CON;
 
 		$CON = preg_replace("/\{tags:.+\}/U", "", $CON);
 

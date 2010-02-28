@@ -5,7 +5,7 @@
  * As of 13. 9. 2009 it is:
  * - stable and functioning
  * - not very configurable (given the awesome possibilities of GeSHI)
- * - alpha - it's possible that it will change rapidly in the near future
+ * - caching - GeSHI is quite slow, so we use caching of generated HTML code
  * - trimmed. GeSHI contains by default a huge number of languages, most of them are obscure and have little practical
  * use. If this plugin does not contain support for you language of choice, check GeSHI website, it's quite possible
  * that it's part of the official release but I didn't include it here. Then simply copy language file to plugins/SyntaxHighlighter/
@@ -35,19 +35,12 @@ class SyntaxHighlighter
 	var $language_name = true; // language name in the footer
 	var $plain_text_link = true; // link to the plain text version, for usable copy&paste in FF with line numbers turned on
 
-	var $version = "1.0";
+	var $version = "1.1";
 	var $n_codes = 0;
 
 	var $desc = array(
 		array("SyntaxHighlighter plugin", "plugin provides syntax highlighting for a lot of programming languages. Syntax: {source php} echo 'This is my code!'; {/source}.")
 	);
-
-	function template()
-	{
-		global $HEAD;
-
-		return false;
-	}
 
 	function subPagesLoaded()
 	{
@@ -67,38 +60,62 @@ class SyntaxHighlighter
 			die("<pre>" . h($this->codes[(int) $_GET["num"]][3]) . "</pre>");
 	}
 
-	function formatFinished()
+	function formatEnd()
 	{
-		global $CON, $PLUGINS_DIR, $page, $action;
+		global $CON, $PLUGINS_DIR, $PLUGINS_DATA_DIR, $page, $self;
 
 		if($this->n_codes > 0) {
 			include_once $PLUGINS_DIR . 'SyntaxHighlighter/geshi.php';
 
 			$i = 0;
 
+			$cache_dir = $PLUGINS_DATA_DIR . '/SyntaxHighlighter';
+
+			// Check existence of SyntaxHighlighter cache directory
+			if(!file_exists($cache_dir))
+				mkdir($cache_dir, 0777);
+
 			foreach($this->codes as $code) {
-				$geshi = new GeSHi($code[3], $code[2]);
+				$language = $code[2];
+				$source = trim($code[3]);
 
-				// Here you can play with various GeSHI configuration possibilities, see http://qbnz.com/highlighter/geshi-doc.html
+				$cached_file_path = $cache_dir . "/" . md5($source) . ".html";
 
-				$geshi->set_header_type(GESHI_HEADER_PRE);
+				// Is code cached?
+				if(file_exists($cached_file_path)) // Yeah, just use the cached one
+					$html = file_get_contents($cached_file_path);
+				else { // code is not cached, need to generate it
+					$geshi = new GeSHi($source, $language);
 
-				if($this->line_numbers)
-					$geshi->enable_line_numbers(GESHI_NORMAL_LINE_NUMBERS);
+					// Here you can play with various GeSHI configuration possibilities, see http://qbnz.com/highlighter/geshi-doc.html
 
-				if($this->language_name || $this->plain_text_link) {
-					$header_template = '<div style="float: right;">';
+					$geshi->set_header_type(GESHI_HEADER_PRE);
 
-					if($this->language_name)
-						$header_template .= "{LANGUAGE} ";
+					if($this->line_numbers)
+						$geshi->enable_line_numbers(GESHI_NORMAL_LINE_NUMBERS);
 
-					if($this->plain_text_link)
-						$header_template .= '(<a href="'.$self.'?page='.u($page).'&amp;plaincode=1&amp;num='.$i.'">plain</a>)';
+					if($this->language_name || $this->plain_text_link) {
+						$header_template = '<div style="float: right;">';
 
-					$geshi->set_header_content($header_template);
+						if($this->language_name)
+							$header_template .= "{LANGUAGE} ";
+
+						if($this->plain_text_link)
+							$header_template .= '(<a href="'.$self.'?page='.u($page).'&plaincode=1&num='.$i.'">plain</a>)';
+
+						$header_template .= '</div>';
+
+						$geshi->set_header_content($header_template);
+					}
+					
+					$html = $geshi->parse_code();
+
+					$cached = fopen($cached_file_path, 'w');
+					fwrite($cached, $html);
+					fclose($cached);
 				}
 
-				$CON = preg_replace("/{SYNTAX}/Us", $geshi->parse_code(), $CON, 1);
+				$CON = preg_replace("/{SYNTAX}/Us", $html, $CON, 1);
 
 				$i++;
 			}

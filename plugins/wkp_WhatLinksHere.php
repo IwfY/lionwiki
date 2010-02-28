@@ -19,7 +19,6 @@ class WhatLinksHere {
 		if($a == "whatlinkshere") {
 			$CON = "<ul>";
 
-			$editable = false;
 			$dir = opendir($PG_DIR);
 
 			while($file = readdir($dir)) {
@@ -27,8 +26,9 @@ class WhatLinksHere {
 					@$con = file_get_contents($PG_DIR . $file);
 					$query = preg_quote($page);
 
-					if(@preg_match("/\[([^|\]]+\|)? *$query(#[^\]]+)? *\]/i", $con))
-					$files[] = substr($file, 0, strlen($file) - 4);
+					if(@preg_match("/\[([^|\]]+\|)? *$query(#[^\]]+)? *\]/i", $con)
+						|| @preg_match("/\[([^]]*)\|link=\s*$query(#([^\]]+))?([|\]])/", $con))
+						$files[] = substr($file, 0, strlen($file) - 4);
 				}
 			}
 
