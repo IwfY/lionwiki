@@ -120,7 +120,9 @@ if(!$action)
 if($PROTECTED_READ && !authentified()) { // does user need password to read content of site. If yes, ask for it.
 	$CON = "<form action=\"$self\" method=\"post\"><p>$T_PROTECTED_READ <input type=\"password\" name=\"sc\"/> <input class=\"submit\" type=\"submit\"/></p></form>";
 	$action = 'view-html';
-} elseif($restore || $action == 'rev') { // Show old revision
+} else
+
+if($restore || $action == 'rev') { // Show old revision
 	$CON = @file_get_contents("$HIST_DIR$page/$f1");
 
 	if($action == 'rev') {
@@ -128,9 +130,7 @@ if($PROTECTED_READ && !authentified()) { // does user need password to read cont
 		$CON = strtr($T_REVISION, array('{TIME}' => rev_time($f1), '{RESTORE}' => $rev_restore)) . $CON;
 		$action = '';
 	}
-}
-
-if($page) { // Load the page
+} else if($page) { // Load the page
 	$last_changed_ts = @filemtime("$PG_DIR$page.txt");
 
 	if(!$action || $action == 'edit') {
