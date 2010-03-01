@@ -77,7 +77,7 @@ class ImageExt
 		return rtrim($str);
 	}
 
-	function pathToFilename($path)
+	function pathToFilename($path, $x, $y)
 	{
 		$path = clear_path($path);
 
@@ -95,7 +95,7 @@ class ImageExt
 		$path = str_replace("/", "_", $path);
 		$path = str_replace(".", "_", $path);
 
-		return $path . ".jpg";
+		return $path . "-{$x}x{$y}.jpg";
 	}
 
 	function scaleImage($path, $nx, $ny)
@@ -106,7 +106,7 @@ class ImageExt
 		if(substr($path, 0, 2) == "./")
 			$path = "http://" . $_SERVER["HTTP_HOST"] . $_SERVER["PATH_INFO"] . $path;
 
-		$filename = $this->pathToFilename($path);
+		$filename = $this->pathToFilename($path, $nx, $ny);
 
 		if(!file_exists($this->dir) . $filename) {
 			if(!strcasecmp(substr($path, -4), ".png"))
