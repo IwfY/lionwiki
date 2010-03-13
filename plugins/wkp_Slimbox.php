@@ -1,17 +1,19 @@
 <?php
 /*
  * Slimbox plugin for LionWiki
- * Usage: [images/thumb/thumbnail.png|images/picture.jpg|Caption of the image]
+ * Usage: [images/thumb/thumbnail.png|link=images/picture.jpg|title=Caption of the image]
+ * (or other similar syntax)
  * 
  * Not part of LionWiki official distribution, must be downloaded separately.
+ * Homepage: http://lionwiki.0o.cz/index.php?page=UserGuide%3A+Slimbox+plugin
  */
 class Slimbox
 {
 	var $desc = array(
-		array("Slimbox plugin", "plugin provides Slimbox galleries using syntax: [images/thumb/thumbnail.png|images/picture.jpg|Caption of the image].")
+		array("Slimbox plugin", "plugin provides Slimbox galleries using syntax.")
 	);
 
-	var $version = "1.1";
+	var $version = "1.2";
 
 	function template()
 	{
@@ -23,14 +25,10 @@ class Slimbox
 		return false;
 	}
 
-	function formatBegin()
+	function formatEnd()
 	{
 		global $CON;
 
-		$rg_img_local = "([^\]\|]+\.(jpeg|jpg|gif|png))";
-
-		$regex = "#\[$rg_img_local\|link=$rg_img_local\|title=(.+)\]#U";
-
-		$CON = preg_replace($regex, '<a href="$3" class="lightbox" rel="lightbox[]" title="$5"><img src="$1" alt="$5"/></a>', $CON);
+		$CON = preg_replace('/<a href="([^"]*\.(jpeg|jpg|gif|png))"([^>]*)><img/', '<a href="$1" class="lightbox" rel="lightbox[]"$3><img', $CON);
 	 }
 }
