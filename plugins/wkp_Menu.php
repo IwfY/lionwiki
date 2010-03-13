@@ -65,7 +65,7 @@ class Menu
 	function formatEnd()
 	{
 		global $CON;
-
+		
 		foreach($this->menus as $m) {
 			$template_file = $m[2];
 			list($parent_link, $parent_name) = $this->getLink($m[4]);

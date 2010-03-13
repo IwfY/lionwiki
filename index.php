@@ -365,7 +365,7 @@ if(!$action || $preview) { // page parsing
 		foreach($options as $o)
 			if($o[1] == 'center') $center = true;
 			elseif($o[1] == 'right' || $o[1] == 'left') $i_attr .= " style=\"float:$o[1]\"";
-			elseif($o[1] == 'link') $link = substr($o[3], 0, 4) == "http" ? $o[3] : "$self?page=" . u($o[3]);
+			elseif($o[1] == 'link') $link = (substr($o[3], 0, 4) == "http" || substr($o[3], 0, 2) == "./") ? $o[3] : "$self?page=" . u($o[3]);
 			elseif($o[1] == 'alt') $i_attr .= " alt=\"$o[3]\"";
 			elseif($o[1] == 'title') $a_attr .= " title=\"$o[3]\"";
 
@@ -614,8 +614,8 @@ function plugin($method) {
 	$ret = false;
 	$args = array_slice(func_get_args(), 1);
 
-	foreach($GLOBALS['plugins'] as $plugin)
-		$ret |= method_exists($plugin, $method) && call_user_func_array(array($plugin, $method), $args);
+	foreach($GLOBALS['plugins'] as $idx => $plugin)
+		$ret |= method_exists($GLOBALS['plugins'][$idx], $method) && call_user_func_array(array(&$GLOBALS['plugins'][$idx], $method), $args);
 
 	return $ret; // returns true if treated by a plugin
 }

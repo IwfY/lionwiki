@@ -6,11 +6,12 @@
 class ImageExt
 {
 	var $desc = array(
-		array("Index plugin", "gives list of pages in the wiki.")
+		array("ImageExt plugin", "provides advanced image functions.")
 	);
 
 	var $dir;
 	var $quality = 85;
+	var $imgs = array();
 
 	function ImageExt()
 	{
@@ -30,7 +31,7 @@ class ImageExt
 	function formatEnd()
 	{
 		global $CON;
-
+		
 		foreach($this->imgs as $img) {
 			preg_match_all("/\|([^\]\|=]+)(=([^\]\|\"]+))?(?=[\]\|])/", $img[0], $options, PREG_SET_ORDER);
 
@@ -40,7 +41,7 @@ class ImageExt
 			foreach($options as $o)
 				if($o[1] == "center") $center = true;
 				else if($o[1] == "right" || $o[1] == "left") $style .= "float:$o[1];";
-				else if($o[1] == "link") $link = substr($o[3], 0, 4) == "http" ? $o[3] : "$self?page=" . u($o[3]);
+				else if($o[1] == "link") $link = (substr($o[3], 0, 4) == "http" || substr($o[3], 0, 2) == "./") ? $o[3] : "$self?page=" . u($o[3]);
 				else if($o[1] == "alt") $i_attr .= " alt=\"$o[3]\"";
 				else if($o[1] == "title") $a_attr .= " title=\"$o[3]\"";
 				else if($o[1] == "width") $width = $o[3];
