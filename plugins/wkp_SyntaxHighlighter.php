@@ -12,6 +12,7 @@
  * and it's gonna work.
  *
  * Not part of LionWiki official distribution, must be downloaded separately.
+ * Homepage: http://lionwiki.0o.cz/index.php?page=UserGuide%3A+SyntaxHighlighter+plugin
  *
  * (c) Adam Zivner 2009, adam.zivner@gmail.com, GPL'd
  *

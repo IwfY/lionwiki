@@ -53,9 +53,9 @@ class BetterEditor
 
 	function template()
 	{
-		global $action, $HEAD, $preview, $html;
+		global $action, $HEAD, $preview, $html, $PLUGINS_DIR;
 
-		$HEAD .= '<script type="text/javascript" src="plugins/BetterEditor/bettereditor.js"></script>';
+		$HEAD .= '<script type="text/javascript" src="'.$PLUGINS_DIR.'BetterEditor/bettereditor.js"></script>';
 
 		if($action == "edit" || $preview) {
 			$html = template_replace("plugin:RESIZE_TEXTAREA", $this->resize_html, $html);

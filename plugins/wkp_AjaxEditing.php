@@ -78,7 +78,7 @@ class AjaxEditing
 			array("ERROR", $error)
 		);
 
-		$html = @file_get_contents("plugins/AjaxEditing/template.html");
+		$html = @file_get_contents($GLOBALS["PLUGINS_DIR"]."/AjaxEditing/template.html");
 
 		plugin("template"); // plugin specific template substitutions
 
@@ -105,6 +105,6 @@ class AjaxEditing
 
 	function formatBegin()
 	{
-		$GLOBALS["HEAD"] .= '<script type="text/javascript" src="plugins/AjaxEditing/ajax.js"></script>';
+		$GLOBALS["HEAD"] .= '<script type="text/javascript" src="'.$GLOBALS['PLUGINS_DIR'].'/AjaxEditing/ajax.js"></script>';
 	}
 }
