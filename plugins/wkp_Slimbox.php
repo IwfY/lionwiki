@@ -25,7 +25,7 @@ class Slimbox
 		return false;
 	}
 
-	function formatEnd()
+	function formatFinished()
 	{
 		global $CON;
 

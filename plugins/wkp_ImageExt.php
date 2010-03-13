@@ -18,7 +18,7 @@ class ImageExt
 		$this->dir = $VAR_DIR . "images/";
 	}
 
-	function subPagesLoaded()
+	function formatBegin()
 	{
 		global $CON;
 
@@ -105,7 +105,7 @@ class ImageExt
 			mkdir(rtrim($this->dir, "/"), 0777);
 
 		if(substr($path, 0, 2) == "./")
-			$path = "http://" . $_SERVER["HTTP_HOST"] . $_SERVER["PATH_INFO"] . $path;
+			$path = "http://" . $_SERVER["HTTP_HOST"] . dirname($_SERVER["REQUEST_URI"]) . '/' . substr($path, 2);
 
 		$filename = $this->pathToFilename($path, $nx, $ny);
 
