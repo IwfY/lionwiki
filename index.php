@@ -629,14 +629,14 @@ function fallback_template() { return '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 
 *{margin:0;padding:0}
 body{font-size:12px;line-height:16px;padding:10px 20px 20px 20px}
 p{margin:5px}
-a{color:#006600;text-decoration:none;border-bottom:1px dotted #060}
+a{color:#060;text-decoration:none;border-bottom:1px dotted #060}
 a.pending{color:#900}
 a.external:after{content:"\2197"}
 pre{border:1px dotted #ccc;padding:4px;overflow:auto;margin:3px}
 img,a img{border:0}
 h1,h2,h3,h4,h5,h6{letter-spacing:2px;font-weight:normal;margin:15px 0 15px 0;color:#060}
 h1 a:hover,h2 a:hover,h3 a:hover,h4 a:hover,h5 a:hover,h6 a:hover{color:#060}
-h1 a,h2 a,h3 a,h4 a,h5 a,h6 a{border-bottom:0}
+h1 a{border-bottom:0}
 h2 .par-edit,h3 .par-edit,h4 .par-edit,h5 .par-edit,h6 .par-edit{visibility:hidden;font-size:x-small}
 h2:hover .par-edit,h3:hover .par-edit,h4:hover .par-edit,h5:hover .par-edit,h6:hover .par-edit{visibility:visible}
 hr{margin:10px 0 10px 0;height:1px;overflow:hidden;border:0;background:#060}
