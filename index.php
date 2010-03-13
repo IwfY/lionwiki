@@ -411,7 +411,7 @@ if(!$action || $preview) { // page parsing
 
 		$stack[] = $excl;
 
-		$ret .= "<div class=\"par-div\" id=\"par-$h_id\"><h$excl><a class=\"section-edit\" name=\"$hash\">$m[2]</a>";
+		$ret .= "<div class=\"par-div\" id=\"par-$h_id\"><h$excl id=\"$hash\">$m[2]";
 
 		if(is_writable($PG_DIR . $page . '.txt'))
 			$ret .= "<span class=\"par-edit\">(<a href=\"$self?action=edit&page=".u($page)."&par=$h_id\">$T_EDIT</a>)</span>";
