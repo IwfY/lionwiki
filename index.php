@@ -72,7 +72,7 @@ if($_GET['lang']) {
 else
 	list($LANG) = explode(',', $_SERVER['HTTP_ACCEPT_LANGUAGE']);
 
-if(!@include("$LANG_DIR$LANG.php") && !@include($LANG_DIR . substr($LANG, 0, 2) . '.php'))
+if(@include("$LANG_DIR$LANG.php") === false && @include($LANG_DIR . substr($LANG, 0, 2) . '.php') === false)
 	$LANG = 'en';
 
 // Creating essential directories if they don't exist
