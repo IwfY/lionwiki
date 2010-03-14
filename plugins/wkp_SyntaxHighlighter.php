@@ -52,13 +52,15 @@ class SyntaxHighlighter
 		 * After LionWiki does its job, we'll substitute it back (in formatEnd() method).
 		 */
 
-		$this->n_codes = preg_match_all("/[^\^](\{syntax (.+)\}(.+)\{\/syntax\})/Ums", $CON, $this->codes, PREG_SET_ORDER);
+		$this->n_codes = preg_match_all("/[^\^](\{syntax (.+)\}(.+)\{\/syntax\})/Ums", $CON, $arr, PREG_SET_ORDER);
 
-		foreach($this->codes as $code)
+		foreach($arr as $code) {
+			$this->codes[md5(trim($code[3]))] = $code;
 			$CON = str_replace($code[1], "{SYNTAX}", $CON);
+		}
 
 		if($_GET["plaincode"]) // "almost plain text"
-			die("<pre>" . h($this->codes[(int) $_GET["num"]][3]) . "</pre>");
+			die("<pre>" . h($this->codes[$_GET["hash"]][3]) . "</pre>");
 	}
 
 	function formatEnd()
@@ -67,8 +69,6 @@ class SyntaxHighlighter
 
 		if($this->n_codes > 0) {
 			include_once $PLUGINS_DIR . 'SyntaxHighlighter/geshi.php';
-
-			$i = 0;
 
 			$cache_dir = $PLUGINS_DATA_DIR . '/SyntaxHighlighter';
 
@@ -80,7 +80,8 @@ class SyntaxHighlighter
 				$language = $code[2];
 				$source = trim($code[3]);
 
-				$cached_file_path = $cache_dir . "/" . md5($source) . ".html";
+				$hash = md5($source);
+				$cached_file_path = $cache_dir . "/" . $hash . ".html";
 
 				// Is code cached?
 				if(file_exists($cached_file_path)) // Yeah, just use the cached one
@@ -102,7 +103,7 @@ class SyntaxHighlighter
 							$header_template .= "{LANGUAGE} ";
 
 						if($this->plain_text_link)
-							$header_template .= '(<a href="'.$self.'?page='.u($page).'&plaincode=1&num='.$i.'">plain</a>)';
+							$header_template .= '(<a href="'.$self.'?page='.u($page).'&plaincode=1&hash='.$hash.'">plain</a>)';
 
 						$header_template .= '</div>';
 
@@ -117,8 +118,6 @@ class SyntaxHighlighter
 				}
 
 				$CON = preg_replace("/{SYNTAX}/Us", $html, $CON, 1);
-
-				$i++;
 			}
 		}
 	}
