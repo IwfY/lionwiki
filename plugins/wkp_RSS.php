@@ -29,9 +29,9 @@ class RSS {
 
 	function pageWritten()
 	{
-		global $WIKI_TITLE, $PG_DIR, $page, $HIST_DIR, $LANG, $TIME_FORMAT, $VAR_DIR, $USE_HISTORY, $PROTECTED_READ;
+		global $WIKI_TITLE, $PG_DIR, $page, $HIST_DIR, $LANG, $TIME_FORMAT, $VAR_DIR, $PROTECTED_READ;
 
-		if(!$USE_HISTORY || $PROTECTED_READ)
+		if($PROTECTED_READ)
 			return false;
 
 		$pagelink = "http://" . $_SERVER["SERVER_NAME"] . $_SERVER["SCRIPT_NAME"];
