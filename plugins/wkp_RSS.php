@@ -11,7 +11,7 @@
 
 class RSS {
 	var $desc = array(
-		array("RSS plugin", "tracks all changes made to pages in form of diffs. Default location for feed is <a href=\"/rss.xml\">here</a>.")
+		array("RSS plugin", "tracks all changes made to pages in form of diffs. Default location for feed is <a href=\"var/rss.xml\">here</a>.")
 	);
 
 	var $max_changes = 50; // RSS contains $max_changes last changes
