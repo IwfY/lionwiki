@@ -246,7 +246,7 @@ class Comments
 		if(!$this->rss_use || $PROTECTED_READ)
 			return;
 
-		$pagelink = "http://" . $_SERVER["SERVER_NAME"] . $_SERVER["SCRIPT_NAME"];
+		$pagelink = ($_SERVER["HTTPS"] ? "https://" : "http://") . $_SERVER["SERVER_NAME"] . ":" . $_SERVER["SERVER_PORT"] . $_SERVER["SCRIPT_NAME"];
 
 		preg_match("/<\/language>(.*)<\/channel>/s", @file_get_contents($this->rss_file), $matches);
 
