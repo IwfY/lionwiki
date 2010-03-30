@@ -34,7 +34,7 @@ class RSS {
 		if($PROTECTED_READ)
 			return false;
 
-		$pagelink = "http://" . $_SERVER["SERVER_NAME"] . $_SERVER["SCRIPT_NAME"];
+		$pagelink = ($_SERVER["HTTPS"] ? "https://" : "http://") . $_SERVER["SERVER_NAME"] . ":" . $_SERVER["SERVER_PORT"] . $_SERVER["SCRIPT_NAME"];
 
 		preg_match("/<\/language>(.*)<\/channel>/s", @file_get_contents($VAR_DIR . "rss.xml"), $matches);
 
