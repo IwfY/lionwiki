@@ -1,4 +1,4 @@
-<?php // LionWiki 3.2.1, (c) Adam Zivner, licensed under GNU/GPL v2
+<?php // LionWiki 3.2.2, (c) Adam Zivner, licensed under GNU/GPL v2
 foreach($_REQUEST as $k => $v)
 	unset($$k); // register_globals = off
 
@@ -358,9 +358,9 @@ if(!$action || $preview) { // page parsing
 	preg_match_all("#\[((https?://|\./)[^\]]+\.(jpeg|jpg|gif|png))(\|[^\]]+)?\]#", $CON, $imgs, PREG_SET_ORDER);
 
 	foreach($imgs as $img) {
-		preg_match_all("/\|([^\]\|=]+)(=([^\]\|\"]+))?(?=[\]\|])/", $img[0], $options, PREG_SET_ORDER);
-
 		$link = $i_attr = $a_attr = $center = $tag = "";
+
+		preg_match_all("/\|([^\]\|=]+)(=([^\]\|\"]+))?(?=[\]\|])/", $img[0], $options, PREG_SET_ORDER);
 
 		foreach($options as $o)
 			if($o[1] == 'center') $center = true;
@@ -369,7 +369,7 @@ if(!$action || $preview) { // page parsing
 			elseif($o[1] == 'alt') $i_attr .= " alt=\"$o[3]\"";
 			elseif($o[1] == 'title') $a_attr .= " title=\"$o[3]\"";
 
-		$tag = "<img src=\"$img[1]\" alt=\"$alt\"$i_attr/>";
+		$tag = "<img src=\"$img[1]\"$i_attr/>";
 
 		if($link) $tag = "<a href=\"$link\"$a_attr>$tag</a>";
 		if($center) $tag = "<div style=\"text-align:center\">$tag</div>";
@@ -389,7 +389,7 @@ if(!$action || $preview) { // page parsing
 		$m[1] = $m[1] ? $m[1] : $m[2]; // is page label same as its name?
 		$m[3] = $m[3] ? '#'.u(preg_replace('/[^\da-z]/i', '_', $m[3])) : ''; // anchor
 
-		$attr = file_exists("$PG_DIR$m[2].txt") ? $m[3] : '&action=edit" class="pending"';
+		$attr = file_exists("$PG_DIR$m[2].txt") ? $m[3] : '&action=edit" class="pending';
 		$CON = str_replace($m[0], '<a href="'.$self.'?page='.u($m[2]).$attr.'">'.$m[1].'</a>', $CON);
 	}
 

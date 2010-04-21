@@ -15,7 +15,7 @@ class ImageExt
 
 	function ImageExt()
 	{
-		$this->dir = $VAR_DIR . "images/";
+		$this->dir = $GLOBALS["VAR_DIR"] . "images/";
 	}
 
 	function formatBegin()
@@ -33,10 +33,10 @@ class ImageExt
 		global $CON;
 		
 		foreach($this->imgs as $img) {
-			preg_match_all("/\|([^\]\|=]+)(=([^\]\|\"]+))?(?=[\]\|])/", $img[0], $options, PREG_SET_ORDER);
-
 			$link = $i_attr = $a_attr = $center = $tag = $style = "";
 			$width = $height = 0;
+
+			preg_match_all("/\|([^\]\|=]+)(=([^\]\|\"]+))?(?=[\]\|])/", $img[0], $options, PREG_SET_ORDER);
 
 			foreach($options as $o)
 				if($o[1] == "center") $center = true;
@@ -55,7 +55,7 @@ class ImageExt
 			if($width || $height)
 				$img[1] = $this->scaleImage($img[1], $width, $height);
 
-			$tag = "<img src=\"$img[1]\" style=\"$style\" alt=\"$alt\"$i_attr/>";
+			$tag = "<img src=\"$img[1]\" style=\"$style\"$i_attr/>";
 
 			if($link)   $tag = "<a href=\"$link\"$a_attr>$tag</a>";
 			if($center) $tag = "<div style=\"text-align:center\">$tag</div>";
