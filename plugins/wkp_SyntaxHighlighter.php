@@ -103,7 +103,7 @@ class SyntaxHighlighter
 							$header_template .= "{LANGUAGE} ";
 
 						if($this->plain_text_link)
-							$header_template .= '(<a href="'.$self.'?page='.u($page).'&plaincode=1&hash='.$hash.'">plain</a>)';
+							$header_template .= '(<a href="'.$self.'?page='.u($page).'&amp;plaincode=1&amp;hash='.$hash.'">plain</a>)';
 
 						$header_template .= '</div>';
 

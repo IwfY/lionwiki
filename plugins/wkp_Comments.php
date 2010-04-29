@@ -68,7 +68,7 @@ class Comments
 			$m[1] = $m[1] ? $m[1] : $m[2]; // is page label same as its name?
 			$m[3] = $m[3] ? "#".u(preg_replace("/[^\da-z]/i", "_", $m[3])) : ""; // anchor
 
-			$attr = file_exists("$PG_DIR$m[2].txt") ? $m[3] : '&action=edit" class="pending"';
+			$attr = file_exists("$PG_DIR$m[2].txt") ? $m[3] : '&amp;action=edit" class="pending"';
 
 			$txt = str_replace($m[0], '<a href="'.$self.'?page='.u($m[2]).$attr.'">'.$m[1].'</a>', $txt);
 		}
