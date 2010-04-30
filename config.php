@@ -2,7 +2,7 @@
 $WIKI_TITLE = 'My new wiki'; // name of the site
 
 // SHA1 hash of password. If empty (or commented out), no password is required
-$PASSWORD = sha1("my_password");
+// $PASSWORD = sha1("my_password");
 
 $TEMPLATE = 'templates/dandelion.html'; // presentation template
 
