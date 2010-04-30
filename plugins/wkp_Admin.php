@@ -85,7 +85,7 @@ class Admin
 <form action="'.$self.'" method="post">
 <input type="hidden" name="action" value="'.$action.'" />
 <table width="600px">
-<tr><td><textarea name="'.$dataname.'" rows="15" style="width: 100%;">' . (!empty($_POST["$dataname"]) ? $_POST["$dataname"] : @file_get_contents($filename)) . '</textarea></td></tr>
+<tr><td><textarea name="'.$dataname.'" rows="15" cols="60" style="width: 100%;">' . (!empty($_POST["$dataname"]) ? $_POST["$dataname"] : @file_get_contents($filename)) . '</textarea></td></tr>
 <tr><td style="text-align:right;">';
 
 		if(!$this->authentified())

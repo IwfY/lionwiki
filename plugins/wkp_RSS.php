@@ -59,7 +59,7 @@ class RSS {
 			rsort($files);
 
 			$newest = diff($files[0], $files[1], $this->short_diff); // LionWiki diff function
-			clearstatcache(false, $PG_DIR . $page . ".txt");
+			clearstatcache();
 			$timestamp = filemtime($PG_DIR . $page . ".txt");
 
 			$n_item = "
