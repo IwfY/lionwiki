@@ -118,7 +118,7 @@ if(!$action)
 		$action = 'edit'; // create page if it doesn't exist
 
 if($PROTECTED_READ && !authentified()) { // does user need password to read content of site. If yes, ask for it.
-	$CON = "<form action=\"$self\" method=\"post\"><p>$T_PROTECTED_READ <input type=\"password\" name=\"sc\"/> <input class=\"submit\" type=\"submit\"/></p></form>";
+	$CON = "<form action=\"$self?page=".u($page)."\" method=\"post\"><p>$T_PROTECTED_READ <input type=\"password\" name=\"sc\"/> <input class=\"submit\" type=\"submit\"/></p></form>";
 	$action = 'view-html';
 } else
 
@@ -203,7 +203,7 @@ if($action == 'save' && !$preview && authentified()) { // do we have page to sav
 if($action == 'edit' || $preview) {
 	$CON_FORM_BEGIN = "<form action=\"$self\" method=\"post\"><input type=\"hidden\" name=\"action\" value=\"save\"/><input type=\"hidden\" name=\"last_changed\" value=\"$last_changed_ts\"/><input type=\"hidden\" name=\"showsource\" value=\"$showsource\"/><input type=\"hidden\" name=\"par\" value=\"".h($par)."\"/><input type=\"hidden\" name=\"page\" value=\"".h($page)."\"/>";
 	$CON_FORM_END = '</form>';
-	$CON_TEXTAREA = '<textarea class="contentTextarea" name="content" style="width:100%" rows="30">'.h($CON).'</textarea>';
+	$CON_TEXTAREA = '<textarea class="contentTextarea" name="content" style="width:100%" cols="100" rows="30">'.h($CON).'</textarea>';
 	$CON_PREVIEW = '<input class="submit" type="submit" name="preview" value="'.$T_PREVIEW.'"/>';
 
 	if(!$showsource) {
@@ -358,7 +358,7 @@ if(!$action || $preview) { // page parsing
 	preg_match_all("#\[((https?://|\./)[^\]]+\.(jpeg|jpg|gif|png))(\|[^\]]+)?\]#", $CON, $imgs, PREG_SET_ORDER);
 
 	foreach($imgs as $img) {
-		$link = $i_attr = $a_attr = $center = $tag = "";
+		$link = $i_attr = $a_attr = $alt = $center = $tag = "";
 
 		preg_match_all("/\|([^\]\|=]+)(=([^\]\|\"]+))?(?=[\]\|])/", $img[0], $options, PREG_SET_ORDER);
 
@@ -366,10 +366,10 @@ if(!$action || $preview) { // page parsing
 			if($o[1] == 'center') $center = true;
 			elseif($o[1] == 'right' || $o[1] == 'left') $i_attr .= " style=\"float:$o[1]\"";
 			elseif($o[1] == 'link') $link = (substr($o[3], 0, 4) == "http" || substr($o[3], 0, 2) == "./") ? $o[3] : "$self?page=" . u($o[3]);
-			elseif($o[1] == 'alt') $i_attr .= " alt=\"$o[3]\"";
-			elseif($o[1] == 'title') $a_attr .= " title=\"$o[3]\"";
+			elseif($o[1] == 'alt') $alt = h($o[3]);
+			elseif($o[1] == 'title') $a_attr .= ' title="'.h($o[3]).'"';
 
-		$tag = "<img src=\"$img[1]\"$i_attr/>";
+		$tag = "<img src=\"$img[1]\" alt=\"$alt\"$i_attr/>";
 
 		if($link) $tag = "<a href=\"$link\"$a_attr>$tag</a>";
 		if($center) $tag = "<div style=\"text-align:center\">$tag</div>";
