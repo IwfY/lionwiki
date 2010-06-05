@@ -300,7 +300,8 @@ class Comments
 		if(!$moveto || $moveto == $orig_name) // page was not moved, nothing to do
 			return;
 
-		rename($this->comments_dir . $orig_name, $this->comments_dir . $moveto);
+		if(file_exists($this->comments_dir . $orig_name))
+			rename($this->comments_dir . $orig_name, $this->comments_dir . $moveto);
 	}
 
 	// Localization strings

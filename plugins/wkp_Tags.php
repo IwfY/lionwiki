@@ -108,7 +108,7 @@ class Tags
 			}
 
 			if(empty($results))
-				$CON = "'''No pages are tagged with this tag.'''"; // shouldn't happen at all
+				$CON = "<b>No pages are tagged with this tag.</b>"; // shouldn't happen at all
 			else {
 				$CON = "<ul>\n";
 

@@ -26,6 +26,8 @@ class RenameFix {
 			$changed = preg_replace("/\[(([^|\]]+)\|)?" . preg_quote($orig_name, '/') . "(#([^\]]+))?\]/", "[$1$moveto$3]", $content);
 			// image link
 			$changed = preg_replace("/\[([^]]*)\|link=\s*" . preg_quote($orig_name, '/') . "(#([^\]]+))?([|\]])/", "[$1|link=$moveto$2$4", $changed);
+			// redirect
+			$changed = preg_replace("/{redirect:\s*" . preg_quote($orig_name, '/') . "([^}]*)}/", "{redirect:$moveto$1}", $changed);
 
 			if($changed != $content) {
 				$h = fopen($PG_DIR . $f, 'w');
