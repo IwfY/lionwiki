@@ -93,33 +93,38 @@ class Tags
 
 			$TITLE = 'List of pages tagged with "' . h($tag) . '"';
 
-			$f = fopen($this->tagfile, "rb");
-
-			if(!$f)
-				return;
-
-			$results = array();
-
-			while($page = fgets($f)) {
-				$tags = array_map("trim", explode(",", fgets($f)));
-
-				if($this->inCaseArray($tag, $tags))
-					$results[] = trim($page);
-			}
-
-			if(empty($results))
-				$CON = "<b>No pages are tagged with this tag.</b>"; // shouldn't happen at all
-			else {
-				$CON = "<ul>\n";
-
-				foreach($results as $r)
-					$CON .= "	<li><a href=\"$self?page=".u($r)."\">".h($r)."</a></li>\n";
-
-				$CON .= "</ul>\n";
-
-				return true;
-			}
+			$CON = $this->getPagesListForTag($tag);
 		}
+	}
+
+	function getPagesListForTag($tag)
+	{
+		$f = fopen($this->tagfile, "rb");
+
+		if(!$f)
+			return;
+
+		$results = array();
+
+		while($page = fgets($f)) {
+			$tags = array_map("trim", explode(",", fgets($f)));
+
+			if($this->inCaseArray($tag, $tags))
+				$results[] = trim($page);
+		}
+
+		if(empty($results))
+			$list = "<b>No pages are tagged with this tag.</b>"; // shouldn't happen at all
+		else {
+			$list = "<ul>\n";
+
+			foreach($results as $r)
+				$list .= "	<li><a href=\"$self?page=".u($r)."\">".h($r)."</a></li>\n";
+
+			$list .= "</ul>\n";
+		}
+
+		return $list;
 	}
 
 	function pageWritten()
@@ -273,6 +278,9 @@ class Tags
 
 		if(template_match("TAG_CLOUD", $CON, $null))
 			$CON = template_replace("TAG_CLOUD", $this->tagCloud(), $CON);
+
+		while(preg_match("/\{PAGES_TAGGED_WITH:\s*([^}]+)\}/", $CON, $m))
+			$CON = str_replace($m[0], $this->getPagesListForTag($m[1]), $CON);
 	}
 
 	function template()

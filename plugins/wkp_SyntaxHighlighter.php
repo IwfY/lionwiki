@@ -36,7 +36,7 @@ class SyntaxHighlighter
 	var $language_name = true; // language name in the footer
 	var $plain_text_link = true; // link to the plain text version, for usable copy&paste in FF with line numbers turned on
 
-	var $version = "1.1";
+	var $version = "1.1.1";
 	var $n_codes = 0;
 
 	var $desc = array(
@@ -52,7 +52,7 @@ class SyntaxHighlighter
 		 * After LionWiki does its job, we'll substitute it back (in formatEnd() method).
 		 */
 
-		$this->n_codes = preg_match_all("/[^\^](\{syntax (.+)\}(.+)\{\/syntax\})/Ums", $CON, $arr, PREG_SET_ORDER);
+		$this->n_codes = preg_match_all("/(?<!\^)(\{syntax (.+)\}(.+)\{\/syntax\})/Ums", $CON, $arr, PREG_SET_ORDER);
 
 		foreach($arr as $code) {
 			$this->codes[md5(trim($code[3]))] = $code;

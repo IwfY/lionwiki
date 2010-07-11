@@ -1,24 +1,22 @@
 <?php
 /*************************************************************************************
- * lisp.php
+ * clojure.php
  * --------
- * Author: Roberto Rossi (rsoftware@altervista.org)
- * Copyright: (c) 2004 Roberto Rossi (http://rsoftware.altervista.org), Nigel McNie (http://qbnz.com/highlighter
+ * Author: Jess Johnson (jess@grok-code.com)
+ * Copyright: (c) 2009 Jess Johnson (http://grok-code.com)
  * Release Version: 1.0.8.8
- * Date Started: 2004/08/30
+ * Date Started: 2009/09/20
  *
- * Generic Lisp language file for GeSHi.
+ * Clojure language file for GeSHi.
+ *
+ * This file borrows significantly from the lisp language file for GeSHi
  *
  * CHANGES
  * -------
- * 2005/12/9  (1.0.2)
- *  -  Added support for :keywords and ::access (Denis Mashkevich)
- * 2004/11/27 (1.0.1)
- *  -  Added support for multiple object splitters
- * 2004/08/30 (1.0.0)
+ * 2009/09/20 (1.0.8.6)
  *  -  First Release
  *
- * TODO (updated 2004/11/27)
+ * TODO (updated 2009/09/20)
  * -------------------------
  *
  *************************************************************************************
@@ -42,7 +40,7 @@
  ************************************************************************************/
 
 $language_data = array (
-    'LANG_NAME' => 'Lisp',
+    'LANG_NAME' => 'Clojure',
     'COMMENT_SINGLE' => array(1 => ';'),
     'COMMENT_MULTI' => array(';|' => '|;'),
     'CASE_KEYWORDS' => GESHI_CAPS_NO_CHANGE,
@@ -50,42 +48,39 @@ $language_data = array (
     'ESCAPE_CHAR' => '\\',
     'KEYWORDS' => array(
         1 => array(
-            'not','defun','princ','when',
-            'eval','apply','funcall','quote','identity','function',
-            'complement','backquote','lambda','set','setq','setf',
-            'defmacro','gensym','make','symbol','intern',
-            'name','value','plist','get',
-            'getf','putprop','remprop','hash','array','aref',
-            'car','cdr','caar','cadr','cdar','cddr','caaar','caadr','cadar',
-            'caddr','cdaar','cdadr','cddar','cdddr','caaaar','caaadr',
-            'caadar','caaddr','cadaar','cadadr','caddar','cadddr',
-            'cdaaar','cdaadr','cdadar','cdaddr','cddaar','cddadr',
-            'cdddar','cddddr','cons','list','append','reverse','last','nth',
-            'nthcdr','member','assoc','subst','sublis','nsubst',
-            'nsublis','remove','length',
-            'mapc','mapcar','mapl','maplist','mapcan','mapcon','rplaca',
-            'rplacd','nconc','delete','atom','symbolp','numberp',
-            'boundp','null','listp','consp','minusp','zerop','plusp',
-            'evenp','oddp','eq','eql','equal','cond','case','and','or',
-            'let','l','if','prog','prog1','prog2','progn','go','return',
-            'do','dolist','dotimes','catch','throw','error','cerror','break',
-            'continue','errset','baktrace','evalhook','truncate','float',
-            'rem','min','max','abs','sin','cos','tan','expt','exp','sqrt',
-            'random','logand','logior','logxor','lognot','bignums','logeqv',
-            'lognand','lognor','logorc2','logtest','logbitp','logcount',
-            'integer','nil','parse-integer','make-list','print','write'
+            'defn', 'defn-', 'defmulti', 'defmethod', 'defmacro', 'deftest',
+            'defstruct', 'def', 'defonce', 'let', 'letfn', 'do', 'cond', 'condp',
+            'for', 'loop', 'recur', 'when', 'when-not', 'when-let', 'when-first',
+            'if', 'if-let', 'if-not', 'doto', 'and', 'or','not','aget','aset',
+            'dosync', 'doseq', 'dotimes', 'dorun', 'doall',
+            'load', 'import', 'unimport', 'ns', 'in-ns', 'refer', 'print',
+            'try', 'catch', 'finally', 'throw', 'fn', 'update-in',
+            'with-open', 'with-local-vars', 'binding',
+            'gen-class', 'gen-and-load-class', 'gen-and-save-class',
+            'implement', 'proxy', 'lazy-cons', 'with-meta',
+            'struct', 'struct-map', 'delay', 'locking', 'sync', 'time', 'apply',
+            'remove', 'merge', 'interleave', 'interpose', 'distinct',
+            'cons', 'concat', 'lazy-cat', 'cycle', 'rest', 'frest', 'drop',
+            'drop-while', 'nthrest', 'take', 'take-while', 'take-nth', 'butlast',
+            'reverse', 'sort', 'sort-by', 'split-at', 'partition', 'split-with',
+            'first', 'ffirst', 'rfirst', 'zipmap', 'into', 'set', 'vec',
+            'to-array-2d', 'not-empty', 'seq?', 'not-every?', 'every?', 'not-any?',
+            'map', 'mapcat', 'vector?', 'list?', 'hash-map', 'reduce', 'filter',
+            'vals', 'keys', 'rseq', 'subseq', 'rsubseq', 'count', 'empty?',
+            'fnseq', 'repeatedly', 'iterate', 'drop-last',
+            'repeat', 'replicate', 'range',  'into-array',
+            'line-seq', 'resultset-seq', 're-seq', 're-find', 'tree-seq', 'file-seq',
+            'iterator-seq', 'enumeration-seq', 'declare',  'xml-seq',
+            'symbol?', 'string?', 'vector', 'conj', 'str',
+            'pos?', 'neg?', 'zero?', 'nil?', 'inc', 'dec', 'format',
+            'alter', 'commute', 'ref-set', 'floor', 'assoc', 'send', 'send-off'
             )
         ),
     'SYMBOLS' => array(
-        '(', ')', '{', '}', '[', ']',
-        '!', '%', '^', '&',
-        ' + ',' - ',' * ',' / ',
-        '=','<','>',
-        '.',':',',',';',
-        '|'
+        '(', ')', '{', '}', '[', ']', '!', '%', '^', '&', '/','+','-','*','=','<','>',';','|', '.', '..', '->',
         ),
     'CASE_SENSITIVE' => array(
-        GESHI_COMMENTS => false,
+        GESHI_COMMENTS => true,
         1 => false
         ),
     'STYLES' => array(
@@ -125,7 +120,7 @@ $language_data = array (
         ),
     'OOLANG' => true,
     'OBJECT_SPLITTERS' => array(
-        '::', ':'
+            '::', ':'
         ),
     'REGEXPS' => array(
         ),
@@ -133,11 +128,6 @@ $language_data = array (
     'SCRIPT_DELIMITERS' => array(
         ),
     'HIGHLIGHT_STRICT_BLOCK' => array(
-        ),
-    'PARSER_CONTROL' => array(
-        'OOLANG' => array(
-            'MATCH_AFTER' => '[a-zA-Z][a-zA-Z0-9_\-]*'
-            )
         )
 );
 
