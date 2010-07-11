@@ -36,7 +36,7 @@ class SyntaxHighlighter
 	var $language_name = true; // language name in the footer
 	var $plain_text_link = true; // link to the plain text version, for usable copy&paste in FF with line numbers turned on
 
-	var $version = "1.1.1";
+	var $version = "1.1.2";
 	var $n_codes = 0;
 
 	var $desc = array(
