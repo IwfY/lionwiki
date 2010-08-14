@@ -14,7 +14,7 @@ class WhatLinksHere {
 
 	function action($a)
 	{
-		global $TITLE, $page, $PG_DIR, $CON;
+		global $TITLE, $page, $PG_DIR, $CON, $self;
 
 		if($a == "whatlinkshere") {
 			$CON = "<ul>";
@@ -51,13 +51,16 @@ class WhatLinksHere {
 
 	function template()
 	{
-		global $html, $page, $START_PAGE, $WIKI_TITLE, $TITLE;
+		global $html, $page, $START_PAGE, $WIKI_TITLE, $TITLE, $self;
 
-		if(!empty($page)) {
+		if(!empty($page) && $this->link_page_title) {
 			$page_nolang = preg_replace("/\.[A-Za-z]{2}(-[A-Za-z]{2})?$/", "", $page);
 
 			$html = template_replace("plugin:WHAT_LINKS_HERE", "<a href=\"$self?action=whatlinkshere&amp;page=".u($page_nolang)."\" rel=\"nofollow\">What links here?</a>", $html);
 			$html = template_replace("PAGE_TITLE", "<a href=\"$self?action=whatlinkshere&amp;page=".u($page_nolang)."\" rel=\"nofollow\" title=\"What links to this page?\">".h($page == $START_PAGE && $page == $TITLE ? $WIKI_TITLE : $TITLE)."</a>", $html);
 		}
+
+		if($_GET["action"] == "whatlinkshere")
+			$html = template_replace("SHOW_PAGE", "<a href=\"$self?page=".u($page_nolang)."\" rel=\"nofollow\">$GLOBALS[T_SHOW_PAGE]</a>", $html);
 	}
 }
