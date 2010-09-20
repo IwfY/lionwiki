@@ -1,4 +1,4 @@
-<?php // LionWiki 3.2.3, (c) Adam Zivner, licensed under GNU/GPL v2
+<?php // LionWiki 3.2.4, (c) Adam Zivner, licensed under GNU/GPL v2
 foreach($_REQUEST as $k => $v)
 	unset($$k); // register_globals = off
 
@@ -126,7 +126,7 @@ if($restore || $action == 'rev') { // Show old revision
 	$CON = @file_get_contents("$HIST_DIR$page/$f1");
 
 	if($action == 'rev') {
-		$rev_restore = "[$T_RESTORE|./$self?page=".u($page)."&action=edit&f1=$f1&restore=1]";
+		$rev_restore = "[$T_RESTORE|./$self?page=".u($page)."&amp;action=edit&amp;f1=$f1&amp;restore=1]";
 		$CON = strtr($T_REVISION, array('{TIME}' => rev_time($f1), '{RESTORE}' => $rev_restore)) . $CON;
 		$action = '';
 	}
@@ -147,7 +147,7 @@ if($action == 'save' && !$preview && authentified()) { // do we have page to sav
 		@unlink("$PG_DIR$page.txt");
 	elseif($last_changed < @filemtime("$PG_DIR$page.txt")) {
 		$action = 'edit';
-		$error = str_replace('{DIFF}', "<a href=\"$self?page=".u($page)."&action=diff\">$T_DIFF</a>", $T_EDIT_CONFLICT);
+		$error = str_replace('{DIFF}', "<a href=\"$self?page=".u($page)."&amp;action=diff\">$T_DIFF</a>", $T_EDIT_CONFLICT);
 	} elseif(!plugin('writingPage')) { // are plugins OK with page? (e.g. checking for spam)
 		if($par) {
 			$c = @file_get_contents("$PG_DIR$page.txt");
@@ -203,7 +203,7 @@ if($action == 'save' && !$preview && authentified()) { // do we have page to sav
 if($action == 'edit' || $preview) {
 	$CON_FORM_BEGIN = "<form action=\"$self\" method=\"post\"><input type=\"hidden\" name=\"action\" value=\"save\"/><input type=\"hidden\" name=\"last_changed\" value=\"$last_changed_ts\"/><input type=\"hidden\" name=\"showsource\" value=\"$showsource\"/><input type=\"hidden\" name=\"par\" value=\"".h($par)."\"/><input type=\"hidden\" name=\"page\" value=\"".h($page)."\"/>";
 	$CON_FORM_END = '</form>';
-	$CON_TEXTAREA = '<textarea class="contentTextarea" name="content" style="width:100%" rows="30">'.h($CON).'</textarea>';
+	$CON_TEXTAREA = '<textarea class="contentTextarea" name="content" style="width:100%" cols="100" rows="30">'.h($CON).'</textarea>';
 	$CON_PREVIEW = '<input class="submit" type="submit" name="preview" value="'.$T_PREVIEW.'"/>';
 
 	if(!$showsource) {
@@ -238,7 +238,7 @@ if($action == 'edit' || $preview) {
 			$mi++;
 
 		$CON .= '<input type="radio" name="f1" value="'.h($files[$i]).'"/><input type="radio" name="f2" value="'.h($files[$i]).'"/>';
-		$CON .= "<a href=\"$self?page=".u($page)."&action=rev&f1=".$files[$i]."\">".rev_time($files[$i])."</a> - ($m[2] B) $m[1] <i>".h($m[3])."</i><br/>";
+		$CON .= "<a href=\"$self?page=".u($page)."&amp;action=rev&amp;f1=".$files[$i]."\">".rev_time($files[$i])."</a> - ($m[2] B) $m[1] <i>".h($m[3])."</i><br/>";
 	}
 
 	$CON .= '</form>';
@@ -253,8 +253,8 @@ if($action == 'edit' || $preview) {
 		die(header("Location:$self?action=diff&page=".u($page)."&f1=$files[0]&f2=$files[1]"));
 	}
 
-	$r1 = "<a href=\"$self?page=".u($page)."&action=rev&f1=$f1\">".rev_time($f1)."</a>";
-	$r2 = "<a href=\"$self?page=".u($page)."&action=rev&f1=$f2\">".rev_time($f2)."</a>";
+	$r1 = "<a href=\"$self?page=".u($page)."&amp;action=rev&amp;f1=$f1\">".rev_time($f1)."</a>";
+	$r2 = "<a href=\"$self?page=".u($page)."&amp;action=rev&amp;f1=$f2\">".rev_time($f2)."</a>";
 
 	$CON = str_replace(array("{REVISION1}", "{REVISION2}"), array($r1, $r2), $T_REV_DIFF);
 	$CON .= diff($f1, $f2);
@@ -267,12 +267,12 @@ if($action == 'edit' || $preview) {
 	sort($files);
 
 	foreach($files as $f)
-		$list .= "<li><a href=\"$self?page=".u($f).'&redirect=no">'.h($f)."</a></li>";
+		$list .= "<li><a href=\"$self?page=".u($f).'&amp;redirect=no">'.h($f)."</a></li>";
 
 	$CON = "<ul>$list</ul>";
 
 	if($query && !file_exists("$PG_DIR$query.txt")) // offer to create the page
-		$CON = "<p><i><a href=\"$self?action=edit&page=".u($query)."\">$T_CREATE_PAGE ".h($query)."</a>.</i></p>".$CON;
+		$CON = "<p><i><a href=\"$self?action=edit&amp;page=".u($query)."\">$T_CREATE_PAGE ".h($query)."</a>.</i></p>".$CON;
 
 	$TITLE = (!$query ? $T_LIST_OF_ALL_PAGES : "$T_SEARCH_RESULTS $query") . " (".count($files).")";
 } elseif($action == 'recent') { // recent changes
@@ -288,7 +288,7 @@ if($action == 'edit' || $preview) {
 			fclose($meta);
 		}
 
-		$recent .= "<tr><td class=\"rc-diff\"><a href=\"$self?page=".u($f)."&action=diff\">$T_DIFF</a></td><td class=\"rc-date\" nowrap>".date($DATE_FORMAT, $ts + $LOCAL_HOUR * 3600)."</td><td class=\"rc-ip\">$m[1]</td><td class=\"rc-page\"><a href=\"$self?page=".u($f)."&redirect=no\">".h($f)."</a> <span class=\"rc-size\">($m[2] B)</span><i class=\"rc-esum\"> ".h($m[3])."</i></td></tr>";
+		$recent .= "<tr><td class=\"rc-diff\"><a href=\"$self?page=".u($f)."&amp;action=diff\">$T_DIFF</a></td><td class=\"rc-date\" nowrap>".date($DATE_FORMAT, $ts + $LOCAL_HOUR * 3600)."</td><td class=\"rc-ip\">$m[1]</td><td class=\"rc-page\"><a href=\"$self?page=".u($f)."&amp;redirect=no\">".h($f)."</a> <span class=\"rc-size\">($m[2] B)</span><i class=\"rc-esum\"> ".h($m[3])."</i></td></tr>";
 	}
 
 	$CON = "<table>$recent</table>";
@@ -389,7 +389,7 @@ if(!$action || $preview) { // page parsing
 		$m[1] = $m[1] ? $m[1] : $m[2]; // is page label same as its name?
 		$m[3] = $m[3] ? '#'.u(preg_replace('/[^\da-z]/i', '_', $m[3])) : ''; // anchor
 
-		$attr = file_exists("$PG_DIR$m[2].txt") ? $m[3] : '&action=edit" class="pending';
+		$attr = file_exists("$PG_DIR$m[2].txt") ? $m[3] : '&amp;action=edit" class="pending';
 		$CON = str_replace($m[0], '<a href="'.$self.'?page='.u($m[2]).$attr.'">'.$m[1].'</a>', $CON);
 	}
 
@@ -414,7 +414,7 @@ if(!$action || $preview) { // page parsing
 		$ret .= "<div class=\"par-div\" id=\"par-$h_id\"><h$excl id=\"$hash\">$m[2]";
 
 		if(is_writable($PG_DIR . $page . '.txt'))
-			$ret .= "<span class=\"par-edit\">(<a href=\"$self?action=edit&page=".u($page)."&par=$h_id\">$T_EDIT</a>)</span>";
+			$ret .= "<span class=\"par-edit\">(<a href=\"$self?action=edit&amp;page=".u($page)."&amp;par=$h_id\">$T_EDIT</a>)</span>";
 
 		$CON = preg_replace('/' . preg_quote($m[0], '/') . '/', "$ret</h$excl>", $CON, 1);
 		$TOC .= str_repeat("<ul>", $excl - 2).'<li><a href="'.$self.'?page='.u($page).'#'.u($hash).'">'.$m[2].'</a></li>'.str_repeat("</ul>", $excl - 2);
@@ -463,11 +463,11 @@ $tpl_subs = array(
 	'HOME' => "<a href=\"$self?page=".u($START_PAGE)."\">$T_HOME</a>",
 	'RECENT_CHANGES' => "<a href=\"$self?action=recent\">$T_RECENT_CHANGES</a>",
 	'ERROR' => $error,
-	'HISTORY' => $page ? "<a href=\"$self?page=".u($page)."&action=history\">$T_HISTORY</a>" : "",
+	'HISTORY' => $page ? "<a href=\"$self?page=".u($page)."&amp;action=history\">$T_HISTORY</a>" : "",
 	'PAGE_TITLE' => h($page == $START_PAGE && $page == $TITLE ? $WIKI_TITLE : $TITLE),
 	'PAGE_TITLE_HEAD' => h($TITLE),
 	'PAGE_URL' => u($page),
-	'EDIT' => !$action ? ("<a href=\"$self?page=".u($page)."&action=edit".(is_writable("$PG_DIR$page.txt") ? "\">$T_EDIT</a>" : "&showsource=1\">$T_SHOW_SOURCE</a>")) : "",
+	'EDIT' => !$action ? ("<a href=\"$self?page=".u($page)."&amp;action=edit".(is_writable("$PG_DIR$page.txt") ? "\">$T_EDIT</a>" : "&amp;showsource=1\">$T_SHOW_SOURCE</a>")) : "",
 	'WIKI_TITLE' => h($WIKI_TITLE),
 	'LAST_CHANGED_TEXT' => $last_changed_ts ? $T_LAST_CHANGED : "",
 	'LAST_CHANGED' => $last_changed_ts ? date($DATE_FORMAT, $last_changed_ts + $LOCAL_HOUR * 3600) : "",
@@ -475,7 +475,7 @@ $tpl_subs = array(
 	'TOC' => $TOC,
 	'SYNTAX' => $action == "edit" || $preview ? "<a href=\"$SYNTAX_PAGE\">$T_SYNTAX</a>" : "",
 	'SHOW_PAGE' => $action == "edit" || $preview ? "<a href=\"$self?page=".u($page)."\">$T_SHOW_PAGE</a>" : "",
-	'COOKIE' => '<a href="'.$self.'?page='.u($page).'&action='.u($action).'&erasecookie=1">'.$T_ERASE_COOKIE.'</a>',
+	'COOKIE' => '<a href="'.$self.'?page='.u($page).'&amp;action='.u($action).'&amp;erasecookie=1">'.$T_ERASE_COOKIE.'</a>',
 	'CONTENT_FORM' => $CON_FORM_BEGIN,
 	'\/CONTENT_FORM' => $CON_FORM_END,
 	'CONTENT_TEXTAREA' => $CON_TEXTAREA,
