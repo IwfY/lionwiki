@@ -23,7 +23,7 @@ class RenameFix {
 			$content = @file_get_contents($PG_DIR . $f);
 
 			// "classic" link
-			$changed = preg_replace("/\[(([^|\]]+)\|)?" . preg_quote($orig_name, '/') . "(#([^\]]+))?\]/", "[$1$moveto$3]", $content);
+			$changed = preg_replace("/\[(([^|\]]+)\|)?" . preg_quote($orig_name, '/') . "(#([^\]]+))?\]/", "[${1}$moveto$3]", $content);
 			// image link
 			$changed = preg_replace("/\[([^]]*)\|link=\s*" . preg_quote($orig_name, '/') . "(#([^\]]+))?([|\]])/", "[$1|link=$moveto$2$4", $changed);
 			// redirect
