@@ -1,4 +1,4 @@
-<?php // LionWiki 3.2.4, (c) Adam Zivner, licensed under GNU/GPL v2
+<?php // LionWiki 3.2.5, (c) Adam Zivner, licensed under GNU/GPL v2
 foreach($_REQUEST as $k => $v)
 	unset($$k); // register_globals = off
 
@@ -225,7 +225,7 @@ if($action == 'edit' || $preview) {
 	if($preview)
 		$TITLE = "$T_PREVIEW: $page";
 } elseif($action == 'history') { // show whole history of page
-	for($dir = @opendir("$HIST_DIR$page/"); $f = @readdir($dir);)
+	for($files = array(), $dir = @opendir("$HIST_DIR$page/"); $f = @readdir($dir);)
 		if(substr($f, -4) == '.bak')
 			$files[] = $f;
 
