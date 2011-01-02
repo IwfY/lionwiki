@@ -109,7 +109,7 @@ class ImageExt
 
 		$filename = $this->pathToFilename($path, $nx, $ny);
 
-		if(!file_exists($this->dir) . $filename) {
+		if(!file_exists($this->dir . $filename)) {
 			if(!strcasecmp(substr($path, -4), ".png"))
 				$img = imagecreatefrompng($path);
 			else if(!strcasecmp(substr($path, -4), ".gif"))

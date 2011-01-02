@@ -45,6 +45,7 @@ class PageVersions
 		"ru" => "Русский",
 		"sk" => "Slovenština",
 		"sv" => "Svenska",
+		"uk" => "Українська",
 		"zh-tw" => "臺灣國語"
 	);
 

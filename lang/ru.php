@@ -24,6 +24,6 @@ $T_MOVE_TEXT = "Новое имя";
 $T_DIFF = "Разница";
 $T_CREATE_PAGE = "Создать";
 $T_PROTECTED_READ = "Вам необходимо ввести пароль для просмотра сайта: ";
-$TE_WRONG_PASSWORD = "Пароль не верный.";
+$T_WRONG_PASSWORD = "Пароль не верный.";
 
 $DATE_FORMAT = "d/m/Y H:i";
