@@ -52,6 +52,7 @@ class RSS {
 
 		if($opening_dir = @opendir($HIST_DIR . $page . "/")) {
 			// find two last revisions of page
+			$files = array();
 			while($filename = @readdir($opening_dir))
 				if(preg_match('/\.bak.*$/', $filename))
 					$files[] = basename(basename($filename, ".gz"), ".bz2");

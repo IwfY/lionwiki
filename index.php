@@ -1,4 +1,4 @@
-<?php // LionWiki 3.2.5, (c) Adam Zivner, licensed under GNU/GPL v2
+<?php // LionWiki 3.2.6, (c) Adam Zivner, licensed under GNU/GPL v2
 foreach($_REQUEST as $k => $v)
 	unset($$k); // register_globals = off
 
@@ -500,8 +500,8 @@ die($html);
 function h($t) { return htmlspecialchars($t); }
 function u($t) { return urlencode($t); }
 
-function template_replace($what, $subs, $where) { return preg_replace("/\{(([^}]*) )?$what( ([^}]*))?\}/U", empty($subs) ? "" : "\${2}".str_replace("$", "&#36;", trim($subs))."\${4}", $where); }
-function template_match($what, $where, &$dest) { return preg_match("/\{(([^}]*) )?$what( ([^}]*))?\}/U", $where, $dest); }
+function template_replace($what, $subs, $where) { return preg_replace("/\{(([^}{]*) )?$what( ([^}]*))?\}/U", empty($subs) ? "" : "\${2}".str_replace("$", "&#36;", trim($subs))."\${4}", $where); }
+function template_match($what, $where, &$dest) { return preg_match("/\{(([^}{]*) )?$what( ([^}]*))?\}/U", $where, $dest); }
 
 function clear_path($s) {
 	for($i = 0, $ret = "", $c = strlen($s); $i < $c; $i++)
