@@ -1,4 +1,4 @@
-<?php // LionWiki 3.2.6, (c) Adam Zivner, licensed under GNU/GPL v2
+<?php // LionWiki 3.2.7, (c) Adam Zivner, licensed under GNU/GPL v2
 foreach($_REQUEST as $k => $v)
 	unset($$k); // register_globals = off
 
@@ -355,8 +355,8 @@ if(!$action || $preview) { // page parsing
 	$CON = preg_replace("/^([^!\*#\n][^\n]+)$/Um", '<p>$1</p>', $CON); // paragraphs
 
 	// images
-	preg_match_all("#\[((https?://|\./)[^\]]+\.(jpeg|jpg|gif|png))(\|[^\]]+)?\]#", $CON, $imgs, PREG_SET_ORDER);
-
+	preg_match_all("#\[((https?://|\./)[^|\]]+\.(jpeg|jpg|gif|png))(\|[^\]]+)?\]#", $CON, $imgs, PREG_SET_ORDER);
+	
 	foreach($imgs as $img) {
 		$link = $i_attr = $a_attr = $center = $tag = "";
 

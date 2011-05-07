@@ -22,7 +22,7 @@ class ImageExt
 	{
 		global $CON;
 
-		preg_match_all("#\[((https?://|\./)[^\]\|]+\.(jpeg|jpg|gif|png))(\|[^\]]+)?\]#", $CON, $this->imgs, PREG_SET_ORDER);
+		preg_match_all("#\[((https?://|\./)[^|\]]+\.(jpeg|jpg|gif|png))(\|[^\]]+)?\]#", $CON, $this->imgs, PREG_SET_ORDER);
 
 		foreach($this->imgs as $img)
 			$CON = str_replace($img[0], "{IMAGE}", $CON);
