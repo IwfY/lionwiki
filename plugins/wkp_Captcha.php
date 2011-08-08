@@ -16,6 +16,7 @@ class Captcha
 	var $question_file;
 	var $permanent = true; // remember first correct answer and don't ask again
 	var $cookie_password;
+	var $use_javascript_autofill = true;
 
 	function Captcha()
 	{
@@ -44,8 +45,8 @@ class Captcha
 	}
 
 	/*
-	  Functions return number of questions in question file. Method is very simple, it just counts number of occurence of "--" at the begining of the line.
-	*/
+	 * Functions return number of questions in question file. Method is very simple, it just counts number of occurence of "--" at the begining of the line.
+	 */
 
 	function questionCount()
 	{
@@ -67,9 +68,9 @@ class Captcha
 		return $count;
 	}
 
-	  /*
-	    Function returns $line. line of $i. question. Convention is that 1. line is question and second line is answer(s). Numbering is Pascal-like, that means that getQuestion(1, 1) returns 1. line of 1. question.
-	  */
+	/*
+	 * Function returns $line. line of $i. question. Convention is that 1. line is question and second line is answer(s). Numbering is Pascal-like, that means that getQuestion(1, 1) returns 1. line of 1. question.
+	 */
 
 	function getQuestion($i, $line)
 	{
@@ -101,11 +102,6 @@ class Captcha
 
 		return $str;
 	}
-
-	/*
-	 * By convention, writingPage hook is expected to return false if
-	 * everything is ok and true if page should not be saved.
-	 */
 
 	function checkCaptcha()
 	{
@@ -142,6 +138,11 @@ class Captcha
 		return !$equals;
 	}
 
+	/*
+	 * By convention, writingPage hook is expected to return false if
+	 * everything is ok and true if page should not be saved.
+	 */
+
 	function writingPage() { return $this->checkCaptcha(); }
 
 	/*
@@ -152,6 +153,9 @@ class Captcha
 
 	function fillAnswerWithJavascript($question_id)
 	{
+		if ($this->use_javascript_autofill == false)
+			return '';
+
 		$answers = explode(",", $this->getQuestion($question_id, 2));
 
 		return '
@@ -213,7 +217,7 @@ window.onload = function() {
 
 		$comments_html = template_replace("plugin:CAPTCHA_QUESTION", '<span id="captcha-question">' . $question_text . "</span>", $comments_html);
 		$comments_html = template_replace("plugin:CAPTCHA_INPUT", "<input type=\"hidden\" id=\"captcha-id\" name=\"qid\" value=\"$question_id\" /><input type=\"text\" id=\"captcha-input\" name=\"ans\" class=\"input\" value=\"\" />", $comments_html);
-	
+
 		$HEAD .= $this->fillAnswerWithJavascript($question_id);
 	}
 }

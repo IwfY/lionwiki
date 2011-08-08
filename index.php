@@ -1,4 +1,4 @@
-<?php // LionWiki 3.2.7, (c) Adam Zivner, licensed under GNU/GPL v2
+<?php // LionWiki 3.2.8, (c) Adam Zivner, licensed under GNU/GPL v2
 foreach($_REQUEST as $k => $v)
 	unset($$k); // register_globals = off
 
@@ -130,17 +130,16 @@ if($restore || $action == 'rev') { // Show old revision
 		$CON = strtr($T_REVISION, array('{TIME}' => rev_time($f1), '{RESTORE}' => $rev_restore)) . $CON;
 		$action = '';
 	}
-} else if($page) { // Load the page
-	$last_changed_ts = @filemtime("$PG_DIR$page.txt");
+} else if($page && (!$action || $action == 'edit')) {
+	$CON = @file_get_contents("$PG_DIR$page.txt");
+	$CON = $par ? get_paragraph($CON, $par) : $CON;
 
-	if(!$action || $action == 'edit') {
-		$CON = @file_get_contents("$PG_DIR$page.txt");
-		$CON = $par ? get_paragraph($CON, $par) : $CON;
-
-		if(!$action && substr($CON, 0, 10) == '{redirect:' && $_REQUEST['redirect'] != 'no')
-			die(header("Location:$self?page=".u(substr($CON, 10, strpos($CON, '}') - 10))));
-	}
+	if(!$action && substr($CON, 0, 10) == '{redirect:' && $_REQUEST['redirect'] != 'no')
+		die(header("Location:$self?page=".u(substr($CON, 10, strpos($CON, '}') - 10))));
 }
+
+if ($page)
+	$last_changed_ts = @filemtime("$PG_DIR$page.txt");
 
 if($action == 'save' && !$preview && authentified()) { // do we have page to save?
 	if(!trim($content) && !$par) // delete empty page
@@ -356,7 +355,7 @@ if(!$action || $preview) { // page parsing
 
 	// images
 	preg_match_all("#\[((https?://|\./)[^|\]]+\.(jpeg|jpg|gif|png))(\|[^\]]+)?\]#", $CON, $imgs, PREG_SET_ORDER);
-	
+
 	foreach($imgs as $img) {
 		$link = $i_attr = $a_attr = $center = $tag = "";
 

@@ -28,7 +28,7 @@ class SelectTemplate
 
 	function template()
 	{
-		global $html, $page, $action, $TEMPLATE, $CON;
+		global $html, $page, $action, $TEMPLATE, $CON, $self;
 
 		$select = "
 <form action=\"$self\" method=\"get\">

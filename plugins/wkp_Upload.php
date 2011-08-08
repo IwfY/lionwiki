@@ -10,10 +10,10 @@
 class Upload
 {
 	var $desc = array(
-		array("Upload plugin", ".")
+		array("Upload plugin", "is not safe. Delete it if you don't use it!")
 	);
 
-	var $version = "1.0";
+	var $version = "1.1";
 
 	var $datadir;
 
@@ -41,7 +41,7 @@ class Upload
 
 	function action($action)
 	{
-		global $CON, $TITLE, $editable, $T_PASSWORD, $T_WRONG_PASSWORD, $error;
+		global $CON, $TITLE, $T_PASSWORD, $T_WRONG_PASSWORD, $error, $DATE_FORMAT;
 
 		if($action == "upload") {
 			$CON = "";
@@ -84,7 +84,7 @@ class Upload
 
 				// list of files
 				if($opening_dir = @opendir($abs_dir)) {
-					$CON .= '<h2>' . $this->TP_DIRECTORY . " " . $rel_dir . '</h2><table id="fileTable" style="min-width : 600px;"><col span="2" style="color : red;" /><col /><col style="text-align : right;" /><col style="text-align : center;" /><tr><th>' . $this->TP_FILE_NAME . '</th><th>' . $this->TP_FILE_TYPE . '</th><th>' . $this->TP_FILE_SIZE . '</th><th>' . $this->TP_DELETE . '</th></tr>';
+					$CON .= '<h2>' . $this->TP_DIRECTORY . " " . $rel_dir . '</h2><table id="fileTable" style="min-width : 600px;"><col span="2" style="color : red;" /><col /><col style="text-align : right;" /><col style="text-align : center;" /><tr><th>' . $this->TP_FILE_NAME . '</th><th>' . $this->TP_FILE_TYPE . '</th><th>' . $this->TP_FILE_TIME . '</th><th>' . $this->TP_FILE_SIZE . '</th><th>' . $this->TP_DELETE . '</th></tr>';
 
 					$files = array();
 
@@ -113,9 +113,9 @@ class Upload
 						$CON .= "<tr>";
 
 						if(is_dir($this->datadir . $path))
-							$CON = $CON . '<td><a href="'.$self.'?action=' . $action . '&amp;curdir=' . u($path) . '">[' . $file[0] . ']</a></td><td>' . $this->TP_DIRECTORY . '</td><td>-</td>';
+							$CON = $CON . '<td><a href="'.$self.'?action=' . $action . '&amp;curdir=' . u($path) . '">[' . $file[0] . ']</a></td><td>' . $this->TP_DIRECTORY . '</td><td>'.date($DATE_FORMAT, filemtime($this->datadir . $path)).'</td><td>-</td>';
 						else
-							$CON = $CON . '<td><a href="' . $this->datadir . $path . '">' . $file[0] . '</a></td><td>' . $this->TP_FILE . '</td><td>' . @number_format(@filesize($this->datadir . $path), 0, ".", " ") . ' B</td>';
+							$CON = $CON . '<td><a href="' . $this->datadir . $path . '">' . $file[0] . '</a></td><td>' . $this->TP_FILE . '</td><td>'.date($DATE_FORMAT, filemtime($this->datadir . $path)).'</td><td>' . @number_format(@filesize($this->datadir . $path), 0, ".", " ") . ' B</td>';
 
 						if((authentified()) && ($file[0] != '..'))
 							$CON .= '<td><a title="delete" href="'.$self.'?action=upload&amp;del=' . u($path) . "&amp;curdir=" . u($rel_dir) . '">&times;</a></td>';
@@ -181,6 +181,7 @@ class Upload
 		array("TP_FILE_UPLOAD", "Upload souborů"),
 		array("TP_FILE_NAME", "Jméno souboru"),
 		array("TP_FILE_TYPE", "Typ souboru"),
+		array("TP_FILE_TIME", "Datum"),
 		array("TP_FILE_SIZE", "Velikost"),
 		array("TP_DELETE", "Smazat"),
 		array("TP_ERROR_UPLOADING", "Nastala chyba při uploadu souboru"),
@@ -199,6 +200,7 @@ class Upload
 		array("TP_FILE_UPLOAD", "File upload"),
 		array("TP_FILE_NAME", "File name"),
 		array("TP_FILE_TYPE", "Type"),
+		array("TP_FILE_TIME", "Datetime"),
 		array("TP_FILE_SIZE", "Size"),
 		array("TP_DELETE", "Delete"),
 		array("TP_ERROR_UPLOADING", "Error ocurred during uploading file"),
@@ -233,6 +235,7 @@ class Upload
 		array('TP_FILE_UPLOAD', 'Subir ficheros'),
 		array('TP_FILE_NAME', 'Nombre'),
 		array('TP_FILE_TYPE', 'Tipo'),
+		array("TP_FILE_TIME", "Fecha"),
 		array('TP_FILE_SIZE', 'Tamaño'),
 		array('TP_DELETE', 'Borrar'),
 		array('TP_ERROR_UPLOADING', 'Ocurrió un error durante la subida del fichero.'),
@@ -250,6 +253,7 @@ class Upload
 		array("TP_FILE_UPLOAD", "File upload"),
 		array("TP_FILE_NAME", "Nom du fichier/dossier"),
 		array("TP_FILE_TYPE", "Type"),
+		array("TP_FILE_TIME", "Date"),
 		array("TP_FILE_SIZE", "Taille"),
 		array("TP_DELETE", "Supprimer"),
 		array("TP_ERROR_UPLOADING", "Une erreur a empêché le téléversement du fichier"),

@@ -9,6 +9,10 @@
  */
 
 class RenameFix {
+	var $desc = array(
+		array("RenameFix", "fixes links pointing to moved page.")
+	);
+
 	function pageWritten()
 	{
 		global $moveto, $PG_DIR;
