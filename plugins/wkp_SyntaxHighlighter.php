@@ -36,7 +36,7 @@ class SyntaxHighlighter
 	var $language_name = true; // language name in the footer
 	var $plain_text_link = true; // link to the plain text version, for usable copy&paste in FF with line numbers turned on
 
-	var $version = "1.1.2";
+	var $version = "1.1.3";
 	var $n_codes = 0;
 
 	var $desc = array(
@@ -80,7 +80,7 @@ class SyntaxHighlighter
 				$language = $code[2];
 				$source = trim($code[3]);
 
-				$hash = md5($source);
+				$hash = md5($language . $source);
 				$cached_file_path = $cache_dir . "/" . $hash . ".html";
 
 				// Is code cached?
@@ -109,7 +109,7 @@ class SyntaxHighlighter
 
 						$geshi->set_header_content($header_template);
 					}
-					
+
 					$html = $geshi->parse_code();
 
 					$cached = fopen($cached_file_path, 'w');

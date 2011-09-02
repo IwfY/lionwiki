@@ -4,7 +4,7 @@
  * --------
  * Author: Benny Baumann (BenBE@geshi.org)
  * Copyright: (c) 2008 Benny Baumann (http://qbnz.com/highlighter/)
- * Release Version: 1.0.8.8
+ * Release Version: 1.0.8.10
  * Date Started: 2008/10/02
  *
  * Prolog language file for GeSHi.
@@ -121,6 +121,9 @@ $language_data = array (
             ),
         'SCRIPT' => array(
             )
+        ),
+    'URLS' => array(
+        1 => 'http://pauillac.inria.fr/~deransar/prolog/bips.html'
         ),
     'OOLANG' => false,
     'OBJECT_SPLITTERS' => array(

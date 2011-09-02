@@ -1,21 +1,16 @@
 <?php
 /*************************************************************************************
- * scala.php
- * ----------
- * Author: Franco Lombardo (franco@francolombardo.net)
- * Copyright: (c) 2008 Franco Lombardo, Benny Baumann
+ * robots.php
+ * --------
+ * Author: Christian Lescuyer (cl@goelette.net)
+ * Copyright: (c) 2006 Christian Lescuyer http://xtian.goelette.info
  * Release Version: 1.0.8.10
- * Date Started: 2008/02/08
+ * Date Started: 2006/02/17
  *
- * Scala language file for GeSHi.
+ * robots.txt language file for GeSHi.
  *
- * CHANGES
- * -------
- * 2008/02/08 (1.0.7.22)
+ * 2006/02/17 (1.0.0)
  *   -  First Release
- *
- * TODO (updated 2007/04/27)
- * -------------------------
  *
  *************************************************************************************
  *
@@ -38,77 +33,60 @@
  ************************************************************************************/
 
 $language_data = array (
-    'LANG_NAME' => 'Scala',
-    'COMMENT_SINGLE' => array(1 => '//'),
-    'COMMENT_MULTI' => array('/*' => '*/'),
+    'LANG_NAME' => 'robots.txt',
+    'COMMENT_SINGLE' => array(1 => '#'),
+    'COMMENT_MULTI' => array(),
+    'COMMENT_REGEXP' => array(1 => "/^Comment:.*?/m"),
     'CASE_KEYWORDS' => GESHI_CAPS_NO_CHANGE,
-    'QUOTEMARKS' => array("'", '"'),
-    'ESCAPE_CHAR' => '\\',
+    'QUOTEMARKS' => array(),
+    'ESCAPE_CHAR' => '',
     'KEYWORDS' => array(
         1 => array(
-            'abstract', 'case', 'catch', 'class', 'def',
-            'do', 'else', 'extends', 'false', 'final',
-            'finally', 'for', 'forSome', 'if', 'implicit',
-            'import', 'match', 'new', 'null', 'object',
-            'override', 'package', 'private', 'protected', 'requires',
-            'return', 'sealed', 'super', 'this', 'throw',
-            'trait', 'try', 'true', 'type', 'val',
-            'var', 'while', 'with', 'yield'
-            ),
-        2 => array(
-            'void', 'double', 'int', 'boolean', 'byte', 'short', 'long', 'char', 'float'
+            'Allow', 'Crawl-delay', 'Disallow', 'Request-rate', 'Robot-version',
+            'Sitemap', 'User-agent', 'Visit-time'
             )
         ),
     'SYMBOLS' => array(
-        '(', ')', '[', ']', '{', '}', '*', '&', '%', '!', ';', '<', '>', '?',
-        '_', ':', '=', '=>', '<<:',
-        '<%', '>:', '#', '@'
+        ':'
         ),
     'CASE_SENSITIVE' => array(
         GESHI_COMMENTS => false,
-        1 => true,
-        2 => true
+        1 => true
         ),
     'STYLES' => array(
         'KEYWORDS' => array(
-            1 => 'color: #0000ff; font-weight: bold;',
-            2 => 'color: #9999cc; font-weight: bold;',
+            1 => 'color: #b1b100;'
             ),
         'COMMENTS' => array(
-            1=> 'color: #008000; font-style: italic;',
-            'MULTI' => 'color: #00ff00; font-style: italic;'
+            1 => 'color: #808080; font-style: italic;',
             ),
         'ESCAPE_CHAR' => array(
-            0 => 'color: #0000ff; font-weight: bold;'
+            0 => 'color: #000099; font-weight: bold;'
             ),
         'BRACKETS' => array(
-            0 => 'color: #F78811;'
+            0 => 'color: #66cc66;'
             ),
         'STRINGS' => array(
-            0 => 'color: #6666FF;'
+            0 => 'color: #ff0000;'
             ),
         'NUMBERS' => array(
-            0 => 'color: #F78811;'
+            0 => 'color: #cc66cc;'
             ),
         'METHODS' => array(
-            1 => 'color: #000000;',
-            2 => 'color: #000000;'
             ),
         'SYMBOLS' => array(
-            0 => 'color: #000080;'
-            ),
-        'SCRIPT' => array(
+            0 => 'color: #66cc66;'
             ),
         'REGEXPS' => array(
+            ),
+        'SCRIPT' => array(
             )
         ),
     'URLS' => array(
-        1 => 'http://scala-lang.org',
-        2 => ''
+        1 => 'http://www.robotstxt.org/wc/norobots.html'
         ),
-    'OOLANG' => true,
+    'OOLANG' => false,
     'OBJECT_SPLITTERS' => array(
-        1 => '.'
         ),
     'REGEXPS' => array(
         ),
