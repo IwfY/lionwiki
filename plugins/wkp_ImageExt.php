@@ -80,11 +80,11 @@ class ImageExt
 
 	function pathToFilename($path, $x, $y)
 	{
-		$path = clear_path($path);
-
 		if(substr($path, 0, 7) == "http://")
 			$path = substr($path, 7);
 
+		$path = clear_path($path);
+		
 		$ext = substr($path, -4);
 
 		if(!strcasecmp($ext, ".png") || !strcasecmp($ext, ".gif") || !strcasecmp($ext, ".jpe"))

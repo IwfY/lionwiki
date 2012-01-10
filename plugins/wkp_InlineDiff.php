@@ -51,4 +51,3 @@ class InlineDiff
 		return true;
 	}
 }
-?>

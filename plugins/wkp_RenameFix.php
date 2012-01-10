@@ -18,7 +18,7 @@ class RenameFix {
 		global $moveto, $PG_DIR;
 
 		// page is already set to $moveto, we need to take original page name from the request
-		$orig_name = $_REQUEST["page"];
+		$orig_name = clear_path($_REQUEST["page"]);
 
 		if(!$moveto || $moveto == $orig_name) // page was not moved, nothing to do
 			return;

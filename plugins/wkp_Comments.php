@@ -59,6 +59,9 @@ class Comments
 	{
 		global $PG_DIR;
 
+		$txt = str_replace(array("<", "&"), array("&lt;", "&amp;"), $txt);
+		$txt = preg_replace("/&amp;([a-z]+;|\#[0-9]+;)/U", "&$1", $txt); // keep HTML entities
+		
 		$txt = preg_replace("#\[([^\]\|]+)\|(\./([^\]]+)|(https?://[^\]]+))\]#U", '<a href="$2" class="external">$1</a>', $txt);
 		$txt = preg_replace("#(?<!\")(https?://[^\]]+)#i", '<a href="$0" class="external">$1</a>', $txt);
 

@@ -25,7 +25,7 @@ if(get_magic_quotes_gpc()) // magic_quotes_gpc can't be turned off
 	for($i = 0, $_SG = array(&$_GET, &$_POST, &$_COOKIE, &$_REQUEST), $c = count($_SG); $i < $c; ++$i)
 		$_SG[$i] = array_map('stripslashes', $_SG[$i]);
 
-$self = basename($_SERVER['PHP_SELF']);
+$self = basename($_SERVER['SCRIPT_NAME']);
 $REAL_PATH = realpath(dirname(__FILE__)).'/';
 $VAR_DIR = 'var/';
 $PG_DIR = $VAR_DIR.'pages/';
@@ -70,7 +70,7 @@ if($_GET['lang']) {
 } elseif($_COOKIE['LW_LANG'])
 	$LANG = clear_path($_COOKIE['LW_LANG']);
 else
-	list($LANG) = explode(',', $_SERVER['HTTP_ACCEPT_LANGUAGE']);
+	list($LANG) = explode(',', clear_path($_SERVER['HTTP_ACCEPT_LANGUAGE']));
 
 if((@include("$LANG_DIR$LANG.php")) === false && (@include($LANG_DIR . substr($LANG, 0, 2) . '.php')) === false)
 	$LANG = 'en';
@@ -101,11 +101,15 @@ for($plugins = array(), $dir = @opendir($PLUGINS_DIR); $dir && $f = readdir($dir
 
 plugin('pluginsLoaded');
 
-foreach(array('action', 'content', 'error', 'esum', 'f1', 'f2', 'last_changed', 'moveto', 'page', 'par', 'preview', 'query', 'restore', 'sc', 'showsource', 'time') as $req)
+foreach(array('action', 'content', 'error', 'esum', 'f1', 'f2', 'last_changed', 'moveto', 'page', 'par', 'preview', 'query', 'restore', 'sc', 'showsource') as $req)
 	$$req = $_REQUEST[$req]; // export request variables to global namespace
+
+foreach(array('par', 'restore', 'showsource') as $var)
+	isset($$var) && $$var = intval($$var);
 
 $TITLE = $page = clear_path($page); $moveto = clear_path($moveto); $f1 = clear_path($f1); $f2 = clear_path($f2);
 $CON = $content;
+$error = h($error);
 
 plugin('actionBegin');
 
@@ -302,13 +306,16 @@ if(!$action || $preview) { // page parsing
 	}
 
 	// subpages
-	while(preg_match('/(?<!\^){include:([^}]+)}/Um', $CON, $m))
-		if(!strcmp($m[1], $page)) // limited recursion protection
+	while(preg_match('/(?<!\^){include:([^}]+)}/Um', $CON, $m)) {
+		$includePage = clear_path($m[1]);
+		
+		if(!strcmp($includePage, $page)) // limited recursion protection
 			$CON = str_replace($m[0], "'''Warning: subpage recursion!'''", $CON);
-		elseif(file_exists("$PG_DIR$m[1].txt"))
-			$CON = str_replace($m[0], file_get_contents("$PG_DIR$m[1].txt"), $CON);
+		elseif(file_exists("$PG_DIR$includePage.txt"))
+			$CON = str_replace($m[0], file_get_contents("$PG_DIR$includePage.txt"), $CON);
 		else
-			$CON = str_replace($m[0], "'''Warning: subpage $m[1] was not found!'''", $CON);
+			$CON = str_replace($m[0], "'''Warning: subpage $includePage was not found!'''", $CON);
+	}
 
 	plugin('subPagesLoaded');
 
@@ -506,7 +513,7 @@ function clear_path($s) {
 	for($i = 0, $ret = "", $c = strlen($s); $i < $c; $i++)
 		$ret .= ctype_cntrl($s[$i]) ? "" : $s[$i];
 
-	return trim(str_replace("..", "", $ret), "/");
+	return trim(str_replace(array('..', '<', '>', '"', '//', '/.', '\\\\'), "", $ret), "/");
 }
 
 function rev_time($time) {

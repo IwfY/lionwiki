@@ -16,7 +16,7 @@ class Captcha
 	var $question_file;
 	var $permanent = true; // remember first correct answer and don't ask again
 	var $cookie_password;
-	var $use_javascript_autofill = true;
+	var $use_javascript_autofill = false;
 
 	function Captcha()
 	{
@@ -45,7 +45,8 @@ class Captcha
 	}
 
 	/*
-	 * Functions return number of questions in question file. Method is very simple, it just counts number of occurence of "--" at the begining of the line.
+	 * Functions return number of questions in question file. Method is very simple, it just counts
+	 * number of occurence of "--" at the begining of the line.
 	 */
 
 	function questionCount()
@@ -69,7 +70,8 @@ class Captcha
 	}
 
 	/*
-	 * Function returns $line. line of $i. question. Convention is that 1. line is question and second line is answer(s). Numbering is Pascal-like, that means that getQuestion(1, 1) returns 1. line of 1. question.
+	 * Function returns $line. line of $i. question. Convention is that 1. line is question and
+	 * second line is answer(s). Numbering is Pascal-like, that means that getQuestion(1, 1) returns 1. line of 1. question.
 	 */
 
 	function getQuestion($i, $line)

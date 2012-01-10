@@ -55,12 +55,20 @@ class SelectTemplate
 		global $TEMPLATE;
 
 		if(!empty($_REQUEST["template"])) {
-			$TEMPLATE = $_REQUEST["template"];
+			$TEMPLATE_request = $_REQUEST["template"];
 
 			if($_REQUEST["permanent"] == 1)
-				setcookie('LW_TEMPLATE', $TEMPLATE, time() + 365 * 86400);
+				setcookie('LW_TEMPLATE', $TEMPLATE_request, time() + 365 * 86400);
 		}
 		else if(!empty($_COOKIE["LW_TEMPLATE"]))
-			$TEMPLATE = $_COOKIE["LW_TEMPLATE"];
+			$TEMPLATE_request = $_COOKIE["LW_TEMPLATE"];
+		
+		// verify $TEMPLATE (whitelisting) added by (as) 2012-01-08
+		foreach(array_keys($this->tpls) as $t_file) {
+			if ($t_file == $TEMPLATE_request) {
+				$TEMPLATE = $TEMPLATE_request; 
+				break;
+			}
+		}
 	}
 }
