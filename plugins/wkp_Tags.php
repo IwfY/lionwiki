@@ -99,6 +99,8 @@ class Tags
 
 	function getPagesListForTag($tag)
 	{
+		global $self;
+		
 		$f = fopen($this->tagfile, "rb");
 
 		if(!$f)

@@ -39,7 +39,7 @@ class Menu
 
 		// First we need to save it, otherwise main parsing algorithm would mess with it
 
-		preg_match_all("/\{menu(\(([^)]*)\))?(\s+parent=\[([^\]]+)\])?\s+([^\}]*)\}/s", $CON, $this->menus, PREG_SET_ORDER);
+		preg_match_all("/\{menu(\(([^)]*)\))?(\s+parent=\[([^\]\"]+)\])?\s+([^\}]*)\}/s", $CON, $this->menus, PREG_SET_ORDER);
 
 		foreach($this->menus as $menu)
 			$CON = str_replace($menu[0], "{MENU}", $CON);
@@ -85,7 +85,7 @@ class Menu
 
 			$items = array();
 
-			if(preg_match_all("/\[([^\]]+)\]/U", $item_string, $matches))
+			if(preg_match_all("/\[([^\]\"]+)\]/U", $item_string, $matches))
 				$items = $matches[1];
 
 			$items_str = "";

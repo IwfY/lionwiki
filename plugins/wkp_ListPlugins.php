@@ -53,7 +53,7 @@ class ListPlugins
 
 	function template()
 	{
-		global $html;
+		global $html, $self;
 
 		$html = template_replace("plugin:LIST_OF_PLUGINS", "<a href=\"$self?action=listplugins\" rel=\"nofollow\">List of installed plugins</a>", $html);
 	}

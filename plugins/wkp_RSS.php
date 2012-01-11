@@ -29,7 +29,7 @@ class RSS {
 
 	function pageWritten()
 	{
-		global $WIKI_TITLE, $PG_DIR, $page, $HIST_DIR, $LANG, $TIME_FORMAT, $VAR_DIR, $PROTECTED_READ;
+		global $WIKI_TITLE, $PG_DIR, $page, $HIST_DIR, $LANG, $VAR_DIR, $PROTECTED_READ;
 
 		if($PROTECTED_READ)
 			return false;
@@ -54,8 +54,8 @@ class RSS {
 			// find two last revisions of page
 			$files = array();
 			while($filename = @readdir($opening_dir))
-				if(preg_match('/\.bak.*$/', $filename))
-					$files[] = basename(basename($filename, ".gz"), ".bz2");
+				if(preg_match('/\.bak$/', $filename))
+					$files[] = $filename;
 
 			rsort($files);
 

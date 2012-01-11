@@ -26,7 +26,7 @@ class Admin
 
 	function Admin()
 	{
-		global $PLUGINS_DATA_DIR, $self;
+		global $self;
 
 		$this->dir = $GLOBALS["PLUGINS_DATA_DIR"];
 
@@ -58,6 +58,8 @@ class Admin
 	// common function used by all "filters"
 	function fileForm($action, $dataname, $comment)
 	{
+		global $self;
+		
 		$filename = $this->dir . $dataname . ".txt";
 
 		$ret = "";
@@ -102,7 +104,7 @@ class Admin
 
 	function action($action)
 	{
-		global $CON, $editable, $TITLE;
+		global $CON, $TITLE;
 
 		if(substr($action, 0, 6) == "admin-") {
 			if(!is_dir(rtrim($this->dir, "/")) && !mkdir(rtrim($this->dir, "/"))) {
@@ -213,7 +215,7 @@ class Admin
 
 	function actionBegin()
 	{
-		global $PASSWORD, $action;
+		global $PASSWORD;
 
 		if($this->checkPages(false) == false) {
 			// with this, user will be thought as unlogged, so password input will appear
@@ -334,7 +336,7 @@ class Admin
 
 	function template()
 	{
-		global $html;
+		global $html, $self;
 
 		$tpl_subs = array(
 			array("plugin:ADMIN_BLOCKED_IPS", "<a href=\"$self?action=admin-blockip\" rel=\"nofollow\">Blocked IPs</a>"),

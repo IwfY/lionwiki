@@ -29,7 +29,7 @@ class Captcha
 		else
 			$this->question_file .= "en_questions.txt";
 
-		$this->cookie_password = md5($_SERVER["SCRIPT_FILENAME"]); // pseudo random string
+		$this->cookie_password = md5($_SERVER["SCRIPT_FILENAME"] . date("Ymd") . $_SERVER["REMOTE_ADDR"]); // pseudo random string
 	}
 
 	/*
@@ -129,7 +129,7 @@ class Captcha
 				$_COOKIE['LW_CAPTCHA'] = $this->cookie_password;
 
 				if($this->permanent)
-					setcookie('LW_CAPTCHA', $this->cookie_password, time() + 365 * 24 * 3600);
+					setsafecookie('LW_CAPTCHA', $this->cookie_password, time() + 365 * 24 * 3600);
 
 				break;
 			}

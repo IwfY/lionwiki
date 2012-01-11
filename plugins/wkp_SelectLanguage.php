@@ -52,7 +52,7 @@ class SelectLanguage
 
 	function template()
 	{
-		global $html, $LANG, $LANG_DIR, $CON, $action, $page;
+		global $self, $html, $LANG, $LANG_DIR, $CON, $action, $page;
 
 		$langs = array();
 

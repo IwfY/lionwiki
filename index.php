@@ -124,9 +124,7 @@ if(!$action)
 if($PROTECTED_READ && !authentified()) { // does user need password to read content of site. If yes, ask for it.
 	$CON = "<form action=\"$self?page=".u($page)."\" method=\"post\"><p>$T_PROTECTED_READ <input type=\"password\" name=\"sc\"/> <input class=\"submit\" type=\"submit\"/></p></form>";
 	$action = 'view-html';
-} else
-
-if($restore || $action == 'rev') { // Show old revision
+} else if($restore || $action == 'rev') { // Show old revision
 	$CON = @file_get_contents("$HIST_DIR$page/$f1");
 
 	if($action == 'rev') {
@@ -308,7 +306,7 @@ if(!$action || $preview) { // page parsing
 	// subpages
 	while(preg_match('/(?<!\^){include:([^}]+)}/Um', $CON, $m)) {
 		$includePage = clear_path($m[1]);
-		
+
 		if(!strcmp($includePage, $page)) // limited recursion protection
 			$CON = str_replace($m[0], "'''Warning: subpage recursion!'''", $CON);
 		elseif(file_exists("$PG_DIR$includePage.txt"))
@@ -361,7 +359,7 @@ if(!$action || $preview) { // page parsing
 	$CON = preg_replace("/^([^!\*#\n][^\n]+)$/Um", '<p>$1</p>', $CON); // paragraphs
 
 	// images
-	preg_match_all("#\[((https?://|\./)[^|\]]+\.(jpeg|jpg|gif|png))(\|[^\]]+)?\]#", $CON, $imgs, PREG_SET_ORDER);
+	preg_match_all("#\[((https?://|\./)[^|\]\"]+\.(jpeg|jpg|gif|png))(\|[^\]]+)?\]#", $CON, $imgs, PREG_SET_ORDER);
 
 	foreach($imgs as $img) {
 		$link = $i_attr = $a_attr = $center = $tag = "";
@@ -372,8 +370,8 @@ if(!$action || $preview) { // page parsing
 			if($o[1] == 'center') $center = true;
 			elseif($o[1] == 'right' || $o[1] == 'left') $i_attr .= " style=\"float:$o[1]\"";
 			elseif($o[1] == 'link') $link = (substr($o[3], 0, 4) == "http" || substr($o[3], 0, 2) == "./") ? $o[3] : "$self?page=" . u($o[3]);
-			elseif($o[1] == 'alt') $i_attr .= " alt=\"$o[3]\"";
-			elseif($o[1] == 'title') $a_attr .= " title=\"$o[3]\"";
+			elseif($o[1] == 'alt') $i_attr .= ' alt="'.h($o[3]).'"';
+			elseif($o[1] == 'title') $a_attr .= ' title="'.h($o[3]).'"';
 
 		$tag = "<img src=\"$img[1]\"$i_attr/>";
 
@@ -386,10 +384,10 @@ if(!$action || $preview) { // page parsing
 	$CON = preg_replace('#([0-9a-zA-Z\./~\-_]+@[0-9a-z/~\-_]+\.[0-9a-z\./~\-_]+)#i', '<a href="mailto:$0">$0</a>', $CON); // mail recognition
 
 	// links
-	$CON = preg_replace("#\[([^\]\|]+)\|(\./([^\]]+)|(https?://[^\]]+))\]#U", '<a href="$2" class="external">$1</a>', $CON);
+	$CON = preg_replace("#\[([^\]\|]+)\|(\./([^\]]+)|(https?://[^\"]]+))\]#U", '<a href="$2" class="external">$1</a>', $CON);
 	$CON = preg_replace("#(?<!\")https?://[0-9a-zA-Z\.\#/~\-_%=\?\&,\+\:@;!\(\)\*\$']*#i", '<a href="$0" class="external">$0</a>', $CON);
 
-	preg_match_all("/\[(?:([^|\]]+)\|)?([^\]#]+)(?:#([^\]]+))?\]/", $CON, $matches, PREG_SET_ORDER); // matching Wiki links
+	preg_match_all("/\[(?:([^|\]\"]+)\|)?([^\]\"#]+)(?:#([^\]\"]+))?\]/", $CON, $matches, PREG_SET_ORDER); // matching Wiki links
 
 	foreach($matches as $m) {
 		$m[1] = $m[1] ? $m[1] : $m[2]; // is page label same as its name?

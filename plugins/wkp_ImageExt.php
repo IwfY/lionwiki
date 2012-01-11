@@ -22,7 +22,7 @@ class ImageExt
 	{
 		global $CON;
 
-		preg_match_all("#\[((https?://|\./)[^|\]]+\.(jpeg|jpg|gif|png))(\|[^\]]+)?\]#", $CON, $this->imgs, PREG_SET_ORDER);
+		preg_match_all("#\[((https?://|\./)[^|\]\"]+\.(jpeg|jpg|gif|png))(\|[^\]]+)?\]#", $CON, $this->imgs, PREG_SET_ORDER);
 
 		foreach($this->imgs as $img)
 			$CON = str_replace($img[0], "{IMAGE}", $CON);
@@ -30,22 +30,22 @@ class ImageExt
 
 	function formatEnd()
 	{
-		global $CON;
+		global $CON, $self;
 		
 		foreach($this->imgs as $img) {
 			$link = $i_attr = $a_attr = $alt = $center = $tag = $style = "";
 			$width = $height = 0;
 
 			preg_match_all("/\|([^\]\|=]+)(=([^\]\|\"]+))?(?=[\]\|])/", $img[0], $options, PREG_SET_ORDER);
-
+						
 			foreach($options as $o)
 				if($o[1] == "center") $center = true;
 				else if($o[1] == "right" || $o[1] == "left") $style .= "float:$o[1];";
 				else if($o[1] == "link") $link = (substr($o[3], 0, 4) == "http" || substr($o[3], 0, 2) == "./") ? $o[3] : "$self?page=" . u($o[3]);
 				else if($o[1] == "alt") $alt = h($o[3]);
 				else if($o[1] == "title") $a_attr .= ' title="'.h($o[3]).'"';
-				else if($o[1] == "width") $width = $o[3];
-				else if($o[1] == "height") $height = $o[3];
+				else if($o[1] == "width") $width = (int) $o[3];
+				else if($o[1] == "height") $height = (int) $o[3];
 				else if($o[1] == "class") $i_attr .= " class=\"$o[3]\"";
 				else if($o[1] == "id") $i_attr .= " id=\"$o[3]\"";
 				else if($o[1] == "style") $style .= "$o[3];";
@@ -55,7 +55,7 @@ class ImageExt
 			if($width || $height)
 				$img[1] = $this->scaleImage($img[1], $width, $height);
 
-			$tag = "<img src=\"$img[1]\" alt=\"$alt\" style=\"$style\"$i_attr/>";
+			$tag = "<img src=\"$img[1]\" alt=\"".$alt."\" style=\"$style\"$i_attr/>";
 
 			if($link)   $tag = "<a href=\"$link\"$a_attr>$tag</a>";
 			if($center) $tag = "<div style=\"text-align:center\">$tag</div>";

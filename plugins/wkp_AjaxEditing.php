@@ -25,7 +25,7 @@ class AjaxEditing
 
 	function formatFinished()
 	{
-		global $CON, $content, $self, $showsource, $page, $esum, $error, $preview, $par, $action, $html;
+		global $CON, $content, $self, $showsource, $page, $esum, $error, $preview, $action, $html;
 		global $T_PASSWORD, $T_EDIT_SUMMARY, $T_PREVIEW, $T_DONE, $T_DISCARD_CHANGES;
 
 		if(!$_REQUEST["ajax"])
@@ -54,7 +54,7 @@ class AjaxEditing
 
 		$CON_FORM_END = "</form>";
 
-		$CON_TEXTAREA = "<textarea name=\"content\" class=\"ajaxContentTextarea contentTextarea\" cols=\"83\" rows=\"$rows\">" . h($content ? $content : $CON) . "</textarea><input type=\"hidden\" id=\"ajaxPage\" name=\"page\" value=\"$page\" />";
+		$CON_TEXTAREA = "<textarea name=\"content\" class=\"ajaxContentTextarea contentTextarea\" cols=\"83\" rows=\"$rows\">" . h($content ? $content : $CON) . "</textarea><input type=\"hidden\" id=\"ajaxPage\" name=\"page\" value=\"".h($page)."\" />";
 
 		if(!$showsource) {
 			$CON_SUBMIT = "<input class=\"submit ajaxContentSubmit\" onclick=\"ajaxAction('save', this);return false;\" type=\"submit\" value=\"$T_DONE\" />";

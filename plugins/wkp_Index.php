@@ -13,7 +13,7 @@ class Index
 
 	function pagesList($type)
 	{
-		global $TITLE, $page, $PG_DIR;
+		global $self, $PG_DIR;
 
 		$list = array();
 
@@ -27,7 +27,7 @@ class Index
 			sort($files);
 
 			foreach($files as $file)
-				$list[] = "<a href=\"$self?page=" . $file . "\">" . $file . "</a>";
+				$list[] = "<a href=\"$self?page=" . u($file) . "\">" . h($file) . "</a>";
 		}
 
 		if($type == "comma")

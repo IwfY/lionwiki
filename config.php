@@ -10,4 +10,4 @@ $TEMPLATE = 'templates/dandelion.html'; // presentation template
 // before setting to true, read http://lionwiki.0o.cz/index.php?page=UserGuide%3A+How+to+use+PROTECTED_READ
 $PROTECTED_READ = false;
 
-$NO_HTML = false; // XSS protection
+$NO_HTML = true; // XSS protection

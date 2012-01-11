@@ -22,13 +22,17 @@ class Meta
 		global $HEAD, $CON;
 
 		if(preg_match("/\{description:(.*)\}/U", $CON, $match)) {
-			$HEAD .= "<meta name=\"description\" content=\"".strip_tags($match[1])."\" />\n";
+			$description = str_replace('"', '', strip_tags($match[1]));
+			
+			$HEAD .= "<meta name=\"description\" content=\"".h($description)."\" />\n";
 
 			$CON = str_replace($match[0], "", $CON);
 		}
 
 		if(preg_match("/\{keywords:(.*)\}/U", $CON, $match)) {
-			$HEAD .= "<meta name=\"keywords\" content=\"".strip_tags($match[1])."\" />\n";
+			$description = str_replace('"', '', strip_tags($match[1]));
+			
+			$HEAD .= "<meta name=\"keywords\" content=\"".h($description)."\" />\n";
 
 			$CON = str_replace($match[0], "", $CON);
 		}
