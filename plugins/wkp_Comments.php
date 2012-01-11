@@ -57,7 +57,7 @@ class Comments
 
 	function processComment($txt)
 	{
-		global $PG_DIR;
+		global $PG_DIR, $self;
 
 		$txt = str_replace(array("<", "&"), array("&lt;", "&amp;"), $txt);
 		$txt = preg_replace("/&amp;([a-z]+;|\#[0-9]+;)/U", "&$1", $txt); // keep HTML entities
@@ -91,7 +91,7 @@ class Comments
 
 	function template()
 	{
-		global $CON, $html, $action, $preview, $page, $PG_DIR, $HEAD, $self, $comments_html, $comment_captcha_failed;
+		global $CON, $html, $action, $preview, $page, $HEAD, $self, $comments_html, $comment_captcha_failed;
 
 		/*
 		 * Include comments if:
@@ -189,7 +189,7 @@ class Comments
 
 	function actionBegin()
 	{
-		global $page, $LOCAL_HOUR, $plugins, $action, $plugin_saveok, $error, $comment_captcha_failed;
+		global $page, $LOCAL_HOUR, $plugins, $action, $error, $comment_captcha_failed, $self;
 
 		if($action == "save-comment") {
 			if(isset($plugins["Captcha"]) && $plugins["Captcha"]->checkCaptcha() == true) {
@@ -231,7 +231,10 @@ class Comments
 			if(!$h)
 				return;
 
-			fwrite($h, $meta . $_POST["content"]);
+			$content = $_POST["content"];
+			$content = str_replace("<", "&lt;", $content); // prevetion of php code inclusion
+			
+			fwrite($h, $meta . $content);
 			fclose($h);
 
 			$this->writeRSS($page, $rightnow, $meta . $_POST["content"]);
@@ -295,7 +298,7 @@ class Comments
 
 	function pageWritten()
 	{
-		global $moveto, $PG_DIR;
+		global $moveto;
 
 		// page is already set to $moveto, we need to take original page name from the request
 		$orig_name = $_REQUEST["page"];

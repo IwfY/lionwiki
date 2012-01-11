@@ -51,7 +51,7 @@ class PageVersions
 
 	function template()
 	{
-		global $CON, $html, $page, $PG_DIR, $action;
+		global $CON, $html, $page, $PG_DIR, $action, $self;
 
 		if(!empty($action))
 			return;

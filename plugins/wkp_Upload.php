@@ -41,7 +41,7 @@ class Upload
 
 	function action($action)
 	{
-		global $CON, $TITLE, $T_PASSWORD, $T_WRONG_PASSWORD, $error, $DATE_FORMAT;
+		global $CON, $TITLE, $T_PASSWORD, $T_WRONG_PASSWORD, $error, $DATE_FORMAT, $self;
 
 		if($action == "upload") {
 			$CON = "";
@@ -170,7 +170,7 @@ class Upload
 
 	function template()
 	{
-		global $html;
+		global $html, $self;
 
 		$html = template_replace("plugin:UPLOAD", "<a href=\"$self?action=upload\" rel=\"nofollow\">Upload</a>", $html);
 	}
