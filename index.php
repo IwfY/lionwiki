@@ -137,7 +137,7 @@ if($PROTECTED_READ && !authentified()) { // does user need password to read cont
 	$CON = $par ? get_paragraph($CON, $par) : $CON;
 
 	if(!$action && substr($CON, 0, 10) == '{redirect:' && $_REQUEST['redirect'] != 'no')
-		die(header("Location:$self?page=".u(substr($CON, 10, strpos($CON, '}') - 10))));
+		die(header("Location:$self?page=".u(clear_path(substr($CON, 10, strpos($CON, '}') - 10)))));
 }
 
 if ($page)
@@ -249,11 +249,11 @@ if($action == 'edit' || $preview) {
 	if(!$f1 && $dir = @opendir("$HIST_DIR$page/")) { // diff is made on two last revisions
 		while($f = @readdir($dir))
 			if(substr($f, -4) == '.bak')
-				$files[] = $f;
+				$files[] = clear_path($f);
 
 		rsort($files);
 
-		die(header("Location:$self?action=diff&page=".u($page)."&f1=$files[0]&f2=$files[1]"));
+		die(header("Location:$self?action=diff&page=".u($page)."&f1=".u($files[0])."&f2=".u($files[1])));
 	}
 
 	$r1 = "<a href=\"$self?page=".u($page)."&amp;action=rev&amp;f1=$f1\">".rev_time($f1)."</a>";
@@ -265,7 +265,7 @@ if($action == 'edit' || $preview) {
 	for($files = array(), $dir = opendir($PG_DIR); $f = readdir($dir);)
 		if(substr($f, -4) == '.txt' && ($c = @file_get_contents($PG_DIR . $f)))
 			if(!$query || stristr($f . $c, $query) !== false)
-				$files[] = substr($f, 0, -4);
+				$files[] = clear_path(substr($f, 0, -4));
 
 	sort($files);
 
@@ -451,10 +451,11 @@ plugin('formatFinished');
 $html = file_exists($TEMPLATE) ? file_get_contents(clear_path($TEMPLATE)) : fallback_template();
 
 // including pages in pure HTML
-while(preg_match('/{include:([^}]+)}/U', $html, $m)) {
-	$inc = str_replace(array('{html}', '{/html}'), '', @file_get_contents("$PG_DIR$m[1].txt"));
-	$html = str_replace($m[0], $inc, $html);
-}
+if (!$NO_HTML)
+	while(preg_match('/{include:([^}]+)}/U', $html, $m)) {
+		$inc = str_replace(array('{html}', '{/html}'), '', @file_get_contents("$PG_DIR$m[1].txt"));
+		$html = str_replace($m[0], $inc, $html);
+	}
 
 plugin('template'); // plugin templating
 
