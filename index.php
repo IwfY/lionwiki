@@ -34,8 +34,6 @@ $PLUGINS_DIR = 'plugins/';
 $PLUGINS_DATA_DIR = $VAR_DIR.'plugins/';
 $LANG_DIR = 'lang/';
 
-@include('config.php'); // config file is not required, see settings above
-
 // default translation
 $T_HOME = 'Main page';
 $T_SYNTAX = 'Syntax';
@@ -74,6 +72,8 @@ else
 
 if((@include("$LANG_DIR$LANG.php")) === false && (@include($LANG_DIR . substr($LANG, 0, 2) . '.php')) === false)
 	$LANG = 'en';
+
+@include('config.php'); // config file is not required, see settings above
 
 // Creating essential directories if they don't exist
 if(!file_exists($VAR_DIR) && !mkdir(rtrim($VAR_DIR, "/")))
