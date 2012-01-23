@@ -151,8 +151,11 @@ class Tags
 				$same = false;
 				break;
 			}
+			
+		// in case page was just moved
+		$orig_name = clear_path($_REQUEST["page"]);
 
-		if(count($tags) != count($file_tags) || !$same) { // if tags are same, don't bother writing
+		if(count($tags) != count($file_tags) || !$same || $page != $orig_name) { // if tags are same, don't bother writing
 			if(!file_exists($this->tagfile))
 				touch($this->tagfile);
 
@@ -170,7 +173,7 @@ class Tags
 			$line_count = count($file_lines);
 
 			for($i = 0; $i < $line_count; $i += 2)
-				if(trim($file_lines[$i]) != trim($page))
+				if(trim($file_lines[$i]) != trim($page) && trim($file_lines[$i]) != trim($orig_name))
 					fputs($f, $file_lines[$i] . $file_lines[$i + 1]);
 
 			fputs($f, $page . "\n");

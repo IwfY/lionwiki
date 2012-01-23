@@ -82,6 +82,8 @@ class ImageExt
 	{
 		if(substr($path, 0, 7) == "http://")
 			$path = substr($path, 7);
+		else if(substr($path, 0, 8) == "https://")
+			$path = substr($path, 8);
 
 		$path = clear_path($path);
 		
@@ -93,8 +95,7 @@ class ImageExt
 		if(!strcasecmp($ext, ".jpeg") || !strcasecmp($ext, ".jfif"))
 			$path = substr($path, 0, -5);
 
-		$path = str_replace("/", "_", $path);
-		$path = str_replace(".", "_", $path);
+		$path = str_replace(array("/", ".", ":"), "_", $path);
 
 		return $path . "-{$x}x{$y}.jpg";
 	}
@@ -105,7 +106,7 @@ class ImageExt
 			mkdir(rtrim($this->dir, "/"), 0777);
 
 		if(substr($path, 0, 2) == "./")
-			$path = "http://" . $_SERVER["HTTP_HOST"] . dirname($_SERVER["REQUEST_URI"]) . '/' . substr($path, 2);
+			$path = ($_SERVER["HTTPS"] ? "https://" : "http://") . $_SERVER["HTTP_HOST"] . ":" . $_SERVER["SERVER_PORT"] . dirname($_SERVER["REQUEST_URI"]) . '/' . substr($path, 2);
 
 		$filename = $this->pathToFilename($path, $nx, $ny);
 

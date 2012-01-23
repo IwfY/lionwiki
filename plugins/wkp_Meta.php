@@ -30,9 +30,9 @@ class Meta
 		}
 
 		if(preg_match("/\{keywords:(.*)\}/U", $CON, $match)) {
-			$description = str_replace('"', '', strip_tags($match[1]));
+			$keywords = str_replace('"', '', strip_tags($match[1]));
 			
-			$HEAD .= "<meta name=\"keywords\" content=\"".h($description)."\" />\n";
+			$HEAD .= "<meta name=\"keywords\" content=\"".h($keywords)."\" />\n";
 
 			$CON = str_replace($match[0], "", $CON);
 		}

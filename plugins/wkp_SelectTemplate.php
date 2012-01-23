@@ -41,7 +41,7 @@ class SelectTemplate
 		foreach($this->tpls as $t_file => $t_name) {
 			$selected = $TEMPLATE == $t_file ? " selected " : "";
 
-			$select .= "<option value=\"$t_file\"$selected>".h($t_name)."</option>\n";
+			$select .= "<option value=\"".h($t_file)."\"$selected>".h($t_name)."</option>\n";
 		}
 
 		$select .= "</select></form>\n";

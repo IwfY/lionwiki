@@ -65,18 +65,18 @@ class RSS {
 
 			$n_item = "
 	<item>
-	  <title>$page</title>
-	  <pubDate>". date("r", $timestamp)."</pubDate>
-	  <link>$pagelink?page=".u($page)."</link>
+	  <title>".h($page)."</title>
+	  <pubDate>".date("r", $timestamp)."</pubDate>
+	  <link>".h($pagelink)."?page=".u($page)."</link>
 	  <description>$newest</description>
 	</item>";
 		} else
 			echo "RSS plugin: can't open history directory!";
 
-		$rss = str_replace('{WIKI_TITLE}', $WIKI_TITLE, $this->template);
-		$rss = str_replace('{PAGE_LINK}', $pagelink, $rss);
-		$rss = str_replace('{LANG}', $LANG, $rss);
-		$rss = str_replace('{WIKI_DESCRIPTION}', "RSS feed from " . $WIKI_TITLE, $rss);
+		$rss = str_replace('{WIKI_TITLE}', h($WIKI_TITLE), $this->template);
+		$rss = str_replace('{PAGE_LINK}', h($pagelink), $rss);
+		$rss = str_replace('{LANG}', h($LANG), $rss);
+		$rss = str_replace('{WIKI_DESCRIPTION}', "RSS feed from " . h($WIKI_TITLE), $rss);
 		$rss = str_replace('{CONTENT_RSS}', $n_item . $items, $rss);
 
 		if(!$file = @fopen($VAR_DIR . "rss.xml", "w")) {

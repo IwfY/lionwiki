@@ -561,14 +561,14 @@ function get_paragraph($text, $par_id) {
 function diff($f1, $f2) { // executes either builtin simple diff or complex diff plugin, if present ...
 	list($f1, $f2) = array(min($f1, $f2), max($f1, $f2));
 
-	$dir = $GLOBALS['HIST_DIR'] . $GLOBALS['page'] . '/';
-
-	return plugin('diff', $dir.$f1, $dir.$f2) ? $GLOBALS['plugin_ret_diff'] : diff_builtin($dir.$f1, $dir.$f2);
+	return plugin('diff', $f1, $f2) ? $GLOBALS['plugin_ret_diff'] : diff_builtin($f1, $f2);
 }
 
 function diff_builtin($f1, $f2) {
-	$a1 = explode("\n", @file_get_contents($f1));
-	$a2 = explode("\n", @file_get_contents($f2));
+	$dir = $GLOBALS['HIST_DIR'] . $GLOBALS['page'] . '/';
+	
+	$a1 = explode("\n", @file_get_contents($dir.$f1));
+	$a2 = explode("\n", @file_get_contents($dir.$f2));
 
 	$d1 = array_diff($a1, $a2);
 	$d2 = array_diff($a2, $a1);

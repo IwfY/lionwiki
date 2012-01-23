@@ -73,7 +73,7 @@ class SelectLanguage
 		foreach($langs as $l) {
 			$selected = $l == $LANG ? " selected=\"selected\" " : "";
 
-			$select .= "<option value=\"$l\"$selected>" . $this->lang_names[$l] . "</option>\n";
+			$select .= "<option value=\"".h($l)."\"$selected>" . h($this->lang_names[$l]) . "</option>\n";
 		}
 
 		$select .= "</select></form>\n";
