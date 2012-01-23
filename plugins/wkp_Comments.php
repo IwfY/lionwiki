@@ -160,8 +160,8 @@ class Comments
 						"{CONTENT}" => $processed_content,
 						"{NAME}" => h($name),
 						"{EMAIL}" => h($email),
-						"{NAME_TO_EMAIL}" => $email == "" ? $name : ("<a href=\"mailto:".h($email)."\">" . h($name) . "</a>"),
-						"{IP}" => $ip,
+						"{NAME_TO_EMAIL}" => $email == "" ? h($name) : ("<a href=\"mailto:".h($email)."\">" . h($name) . "</a>"),
+						"{IP}" => h($ip),
 						"{DATE}" => rev_time(basename($filename, ".txt")),
 						"{ID}" => basename($filename, ".txt"),
 						"{NUMBER}" => $comment_num,
@@ -276,10 +276,10 @@ class Comments
 	<description><pre>".h($content)."</pre></description>
 </item>";
 
-		$rss = str_replace('{WIKI_TITLE}', $WIKI_TITLE . ": " . $this->TP_COMMENTS, $this->rss_template);
-		$rss = str_replace('{PAGE_LINK}', $pagelink, $rss);
-		$rss = str_replace('{LANG}', $LANG, $rss);
-		$rss = str_replace('{WIKI_DESCRIPTION}', "RSS comments feed from " . $WIKI_TITLE, $rss);
+		$rss = str_replace('{WIKI_TITLE}', h($WIKI_TITLE) . ": " . $this->TP_COMMENTS, $this->rss_template);
+		$rss = str_replace('{PAGE_LINK}', h($pagelink), $rss);
+		$rss = str_replace('{LANG}', h($LANG), $rss);
+		$rss = str_replace('{WIKI_DESCRIPTION}', "RSS comments feed from " . h($WIKI_TITLE), $rss);
 		$rss = str_replace('{CONTENT_RSS}', $n_item . $items, $rss);
 
 		if(!$file = @fopen($this->rss_file, "w")) {
@@ -301,7 +301,7 @@ class Comments
 		global $moveto;
 
 		// page is already set to $moveto, we need to take original page name from the request
-		$orig_name = $_REQUEST["page"];
+		$orig_name = clear_path($_REQUEST["page"]);
 
 		if(!$moveto || $moveto == $orig_name) // page was not moved, nothing to do
 			return;
