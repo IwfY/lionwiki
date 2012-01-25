@@ -13,11 +13,14 @@ cp -r * $work
 
 find $work -name .svn -exec rm -rf {} \;
 
+rm $work/lion.jpg
 rm $work/plugins/wkp_Slimbox.php
 rm -rf $work/plugins/Slimbox
 rm $work/plugins/wkp_SyntaxHighlighter.php
 rm -rf $work/plugins/SyntaxHighlighter
 rm -rf $work/var/*
+rm -rf $work/screenshots
+rm -rf $work/images
 rm $work/release.sh*
 rm $work/install.sh*
 rm -rf $work/nbproject
@@ -25,18 +28,15 @@ rm $work/plugins/wkp_Upload.php
 rm $work/plugins/wkp_Script.php
 rm $work/plugins/wkp_LatexImg.php
 rm -rf $work/plugins/LatexImg
-rm $work/plugins/wkp_Pacman.php
-rm -rf $work/pacman
-rm -rf $work/pokus.php*
 
 release=$path/$version
 
 rm -rf $release
 mkdir $release
 
-cd $work
+cd $path
 
-tar cf $release/$version.tar *
+tar cf $release/$version.tar $version-nc
 bzip2 -z -9 $release/$version.tar
 
 cp $work/index.php $release/index.txt
