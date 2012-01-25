@@ -4,7 +4,7 @@ version=$1
 path=$2
 orig_dir=`pwd`
 
-work=$path/$version-nc
+work=$path/lionwiki-$version
 
 rm -rf $work
 mkdir $work
@@ -36,7 +36,7 @@ mkdir $release
 
 cd $path
 
-tar cf $release/$version.tar $version-nc
-bzip2 -z -9 $release/$version.tar
+tar cf $release/lionwiki-$version.tar lionwiki-$version
+bzip2 -z -9 $release/lionwiki-$version.tar
 
 cp $work/index.php $release/index.txt
