@@ -1,4 +1,4 @@
-<?php // LionWiki 3.2.8, (c) Adam Zivner, licensed under GNU/GPL v2
+<?php // LionWiki 3.2.9, (c) Adam Zivner, licensed under GNU/GPL v2
 foreach($_REQUEST as $k => $v)
 	unset($$k); // register_globals = off
 
@@ -318,11 +318,14 @@ if(!$action || $preview) { // page parsing
 	}
 
 	plugin('subPagesLoaded');
-
+	
 	// save content not intended for substitutions ({html} tag)
 	if(!$NO_HTML) { // XSS protection
 		preg_match_all("/(?<!\^)\{html\}(.+)\{\/html\}/Ums", $CON, $htmlcodes, PREG_PATTERN_ORDER);
 		$CON = preg_replace("/(?<!\^)\{html\}.+\{\/html\}/Ums", "{HTML}", $CON);
+		
+		foreach($htmlcodes[1] as &$hc)
+			$hc = str_replace("&lt;", "<", $hc);
 	}
 
 	$CON = preg_replace("/(?<!\^)<!--.*-->/U", "", $CON); // internal comments
@@ -441,7 +444,7 @@ if(!$action || $preview) { // page parsing
 
 	$CON = preg_replace(array_fill(0, count($codes[1]) + 1, '/{CODE}/'), $codes[1], $CON, 1); // put HTML and "normal" codes back
 	$CON = preg_replace(array_fill(0, count($htmlcodes[1]) + 1, '/{HTML}/'), $htmlcodes[1], $CON, 1);
-
+	
 	plugin('formatEnd');
 }
 
