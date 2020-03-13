@@ -324,7 +324,9 @@ if(!$action || $preview) { // page parsing
 	}
 
 	$CON = preg_replace("/(?<!\^)<!--.*-->/U", "", $CON); // internal comments
-	$CON = preg_replace("/\^(.)/e", "'&#'.ord('$1').';'", $CON);
+	$CON = preg_replace_callback("/\^(.)/", function ($matches) { // strings like "^u" become "&#117;"
+		return "&#".ord($matches[1]).";";
+	}, $CON);
 	$CON = str_replace(array("<", "&"), array("&lt;", "&amp;"), $CON);
 	$CON = preg_replace("/&amp;([a-z]+;|\#[0-9]+;)/U", "&$1", $CON); // keep HTML entities
 	$CON = preg_replace("/(\r\n|\r)/", "\n", $CON); // unifying newlines to Unix ones

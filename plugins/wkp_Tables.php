@@ -49,7 +49,10 @@ class Tables {
 		$s = str_replace("\n", "", $s);
 
 		// Creation des <td></td> en se servant des |
-		$s = preg_replace('/\|(([hlrtb]* ){0,1})\s*(\d*)\s*,{0,1}(\d*)\s*(.*?)\|/e', '"<td".("$3"?" colspan=\"$3\"":" ").("$4"?" rowspan=\"$4\"":" ").$this->table_style("$1").">$5</td>"', $s);
+		$instance = $this;
+		$s = preg_replace_callback('/\|(([hlrtb]* ){0,1})\s*(\d*)\s*,{0,1}(\d*)\s*(.*?)\|/e', function ($matches) use ($instance) {
+			return "<td" . ((count($matches) >= 4 && $matches[3]) ? (" colspan=\"" . $matches[3] . "\""):" ").((count($matches) >= 5 && $matches[4]) ? (" rowspan=\"" . $matches[4] . "\""):" ") . $instance->table_style($matches[1]) . ">" . $matches[5] . "</td>";
+		}, $s);
 
 		if($nblinks > 0)
 			$s = preg_replace_callback(array_fill(0, $nblinks, "/\[LINK\]/"), create_function('$m', 'global $matches_links;static $idxlink=0;return "[".$matches_links[1][$idxlink++]."]";'), $s);
@@ -61,6 +64,9 @@ class Tables {
 	{
 		global $CON;
 
-		$CON = preg_replace("/((^ *\|[^\n]*\| *$\n)+)/me", '"<table class=\"wikitable\">".stripslashes($this->make_table("$1"))."</table>\n"', $CON);
+		$instance = $this;
+		$CON = preg_replace_callback('/((^ *\|[^\n]*\| *$\n)+)/m', function ($matches) use ($instance) {
+			return "<table class=\"wikitable\">" . stripslashes($this->make_table($matches[1])) . "</table>\n";
+		}, $CON);
 	}
 }
