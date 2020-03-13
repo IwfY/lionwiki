@@ -439,8 +439,12 @@ if(!$action || $preview) { // page parsing
 	$CON = preg_replace('/-----*/', '<hr/>', $CON); // horizontal line
 	$CON = str_replace('--', '&mdash;', $CON); // --
 
-	$CON = preg_replace(array_fill(0, count($codes[1]) + 1, '/{CODE}/'), $codes[1], $CON, 1); // put HTML and "normal" codes back
-	$CON = preg_replace(array_fill(0, count($htmlcodes[1]) + 1, '/{HTML}/'), $htmlcodes[1], $CON, 1);
+	if (is_array($codes[1])) {
+		$CON = preg_replace(array_fill(0, count($codes[1]) + 1, '/{CODE}/'), $codes[1], $CON, 1); // put HTML and "normal" codes back
+	}
+	if (is_array($htmlcodes[1])) {
+		$CON = preg_replace(array_fill(0, count($htmlcodes[1]) + 1, '/{HTML}/'), $htmlcodes[1], $CON, 1);
+	}
 	
 	plugin('formatEnd');
 }

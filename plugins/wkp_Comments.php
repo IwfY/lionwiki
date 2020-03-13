@@ -101,6 +101,7 @@ class Comments
 
 		if($action == "" && !$preview && ((template_match("plugin:COMMENTS", $html, $null) && strpos($CON, "{NO_COMMENTS}") === false)
 			|| strpos($CON, "{COMMENTS}") !== false)) {
+			$filenames = null;
 
 			$HEAD .= '<script type="text/javascript" src="plugins/Comments/comments.js"></script>';
 			$HEAD .= '<style type="text/css" media="all">@import url("plugins/Comments/comments.css");</style>';
@@ -172,7 +173,11 @@ class Comments
 				}
 			}
 
-			$tmpl = str_replace("{NUMBER_OF_COMMENTS}", count($filenames), $tmpl);
+			if (is_array($filenames)) {
+				$tmpl = str_replace("{NUMBER_OF_COMMENTS}", count($filenames), $tmpl);
+			} else {
+				$tmpl = str_replace("{NUMBER_OF_COMMENTS}", '', $tmpl);
+			}
 
 			$comments_html = preg_replace("/\{item\}.*\{\/item\}/Us", $items_str, $tmpl);
 
