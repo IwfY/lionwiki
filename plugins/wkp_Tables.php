@@ -50,7 +50,7 @@ class Tables {
 
 		// Creation des <td></td> en se servant des |
 		$instance = $this;
-		$s = preg_replace_callback('/\|(([hlrtb]* ){0,1})\s*(\d*)\s*,{0,1}(\d*)\s*(.*?)\|/e', function ($matches) use ($instance) {
+		$s = preg_replace_callback('/\|(([hlrtb]* ){0,1})\s*(\d*)\s*,{0,1}(\d*)\s*(.*?)\|/', function ($matches) use ($instance) {
 			return "<td" . ((count($matches) >= 4 && $matches[3]) ? (" colspan=\"" . $matches[3] . "\""):" ").((count($matches) >= 5 && $matches[4]) ? (" rowspan=\"" . $matches[4] . "\""):" ") . $instance->table_style($matches[1]) . ">" . $matches[5] . "</td>";
 		}, $s);
 
