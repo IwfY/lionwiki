@@ -18,12 +18,7 @@ $LOCAL_HOUR = 0;
 
 @error_reporting(E_ERROR | E_WARNING | E_PARSE);
 @ini_set('default_charset', 'UTF-8');
-set_magic_quotes_runtime(0);
 umask(0);
-
-if(get_magic_quotes_gpc()) // magic_quotes_gpc can't be turned off
-	for($i = 0, $_SG = array(&$_GET, &$_POST, &$_COOKIE, &$_REQUEST), $c = count($_SG); $i < $c; ++$i)
-		$_SG[$i] = array_map('stripslashes', $_SG[$i]);
 
 $self = basename($_SERVER['SCRIPT_NAME']);
 $REAL_PATH = realpath(dirname(__FILE__)).'/';
@@ -329,7 +324,9 @@ if(!$action || $preview) { // page parsing
 	}
 
 	$CON = preg_replace("/(?<!\^)<!--.*-->/U", "", $CON); // internal comments
-	$CON = preg_replace("/\^(.)/e", "'&#'.ord('$1').';'", $CON);
+	$CON = preg_replace_callback("/\^(.)/", function ($matches) { // strings like "^u" become "&#117;"
+		return "&#".ord($matches[1]).";";
+	}, $CON);
 	$CON = str_replace(array("<", "&"), array("&lt;", "&amp;"), $CON);
 	$CON = preg_replace("/&amp;([a-z]+;|\#[0-9]+;)/U", "&$1", $CON); // keep HTML entities
 	$CON = preg_replace("/(\r\n|\r)/", "\n", $CON); // unifying newlines to Unix ones
@@ -442,8 +439,12 @@ if(!$action || $preview) { // page parsing
 	$CON = preg_replace('/-----*/', '<hr/>', $CON); // horizontal line
 	$CON = str_replace('--', '&mdash;', $CON); // --
 
-	$CON = preg_replace(array_fill(0, count($codes[1]) + 1, '/{CODE}/'), $codes[1], $CON, 1); // put HTML and "normal" codes back
-	$CON = preg_replace(array_fill(0, count($htmlcodes[1]) + 1, '/{HTML}/'), $htmlcodes[1], $CON, 1);
+	if (is_array($codes[1])) {
+		$CON = preg_replace(array_fill(0, count($codes[1]) + 1, '/{CODE}/'), $codes[1], $CON, 1); // put HTML and "normal" codes back
+	}
+	if (is_array($htmlcodes[1])) {
+		$CON = preg_replace(array_fill(0, count($htmlcodes[1]) + 1, '/{HTML}/'), $htmlcodes[1], $CON, 1);
+	}
 	
 	plugin('formatEnd');
 }
